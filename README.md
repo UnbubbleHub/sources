@@ -1,4 +1,5 @@
 # Plan
+
 Algoritmo che dato un fatto (o una notizia, e.g. tensione USA/Cuba 1 Feb 2026), estrae una lista di articoli relative al suddetto fatto, ciascuno con una serie di metadati che lo collegano al fatto (opinione rispetto al fatto, supporto del claim, prospettiva, tono, rilevanza...)
 
 Metadati AI generated, due tipi:
@@ -23,6 +24,9 @@ Idee:
 - Ricerca su fonti specifiche
 - Ricerca su google con varie queries
 - ...
+### Piano iniziale
+Definizione di interfacce e API wrappers, integrazione e2e della seguente pipeline (con un solo algoritmo di query+ricerca, ma estendibile):
+Data una notizia/query generare query di ricerca (modelli diversi genereranno query diverse); aggregare le queries usando embedding similarity e clustering; cercare su motore di ricerca, aggregare duplicati.
 ## Step 2: Estrazione metadati
 ### Definizione metadata
 #### Prospettiva
