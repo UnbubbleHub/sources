@@ -1,7 +1,20 @@
 [project]
-name = "core"
+name = "unbubble"
 version = "0.1.0"
-description = "Add your description here"
+description = "Open tools for research and applications against social polarization"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "anthropic>=0.40",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
