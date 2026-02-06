@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import logging
 import sys
 from pathlib import Path
 
 from unbubble.config import create_from_config, get_default_config_path, load_config
-from unbubble.query.models import NewsEvent
+from unbubble.data import NewsEvent
 
+logger = logging.getLogger(__name__)
 
 async def run(query: str, config_path: Path) -> None:
     """Execute the pipeline with the given configuration.
@@ -28,9 +30,8 @@ async def run(query: str, config_path: Path) -> None:
     # Create event from query
     event = NewsEvent(description=query)
 
-    print(f"Running pipeline for: {query}")
-    print(f"Config: {config_path}")
-    print()
+    logger.info(f"Running pipeline for: {query}")
+    logger.info(f"Config: {config_path}")
 
     # Execute pipeline
     articles = await pipeline.run(event)
@@ -38,12 +39,11 @@ async def run(query: str, config_path: Path) -> None:
     # Print results
     print(f"Found {len(articles)} unique articles:\n")
     for i, article in enumerate(articles, 1):
-        print(f"  {i}. {article.title}")
-        print(f"     Source: {article.source}")
-        print(f"     URL: {article.url}")
+        logger.info(f"{i}. {article.title}")
+        logger.info(f"Source: {article.source}")
+        logger.info(f"URL: {article.url}")
         if article.published_at:
-            print(f"     Published: {article.published_at}")
-        print()
+            logger.info(f"Published: {article.published_at}")
 
 
 def main() -> None:
@@ -67,7 +67,7 @@ def main() -> None:
     config_path: Path = args.config if args.config else get_default_config_path()
 
     if not config_path.exists():
-        print(f"Error: Config file not found: {config_path}", file=sys.stderr)
+        logger.warning(f"Error: Config file not found: {config_path}", file=sys.stderr)
         sys.exit(1)
 
     try:

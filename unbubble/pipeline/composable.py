@@ -6,8 +6,8 @@ import asyncio
 import logging
 
 from unbubble.aggregator.base import QueryAggregator
+from unbubble.data import Article, NewsEvent, SearchQuery
 from unbubble.query.base import QueryGenerator
-from unbubble.query.models import Article, NewsEvent, SearchQuery
 from unbubble.search.base import ArticleSearcher
 
 logger = logging.getLogger(__name__)

@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 
 import httpx
 
-from unbubble.query.models import Article, SearchQuery
+from unbubble.data import Article, SearchQuery
 
 GNEWS_API_URL = "https://gnews.io/api/v4/search"
 
+
+logger = logging.getLogger(__name__)
 
 class GNewsSearcher:
     """Search for news articles using the GNews API.
@@ -67,6 +70,7 @@ class GNewsSearcher:
         for result in results:
             if isinstance(result, BaseException):
                 # Log or handle errors; for now skip failed queries
+                logger.warning(f"Error processing query. Error: {result}")
                 continue
             # result is list[Article] here
             for article in result:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from unbubble.query.models import Article, SearchQuery
+from unbubble.data import Article, SearchQuery
 
 
 class ArticleSearcher(Protocol):

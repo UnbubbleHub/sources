@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from unbubble.query.models import Article, NewsEvent
+from unbubble.data import Article, NewsEvent
 
 
 class Pipeline(Protocol):

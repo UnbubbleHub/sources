@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from unbubble.data import NewsEvent, SearchQuery
 from unbubble.query.claude import ClaudeQueryGenerator
-from unbubble.query.models import NewsEvent, SearchQuery
 
 if TYPE_CHECKING:
     pass

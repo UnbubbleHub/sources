@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from unbubble.aggregator.embeddings import SentenceTransformerEmbedder
-from unbubble.query.models import SearchQuery
+from unbubble.data import SearchQuery
 
 
 class PCAAggregator:

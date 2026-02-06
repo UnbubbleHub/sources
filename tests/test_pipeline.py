@@ -6,9 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from unbubble.data import Article, NewsEvent, SearchQuery
 from unbubble.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble.pipeline.composable import ComposablePipeline
-from unbubble.query.models import Article, NewsEvent, SearchQuery
+from unbubble.url import extract_domain
 
 
 class TestComposablePipeline:
@@ -229,9 +230,10 @@ class TestClaudeE2EPipeline:
         assert "Test context" in user_content
 
     def test_extract_domain(self, pipeline: ClaudeE2EPipeline) -> None:
-        assert pipeline._extract_domain("https://www.example.com/path") == "example.com"
-        assert pipeline._extract_domain("https://news.example.com") == "news.example.com"
-        assert pipeline._extract_domain("invalid") == "Unknown"
+        # Test the centralized extract_domain function
+        assert extract_domain("https://www.example.com/path") == "example.com"
+        assert extract_domain("https://news.example.com") == "news.example.com"
+        assert extract_domain("invalid") == "Unknown"
 
 
 def test_pipeline_protocol_compliance() -> None:

@@ -6,8 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from unbubble.query.models import Article, SearchQuery
+from unbubble.data import Article, SearchQuery
 from unbubble.search.claude import ClaudeSearcher
+from unbubble.url import extract_domain
 
 
 class TestClaudeSearcher:
@@ -117,9 +118,10 @@ class TestClaudeSearcher:
         assert articles[0].query == query
 
     def test_extract_domain(self, searcher: ClaudeSearcher):
-        assert searcher._extract_domain("https://www.example.com/path") == "example.com"
-        assert searcher._extract_domain("https://news.example.com/article") == "news.example.com"
-        assert searcher._extract_domain("invalid") == "Unknown"
+        # Test the centralized extract_domain function
+        assert extract_domain("https://www.example.com/path") == "example.com"
+        assert extract_domain("https://news.example.com/article") == "news.example.com"
+        assert extract_domain("invalid") == "Unknown"
 
 
 def test_searcher_uses_env_var(monkeypatch: pytest.MonkeyPatch) -> None:

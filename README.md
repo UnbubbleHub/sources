@@ -66,18 +66,20 @@ unbubble/
 │   ├── models.py           # Pydantic config models
 │   ├── loader.py           # YAML loading
 │   └── factory.py          # Component factories
+├── data/                   # Core data models
+│   └── models.py           # NewsEvent, SearchQuery, Article
 ├── pipeline/               # End-to-end pipelines
 │   ├── base.py             # Pipeline protocol
 │   ├── composable.py       # Composable pipeline
 │   └── claude_e2e.py       # Claude E2E pipeline
 ├── query/                  # Query generation
 │   ├── base.py             # QueryGenerator protocol
-│   ├── claude.py           # Claude API implementation
-│   └── models.py           # Data models (NewsEvent, SearchQuery, Article)
+│   └── claude.py           # Claude API implementation
 ├── search/                 # Article search
 │   ├── base.py             # ArticleSearcher protocol
 │   ├── claude.py           # Claude web search implementation
 │   └── gnews.py            # GNews API implementation
+├── url.py                  # URL utilities (extract_domain)
 └── __init__.py             # Public API exports
 
 configs/                    # YAML configuration files

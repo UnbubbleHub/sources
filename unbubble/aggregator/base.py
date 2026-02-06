@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from unbubble.query.models import SearchQuery
+from unbubble.data import SearchQuery
 
 
 class QueryAggregator(Protocol):

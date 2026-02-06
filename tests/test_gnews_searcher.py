@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import httpx
 import pytest
 
-from unbubble.query.models import Article, SearchQuery
+from unbubble.data import Article, SearchQuery
 from unbubble.search.gnews import GNewsSearcher
 
 

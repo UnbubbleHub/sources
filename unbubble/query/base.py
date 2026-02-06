@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from unbubble.query.models import NewsEvent, SearchQuery
+from unbubble.data import NewsEvent, SearchQuery
 
 
 class QueryGenerator(Protocol):

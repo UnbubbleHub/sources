@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import logging
 import os
-from urllib.parse import urlparse
 
 import anthropic
 from anthropic.types import WebSearchToolResultBlock
 
-from unbubble.query.models import Article, NewsEvent, SearchQuery
+from unbubble.data import Article, NewsEvent, SearchQuery
+from unbubble.url import extract_domain
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ the same underlying facts but from genuinely different angles.\
                             Article(
                                 title=result.title or "",
                                 url=result.url,
-                                source=self._extract_domain(result.url),
+                                source=extract_domain(result.url),
                                 published_at=result.page_age,
                                 description=None,
                                 query=dummy_query,
@@ -123,17 +123,3 @@ the same underlying facts but from genuinely different angles.\
                         )
 
         return articles[: self._target]
-
-    def _extract_domain(self, url: str) -> str:
-        """Extract domain name from URL."""
-        try:
-            parsed = urlparse(url)
-            domain = parsed.netloc
-            if not domain:
-                raise ValueError("Empty domain")
-            if domain.startswith("www."):
-                domain = domain[4:]
-            return domain
-        except Exception as e:
-            logger.warning(f"Could not extract a domain from URL {url}. Error: {e}")
-            return "Unknown"

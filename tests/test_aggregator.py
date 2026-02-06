@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
 from unbubble.aggregator.pca import NoOpAggregator, PCAAggregator
-from unbubble.query.models import SearchQuery
+from unbubble.data import SearchQuery
 
 
 class TestNoOpAggregator:
@@ -37,17 +37,15 @@ class TestPCAAggregator:
         """Create a mock embedder."""
         embedder = MagicMock()
         # Return embeddings that are clearly different for diversity
-        embedder.embed = AsyncMock(
-            return_value=np.array(
-                [
-                    [1.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0],
-                    [0.0, 0.0, 1.0],
-                    [0.5, 0.5, 0.0],
-                    [0.0, 0.5, 0.5],
-                ],
-                dtype=np.float32,
-            )
+        embedder.embed.return_value = np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [0.5, 0.5, 0.0],
+                [0.0, 0.5, 0.5],
+            ],
+            dtype=np.float32,
         )
         return embedder
 
@@ -93,8 +91,8 @@ class TestPCAAggregator:
     async def test_single_query(
         self, aggregator: PCAAggregator, mock_embedder: MagicMock
     ) -> None:
-        mock_embedder.embed = AsyncMock(
-            return_value=np.array([[1.0, 0.0, 0.0]], dtype=np.float32)
+        mock_embedder.embed.return_value = np.array(
+            [[1.0, 0.0, 0.0]], dtype=np.float32
         )
         queries = [SearchQuery(text="only one", intent="single")]
         result = await aggregator.aggregate(queries)

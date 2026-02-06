@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import logging
 import os
 
 import anthropic
 from anthropic.types import WebSearchResultBlock
 
-from unbubble.query.models import Article, SearchQuery
+from unbubble.data import Article, SearchQuery
+from unbubble.url import extract_domain
 
+logger = logging.getLogger(__name__)
 
 class ClaudeSearcher:
     """Search for news articles using Claude's built-in web search tool.
@@ -69,8 +72,9 @@ class ClaudeSearcher:
                     if article.url not in seen_urls:
                         seen_urls.add(article.url)
                         articles.append(article)
-            except Exception:
+            except Exception as e:
                 # Skip failed queries
+                logger.warning(f"Failed query {query}. Error: {e}")
                 continue
 
         return articles
@@ -123,40 +127,18 @@ class ClaudeSearcher:
                 if isinstance(content, list):
                     for result in content:
                         article = self._parse_search_result(result, query)
-                        if article:
-                            articles.append(article)
+                        articles.append(article)
 
         return articles[:max_results]
 
-    def _parse_search_result(self, result: WebSearchResultBlock, query: SearchQuery) -> Article | None:
+    def _parse_search_result(self, result: WebSearchResultBlock, query: SearchQuery) -> Article:
         """Parse a web search result into an Article."""
-        url = result.url
-        title = result.title
-
-        if not url or not title:
-            return None
 
         return Article(
             title=result.title,
             url=result.url,
-            source=self._extract_domain(result.url),
+            source=extract_domain(result.url),
             published_at=result.page_age,
             description=None,  # encrypted_content is not human-readable
             query=query,
         )
-
-    def _extract_domain(self, url: str) -> str:
-        """Extract domain name from URL."""
-        try:
-            from urllib.parse import urlparse
-
-            parsed = urlparse(url)
-            domain = parsed.netloc
-            if not domain:
-                return "Unknown"
-            # Remove www. prefix
-            if domain.startswith("www."):
-                domain = domain[4:]
-            return domain
-        except Exception:
-            return "Unknown"

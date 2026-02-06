@@ -1,6 +1,6 @@
 """Tests for data models."""
 
-from unbubble.query.models import NewsEvent, SearchQuery
+from unbubble.data import NewsEvent, SearchQuery
 
 
 def test_news_event_minimal():

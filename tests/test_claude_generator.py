@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from anthropic.types import TextBlock
 
+from unbubble.data import NewsEvent, SearchQuery
 from unbubble.query.claude import DEFAULT_SYSTEM_PROMPT, ClaudeQueryGenerator
-from unbubble.query.models import NewsEvent, SearchQuery
 
 
 class TestClaudeQueryGenerator:
