@@ -54,9 +54,7 @@ class ClaudeQueryGenerator:
         self._client = anthropic.AsyncAnthropic(api_key=resolved_key)
         self._system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 
-    async def generate(
-        self, event: NewsEvent, *, num_queries: int = 10
-    ) -> list[SearchQuery]:
+    async def generate(self, event: NewsEvent, *, num_queries: int = 10) -> list[SearchQuery]:
         user_content = f"News event: {event.description}"
         if event.date:
             user_content += f"\nDate: {event.date}"
@@ -70,7 +68,7 @@ class ClaudeQueryGenerator:
             messages=[{"role": "user", "content": user_content}],
         )
 
-        raw = response.content[0].text
+        raw: str = str(response.content[0].text)
         # Strip markdown code fences if present
         if raw.startswith("```"):
             raw = raw.split("\n", 1)[1].rsplit("```", 1)[0]

@@ -18,3 +18,15 @@ class SearchQuery:
 
     text: str
     intent: str
+
+
+@dataclass(frozen=True)
+class Article:
+    """A news article retrieved from search."""
+
+    title: str
+    url: str
+    source: str
+    published_at: str | None = None
+    description: str | None = None
+    query: SearchQuery | None = None  # the query that found this article

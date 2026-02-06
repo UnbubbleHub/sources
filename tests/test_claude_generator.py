@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -26,15 +25,15 @@ class TestClaudeQueryGenerator:
         return response
 
     @pytest.fixture
-    def generator(self, monkeypatch: pytest.MonkeyPatch, mock_response: MagicMock) -> ClaudeQueryGenerator:
+    def generator(
+        self, monkeypatch: pytest.MonkeyPatch, mock_response: MagicMock
+    ) -> ClaudeQueryGenerator:
         """Create a generator with mocked API client."""
         gen = ClaudeQueryGenerator(api_key="test-key")
         gen._client.messages.create = AsyncMock(return_value=mock_response)
         return gen
 
-    async def test_generate_returns_search_queries(
-        self, generator: ClaudeQueryGenerator
-    ):
+    async def test_generate_returns_search_queries(self, generator: ClaudeQueryGenerator):
         event = NewsEvent(description="Test event")
         queries = await generator.generate(event, num_queries=2)
 
@@ -43,9 +42,7 @@ class TestClaudeQueryGenerator:
         assert queries[0].text == "query 1"
         assert queries[0].intent == "intent 1"
 
-    async def test_generate_calls_api_with_correct_params(
-        self, generator: ClaudeQueryGenerator
-    ):
+    async def test_generate_calls_api_with_correct_params(self, generator: ClaudeQueryGenerator):
         event = NewsEvent(
             description="Test event",
             date="2026-02-01",
@@ -54,7 +51,7 @@ class TestClaudeQueryGenerator:
         await generator.generate(event, num_queries=5)
 
         call_kwargs = generator._client.messages.create.call_args.kwargs
-        assert call_kwargs["model"] == "claude-sonnet-4-20250514"
+        assert call_kwargs["model"] == "claude-haiku-4-5-20251001"
         assert call_kwargs["max_tokens"] == 1024
         assert "{num_queries}" not in call_kwargs["system"]  # should be formatted
         assert "5" in call_kwargs["system"]
@@ -87,9 +84,7 @@ class TestClaudeQueryGenerator:
         call_kwargs = gen._client.messages.create.call_args.kwargs
         assert call_kwargs["system"] == "Custom prompt with 3 queries"
 
-    async def test_custom_model(
-        self, monkeypatch: pytest.MonkeyPatch, mock_response: MagicMock
-    ):
+    async def test_custom_model(self, monkeypatch: pytest.MonkeyPatch, mock_response: MagicMock):
         gen = ClaudeQueryGenerator(api_key="test-key", model="claude-3-haiku-20240307")
         gen._client.messages.create = AsyncMock(return_value=mock_response)
 

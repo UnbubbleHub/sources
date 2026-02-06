@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from unbubble.query.base import QueryGenerator
 from unbubble.query.claude import ClaudeQueryGenerator
 from unbubble.query.models import NewsEvent, SearchQuery
 
 if TYPE_CHECKING:
-    from typing import Protocol, runtime_checkable
+    pass
 
 
 def test_claude_generator_matches_protocol():
@@ -24,9 +23,7 @@ def test_claude_generator_matches_protocol():
 class MockQueryGenerator:
     """A minimal implementation to verify protocol requirements."""
 
-    async def generate(
-        self, event: NewsEvent, *, num_queries: int = 10
-    ) -> list[SearchQuery]:
+    async def generate(self, event: NewsEvent, *, num_queries: int = 10) -> list[SearchQuery]:
         return [SearchQuery(text="mock", intent="mock")]
 
 
