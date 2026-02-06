@@ -45,7 +45,7 @@ class PCAAggregator:
 
         # Step 1: Embed all query texts
         texts = [q.text for q in queries]
-        embeddings = await self._embedder.embed(texts)
+        embeddings = self._embedder.embed(texts)
 
         # Step 2: Center the embeddings (required for PCA)
         centered = embeddings - embeddings.mean(axis=0)

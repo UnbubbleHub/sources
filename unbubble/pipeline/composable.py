@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from unbubble.aggregator.base import QueryAggregator
 from unbubble.query.base import QueryGenerator
 from unbubble.query.models import Article, NewsEvent, SearchQuery
 from unbubble.search.base import ArticleSearcher
 
+logger = logging.getLogger(__name__)
 
 class ComposablePipeline:
     """Pipeline composed of multiple generators, an aggregator, and multiple searchers.
@@ -68,6 +70,7 @@ class ComposablePipeline:
         all_queries: list[SearchQuery] = []
         for result in generation_results:
             if isinstance(result, BaseException):
+                logger.warning(f"Error in query generation: {str(result)}")
                 continue
             all_queries.extend(result)
 
@@ -95,6 +98,7 @@ class ComposablePipeline:
 
         for search_result in search_results:
             if isinstance(search_result, BaseException):
+                logger.warning(f"Error during search: {str(search_result)}")
                 continue
             # search_result is list[Article] at this point
             article_list: list[Article] = search_result

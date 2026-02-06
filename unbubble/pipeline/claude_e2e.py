@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from urllib.parse import urlparse
 
 import anthropic
-from anthropic.types import WebSearchResultBlock, WebSearchToolResultBlock
+from anthropic.types import WebSearchToolResultBlock
 
 from unbubble.query.models import Article, NewsEvent, SearchQuery
 
+logger = logging.getLogger(__name__)
 
 class ClaudeE2EPipeline:
     """Single Claude call that generates queries and searches in one pass.
@@ -108,20 +110,17 @@ the same underlying facts but from genuinely different angles.\
                 content = block.content
                 if isinstance(content, list):
                     for result in content:
-                        if isinstance(result, WebSearchResultBlock):
-                            url = result.url
-                            if url and url not in seen_urls:
-                                seen_urls.add(url)
-                                articles.append(
-                                    Article(
-                                        title=result.title or "",
-                                        url=url,
-                                        source=self._extract_domain(url),
-                                        published_at=result.page_age,
-                                        description=None,
-                                        query=dummy_query,
-                                    )
-                                )
+                        seen_urls.add(result.url)
+                        articles.append(
+                            Article(
+                                title=result.title or "",
+                                url=result.url,
+                                source=self._extract_domain(result.url),
+                                published_at=result.page_age,
+                                description=None,
+                                query=dummy_query,
+                            )
+                        )
 
         return articles[: self._target]
 
@@ -131,9 +130,10 @@ the same underlying facts but from genuinely different angles.\
             parsed = urlparse(url)
             domain = parsed.netloc
             if not domain:
-                return "Unknown"
+                raise ValueError("Empty domain")
             if domain.startswith("www."):
                 domain = domain[4:]
             return domain
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Could not extract a domain from URL {url}. Error: {e}")
             return "Unknown"

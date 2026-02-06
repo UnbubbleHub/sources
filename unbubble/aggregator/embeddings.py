@@ -6,12 +6,13 @@ from typing import Protocol
 
 import numpy as np
 from numpy.typing import NDArray
+from sentence_transformers import SentenceTransformer
 
 
 class TextEmbedder(Protocol):
     """Interface for text embedding models."""
 
-    async def embed(self, texts: list[str]) -> NDArray[np.float32]:
+    def embed(self, texts: list[str]) -> NDArray[np.float32]:
         """Embed a batch of texts.
 
         Args:
@@ -27,15 +28,11 @@ class SentenceTransformerEmbedder:
     """Embedder using sentence-transformers library."""
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2") -> None:
-        from sentence_transformers import SentenceTransformer
 
         self._model: SentenceTransformer = SentenceTransformer(model_name)
 
-    async def embed(self, texts: list[str]) -> NDArray[np.float32]:
-        """Embed texts using sentence-transformers.
-
-        Note: sentence-transformers is sync, but we wrap for consistent interface.
-        """
+    def embed(self, texts: list[str]) -> NDArray[np.float32]:
+        """Embed texts using sentence-transformers."""
         embeddings: NDArray[np.float32] = self._model.encode(
             texts, convert_to_numpy=True
         ).astype(np.float32)
