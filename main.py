@@ -1,57 +1,41 @@
 #!/usr/bin/env python
-"""CLI for testing query generation and news search."""
+"""CLI for Unbubble news diversity pipeline."""
 
 from __future__ import annotations
 
 import argparse
 import asyncio
-import os
 import sys
+from pathlib import Path
 
-from unbubble import ClaudeQueryGenerator, GNewsSearcher, NewsEvent
+from unbubble.config import create_from_config, get_default_config_path, load_config
+from unbubble.query.models import NewsEvent
 
 
-async def run(
-    description: str,
-    date: str | None,
-    context: str | None,
-    num_queries: int,
-    model: str,
-    max_results: int,
-    skip_search: bool,
-) -> None:
-    event = NewsEvent(description=description, date=date, context=context)
-    generator = ClaudeQueryGenerator(model=model)
+async def run(query: str, config_path: Path) -> None:
+    """Execute the pipeline with the given configuration.
 
-    print(f"Generating {num_queries} queries for: {event.description}")
-    if event.date:
-        print(f"Date: {event.date}")
-    if event.context:
-        print(f"Context: {event.context}")
+    Args:
+        query: Event description or query string.
+        config_path: Path to YAML configuration file.
+    """
+    # Load configuration
+    config = load_config(config_path)
+
+    # Create pipeline from config
+    pipeline = create_from_config(config)
+
+    # Create event from query
+    event = NewsEvent(description=query)
+
+    print(f"Running pipeline for: {query}")
+    print(f"Config: {config_path}")
     print()
 
-    queries = await generator.generate(event, num_queries=num_queries)
+    # Execute pipeline
+    articles = await pipeline.run(event)
 
-    print("Generated queries:")
-    for i, q in enumerate(queries, 1):
-        print(f"  {i}. {q.text}")
-        print(f"     -> {q.intent}\n")
-
-    if skip_search:
-        print("Skipping search (--skip-search flag set or GNEWS_API_KEY not set)")
-        return
-
-    # Search for articles
-    print("-" * 60)
-    print(f"Searching for articles (max {max_results} per query)...\n")
-
-    searcher = GNewsSearcher()
-    articles = await searcher.search(
-        queries,
-        from_date=event.date,
-        max_results_per_query=max_results,
-    )
-
+    # Print results
     print(f"Found {len(articles)} unique articles:\n")
     for i, article in enumerate(articles, 1):
         print(f"  {i}. {article.title}")
@@ -59,72 +43,35 @@ async def run(
         print(f"     URL: {article.url}")
         if article.published_at:
             print(f"     Published: {article.published_at}")
-        if article.query:
-            print(f"     Found via: {article.query.text[:50]}...")
         print()
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Generate diverse search queries and search for news articles."
+    """Entry point for the CLI."""
+    parser = argparse.ArgumentParser(description="Find diverse news coverage of events.")
+    parser.add_argument(
+        "query",
+        help="Event description or search query",
     )
     parser.add_argument(
-        "description",
-        nargs="?",
-        default="US-Cuba diplomatic tensions over migration policy",
-        help="Description of the news event (default: sample event)",
-    )
-    parser.add_argument(
-        "-d",
-        "--date",
-        help="Date of the event (e.g., 2026-02-01). Also used as search from_date.",
-    )
-    parser.add_argument(
+        "--config",
         "-c",
-        "--context",
-        help="Additional context for the event",
-    )
-    parser.add_argument(
-        "-n",
-        "--num-queries",
-        type=int,
-        default=5,
-        help="Number of queries to generate (default: 5)",
-    )
-    parser.add_argument(
-        "-m",
-        "--model",
-        default="claude-haiku-4-5-20251001",
-        help="Anthropic model to use (default: claude-haiku-4-5-20251001)",
-    )
-    parser.add_argument(
-        "-r",
-        "--max-results",
-        type=int,
-        default=5,
-        help="Max results per query (default: 5)",
-    )
-    parser.add_argument(
-        "--skip-search",
-        action="store_true",
-        default=not os.environ.get("GNEWS_API_KEY"),
-        help="Skip the search step (default: true if GNEWS_API_KEY not set)",
+        type=Path,
+        default=None,
+        help="Path to YAML config file (default: configs/default.yaml)",
     )
 
     args = parser.parse_args()
 
+    # Resolve config path
+    config_path: Path = args.config if args.config else get_default_config_path()
+
+    if not config_path.exists():
+        print(f"Error: Config file not found: {config_path}", file=sys.stderr)
+        sys.exit(1)
+
     try:
-        asyncio.run(
-            run(
-                description=args.description,
-                date=args.date,
-                context=args.context,
-                num_queries=args.num_queries,
-                model=args.model,
-                max_results=args.max_results,
-                skip_search=args.skip_search,
-            )
-        )
+        asyncio.run(run(args.query, config_path))
     except KeyboardInterrupt:
         sys.exit(130)
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from anthropic.types import TextBlock
 
 from unbubble.query.claude import DEFAULT_SYSTEM_PROMPT, ClaudeQueryGenerator
 from unbubble.query.models import NewsEvent, SearchQuery
@@ -15,11 +16,12 @@ class TestClaudeQueryGenerator:
 
     @pytest.fixture
     def mock_response(self) -> MagicMock:
-        """Create a mock API response."""
+        """Create a mock API response with a real TextBlock."""
         response = MagicMock()
         response.content = [
-            MagicMock(
-                text='[{"text": "query 1", "intent": "intent 1"}, {"text": "query 2", "intent": "intent 2"}]'
+            TextBlock(
+                type="text",
+                text='[{"text": "query 1", "intent": "intent 1"}, {"text": "query 2", "intent": "intent 2"}]',
             )
         ]
         return response
@@ -62,21 +64,38 @@ class TestClaudeQueryGenerator:
         assert "Test context" in user_content
 
     async def test_generate_handles_markdown_code_fences(
-        self, generator: ClaudeQueryGenerator, mock_response: MagicMock
+        self, monkeypatch: pytest.MonkeyPatch
     ):
-        mock_response.content[0].text = '```json\n[{"text": "q", "intent": "i"}]\n```'
+        """Test that markdown code fences are stripped from response."""
+        gen = ClaudeQueryGenerator(api_key="test-key")
+        response = MagicMock()
+        response.content = [
+            TextBlock(
+                type="text",
+                text='```json\n[{"text": "q", "intent": "i"}]\n```',
+            )
+        ]
+        gen._client.messages.create = AsyncMock(return_value=response)
+
         event = NewsEvent(description="Test")
-        queries = await generator.generate(event)
+        queries = await gen.generate(event)
 
         assert len(queries) == 1
         assert queries[0].text == "q"
 
-    async def test_custom_system_prompt(
-        self, monkeypatch: pytest.MonkeyPatch, mock_response: MagicMock
-    ):
+    async def test_custom_system_prompt(self, monkeypatch: pytest.MonkeyPatch):
+        """Test that custom system prompt is used."""
         custom_prompt = "Custom prompt with {num_queries} queries"
         gen = ClaudeQueryGenerator(api_key="test-key", system_prompt=custom_prompt)
-        gen._client.messages.create = AsyncMock(return_value=mock_response)
+
+        response = MagicMock()
+        response.content = [
+            TextBlock(
+                type="text",
+                text='[{"text": "q", "intent": "i"}]',
+            )
+        ]
+        gen._client.messages.create = AsyncMock(return_value=response)
 
         event = NewsEvent(description="Test")
         await gen.generate(event, num_queries=3)
@@ -84,9 +103,18 @@ class TestClaudeQueryGenerator:
         call_kwargs = gen._client.messages.create.call_args.kwargs
         assert call_kwargs["system"] == "Custom prompt with 3 queries"
 
-    async def test_custom_model(self, monkeypatch: pytest.MonkeyPatch, mock_response: MagicMock):
+    async def test_custom_model(self, monkeypatch: pytest.MonkeyPatch):
+        """Test that custom model is used."""
         gen = ClaudeQueryGenerator(api_key="test-key", model="claude-3-haiku-20240307")
-        gen._client.messages.create = AsyncMock(return_value=mock_response)
+
+        response = MagicMock()
+        response.content = [
+            TextBlock(
+                type="text",
+                text='[{"text": "q", "intent": "i"}]',
+            )
+        ]
+        gen._client.messages.create = AsyncMock(return_value=response)
 
         event = NewsEvent(description="Test")
         await gen.generate(event)

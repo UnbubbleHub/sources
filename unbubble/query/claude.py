@@ -4,6 +4,7 @@ import json
 import os
 
 import anthropic
+from anthropic.types import TextBlock
 
 from unbubble.query.models import NewsEvent, SearchQuery
 
@@ -68,7 +69,10 @@ class ClaudeQueryGenerator:
             messages=[{"role": "user", "content": user_content}],
         )
 
-        raw: str = str(response.content[0].text)
+        content_block = response.content[0]
+        if not isinstance(content_block, TextBlock):
+            raise ValueError(f"Expected TextBlock, got {type(content_block).__name__}")
+        raw: str = content_block.text
         # Strip markdown code fences if present
         if raw.startswith("```"):
             raw = raw.split("\n", 1)[1].rsplit("```", 1)[0]
