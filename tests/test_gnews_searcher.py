@@ -2,20 +2,21 @@
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock
 
 import httpx
 import pytest
 
-from unbubble.data import Article, SearchQuery
-from unbubble.search.gnews import GNewsSearcher
+from unbubble_core.data import Article, SearchQuery
+from unbubble_core.search.gnews import GNewsSearcher
 
 
 class TestGNewsSearcher:
     """Tests for GNewsSearcher."""
 
     @pytest.fixture
-    def mock_response_data(self) -> dict:
+    def mock_response_data(self) -> dict[str, Any]:
         """Sample GNews API response."""
         return {
             "totalArticles": 2,
@@ -42,13 +43,13 @@ class TestGNewsSearcher:
         """Create a searcher with test API key."""
         return GNewsSearcher(api_key="test-key")
 
-    def test_init_requires_api_key(self, monkeypatch: pytest.MonkeyPatch):
+    def test_init_requires_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Should raise if no API key provided."""
         monkeypatch.delenv("GNEWS_API_KEY", raising=False)
         with pytest.raises(ValueError, match="API key required"):
             GNewsSearcher()
 
-    def test_init_uses_env_var(self, monkeypatch: pytest.MonkeyPatch):
+    def test_init_uses_env_var(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Should use GNEWS_API_KEY env var if no key passed."""
         monkeypatch.setenv("GNEWS_API_KEY", "env-key")
         searcher = GNewsSearcher()
@@ -57,15 +58,15 @@ class TestGNewsSearcher:
     async def test_search_returns_articles(
         self,
         searcher: GNewsSearcher,
-        mock_response_data: dict,
+        mock_response_data: dict[str, Any],
         monkeypatch: pytest.MonkeyPatch,
-    ):
+    ) -> None:
         """Should return list of Article objects."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_response_data
         mock_response.raise_for_status = MagicMock()
 
-        async def mock_get(*args, **kwargs):
+        async def mock_get(*args: Any, **kwargs: Any) -> MagicMock:
             return mock_response
 
         monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
@@ -82,15 +83,15 @@ class TestGNewsSearcher:
     async def test_search_deduplicates_by_url(
         self,
         searcher: GNewsSearcher,
-        mock_response_data: dict,
+        mock_response_data: dict[str, Any],
         monkeypatch: pytest.MonkeyPatch,
-    ):
+    ) -> None:
         """Should deduplicate articles with same URL across queries."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_response_data
         mock_response.raise_for_status = MagicMock()
 
-        async def mock_get(*args, **kwargs):
+        async def mock_get(*args: Any, **kwargs: Any) -> MagicMock:
             return mock_response
 
         monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
@@ -108,17 +109,17 @@ class TestGNewsSearcher:
     async def test_search_passes_date_params(
         self,
         searcher: GNewsSearcher,
-        mock_response_data: dict,
+        mock_response_data: dict[str, Any],
         monkeypatch: pytest.MonkeyPatch,
-    ):
+    ) -> None:
         """Should pass from_date and to_date to API."""
-        captured_params: dict = {}
+        captured_params: dict[str, Any] = {}
 
         mock_response = MagicMock()
         mock_response.json.return_value = mock_response_data
         mock_response.raise_for_status = MagicMock()
 
-        async def mock_get(self, url, params=None):
+        async def mock_get(self: Any, url: str, params: dict[str, Any] | None = None) -> MagicMock:
             captured_params.update(params or {})
             return mock_response
 
@@ -140,9 +141,9 @@ class TestGNewsSearcher:
     async def test_search_handles_failed_queries(
         self,
         searcher: GNewsSearcher,
-        mock_response_data: dict,
+        mock_response_data: dict[str, Any],
         monkeypatch: pytest.MonkeyPatch,
-    ):
+    ) -> None:
         """Should skip failed queries and return results from successful ones."""
         call_count = 0
 
@@ -150,7 +151,7 @@ class TestGNewsSearcher:
         mock_response.json.return_value = mock_response_data
         mock_response.raise_for_status = MagicMock()
 
-        async def mock_get(self, url, params=None):
+        async def mock_get(self: Any, url: str, params: dict[str, Any] | None = None) -> MagicMock:
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -171,17 +172,17 @@ class TestGNewsSearcher:
     async def test_search_caps_max_results(
         self,
         searcher: GNewsSearcher,
-        mock_response_data: dict,
+        mock_response_data: dict[str, Any],
         monkeypatch: pytest.MonkeyPatch,
-    ):
+    ) -> None:
         """Should cap max_results at 100 (GNews limit)."""
-        captured_params: dict = {}
+        captured_params: dict[str, Any] = {}
 
         mock_response = MagicMock()
         mock_response.json.return_value = mock_response_data
         mock_response.raise_for_status = MagicMock()
 
-        async def mock_get(self, url, params=None):
+        async def mock_get(self: Any, url: str, params: dict[str, Any] | None = None) -> MagicMock:
             captured_params.update(params or {})
             return mock_response
 
@@ -193,7 +194,7 @@ class TestGNewsSearcher:
         assert captured_params["max"] == 100  # Capped at 100
 
 
-def test_article_dataclass():
+def test_article_dataclass() -> None:
     """Test Article dataclass creation."""
     query = SearchQuery(text="test", intent="test")
     article = Article(

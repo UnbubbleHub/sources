@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from unbubble.data import Article, NewsEvent, SearchQuery
-from unbubble.pipeline.claude_e2e import ClaudeE2EPipeline
-from unbubble.pipeline.composable import ComposablePipeline
-from unbubble.url import extract_domain
+from unbubble_core.data import Article, NewsEvent, SearchQuery
+from unbubble_core.pipeline.claude_e2e import ClaudeE2EPipeline
+from unbubble_core.pipeline.composable import ComposablePipeline
+from unbubble_core.url import extract_domain
 
 
 class TestComposablePipeline:
@@ -200,7 +200,7 @@ class TestClaudeE2EPipeline:
     def pipeline(self, mock_response: MagicMock) -> ClaudeE2EPipeline:
         """Create a pipeline with mocked client."""
         p = ClaudeE2EPipeline(api_key="test-key", target_articles=10)
-        p._client.messages.create = AsyncMock(return_value=mock_response)
+        object.__setattr__(p._client.messages, "create", AsyncMock(return_value=mock_response))
         return p
 
     async def test_run_calls_api_with_web_search(
@@ -209,7 +209,8 @@ class TestClaudeE2EPipeline:
         event = NewsEvent(description="Test event")
         await pipeline.run(event)
 
-        call_kwargs = pipeline._client.messages.create.call_args.kwargs
+        mock_create: AsyncMock = pipeline._client.messages.create  # type: ignore[assignment]
+        call_kwargs = dict(mock_create.call_args.kwargs)
         assert "tools" in call_kwargs
         assert call_kwargs["tools"][0]["type"] == "web_search_20250305"
 
@@ -223,7 +224,8 @@ class TestClaudeE2EPipeline:
         )
         await pipeline.run(event)
 
-        call_kwargs = pipeline._client.messages.create.call_args.kwargs
+        mock_create: AsyncMock = pipeline._client.messages.create  # type: ignore[assignment]
+        call_kwargs = dict(mock_create.call_args.kwargs)
         user_content = call_kwargs["messages"][0]["content"]
         assert "Test event" in user_content
         assert "2026-02-01" in user_content

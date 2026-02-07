@@ -7,8 +7,8 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from unbubble.aggregator.pca import NoOpAggregator, PCAAggregator
-from unbubble.config import (
+from unbubble_core.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_core.config import (
     ClaudeE2EPipelineConfig,
     ClaudeQueryGeneratorConfig,
     ClaudeSearcherConfig,
@@ -21,17 +21,17 @@ from unbubble.config import (
     get_default_config_path,
     load_config,
 )
-from unbubble.config.factory import (
+from unbubble_core.config.factory import (
     create_aggregator,
     create_generator,
     create_pipeline,
     create_searcher,
 )
-from unbubble.pipeline.claude_e2e import ClaudeE2EPipeline
-from unbubble.pipeline.composable import ComposablePipeline
-from unbubble.query.claude import ClaudeQueryGenerator
-from unbubble.search.claude import ClaudeSearcher
-from unbubble.search.gnews import GNewsSearcher
+from unbubble_core.pipeline.claude_e2e import ClaudeE2EPipeline
+from unbubble_core.pipeline.composable import ComposablePipeline
+from unbubble_core.query.claude import ClaudeQueryGenerator
+from unbubble_core.search.claude import ClaudeSearcher
+from unbubble_core.search.gnews import GNewsSearcher
 
 
 class TestConfigModels:

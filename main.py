@@ -9,8 +9,8 @@ import logging
 import sys
 from pathlib import Path
 
-from unbubble.config import create_from_config, get_default_config_path, load_config
-from unbubble.data import NewsEvent
+from unbubble_core.config import create_from_config, get_default_config_path, load_config
+from unbubble_core.data import NewsEvent
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ def main() -> None:
     config_path: Path = args.config if args.config else get_default_config_path()
 
     if not config_path.exists():
-        logger.warning(f"Error: Config file not found: {config_path}", file=sys.stderr)
+        logger.error(f"Error: Config file not found: {config_path}")
         sys.exit(1)
 
     try:

@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from unbubble.data import NewsEvent, SearchQuery
-from unbubble.query.claude import ClaudeQueryGenerator
+from unbubble_core.data import NewsEvent, SearchQuery
+from unbubble_core.query.claude import ClaudeQueryGenerator
 
 if TYPE_CHECKING:
     pass
 
 
-def test_claude_generator_matches_protocol():
+def test_claude_generator_matches_protocol() -> None:
     """Verify ClaudeQueryGenerator structurally matches the QueryGenerator protocol."""
     # This is a compile-time check via type annotations, but we can also verify
     # that the required method exists with the right signature
@@ -27,7 +27,7 @@ class MockQueryGenerator:
         return [SearchQuery(text="mock", intent="mock")]
 
 
-def test_mock_generator_satisfies_protocol():
+def test_mock_generator_satisfies_protocol() -> None:
     """Any class with the right method signature satisfies the protocol."""
     gen = MockQueryGenerator()
     assert hasattr(gen, "generate")

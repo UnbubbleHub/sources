@@ -1,5 +1,5 @@
 [project]
-name = "unbubble"
+name = "unbubble-core"
 version = "0.1.0"
 description = "Open tools for research and applications against social polarization"
 readme = "README.md"
@@ -35,14 +35,6 @@ strict = true
 warn_return_any = true
 warn_unused_ignores = true
 
-[[tool.mypy.overrides]]
-module = ["anthropic", "anthropic.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["sentence_transformers", "sentence_transformers.*"]
-ignore_missing_imports = true
-
 [tool.ruff]
 target-version = "py311"
 line-length = 100
@@ -63,5 +55,5 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["unbubble"]
+known-first-party = ["unbubble_core"]
 
