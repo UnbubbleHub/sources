@@ -1,7 +1,5 @@
 """Factory functions to create components from configuration."""
 
-from __future__ import annotations
-
 from unbubble_core.aggregator.pca import NoOpAggregator, PCAAggregator
 from unbubble_core.config.models import (
     ClaudeE2EPipelineConfig,

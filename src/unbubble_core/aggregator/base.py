@@ -1,7 +1,5 @@
 """Query aggregator protocol."""
 
-from __future__ import annotations
-
 from typing import Protocol
 
 from unbubble_core.data import SearchQuery

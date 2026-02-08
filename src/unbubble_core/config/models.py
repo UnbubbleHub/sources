@@ -1,7 +1,5 @@
 """Pydantic configuration models for Unbubble components."""
 
-from __future__ import annotations
-
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field

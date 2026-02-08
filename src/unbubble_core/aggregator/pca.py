@@ -1,7 +1,5 @@
 """PCA-based query aggregation."""
 
-from __future__ import annotations
-
 import numpy as np
 
 from unbubble_core.aggregator.embeddings import SentenceTransformerEmbedder

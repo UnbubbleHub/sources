@@ -1,7 +1,5 @@
 """Text embedding utilities for query aggregation."""
 
-from __future__ import annotations
-
 from typing import Protocol
 
 import numpy as np

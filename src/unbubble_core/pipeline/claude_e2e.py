@@ -1,7 +1,5 @@
 """Claude E2E pipeline implementation."""
 
-from __future__ import annotations
-
 import logging
 import os
 

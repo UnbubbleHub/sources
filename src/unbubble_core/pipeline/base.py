@@ -1,7 +1,5 @@
 """Pipeline protocol for end-to-end news discovery."""
 
-from __future__ import annotations
-
 from typing import Protocol
 
 from unbubble_core.data import Article, NewsEvent

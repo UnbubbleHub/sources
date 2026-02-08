@@ -1,6 +1,5 @@
 """Tests for configuration loading and factory functions."""
 
-from __future__ import annotations
 
 from pathlib import Path
 from tempfile import NamedTemporaryFile

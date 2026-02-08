@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """CLI for Unbubble news diversity pipeline."""
 
-from __future__ import annotations
-
 import argparse
 import asyncio
 import logging

@@ -1,7 +1,5 @@
 """Core data models for Unbubble."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 
