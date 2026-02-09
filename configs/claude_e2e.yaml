@@ -1,0 +1,7 @@
+# Claude E2E Pipeline Configuration
+# Uses a single Claude call with web search to find diverse articles
+
+pipeline:
+  type: claude_e2e
+  model: claude-haiku-4-5-20251001
+  target_articles: 10
