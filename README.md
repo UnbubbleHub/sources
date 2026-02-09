@@ -1,177 +1,36 @@
-# Unbubble Core
+# Unbubble Sources
 
-**Open tools for research and applications against social polarization.**
+**Surface diverse, high-quality perspectives on any news event.**
 
-Unbubble Core provides algorithms and APIs to surface diverse, high-quality perspectives on any news event or claim, helping users break out of information bubbles.
-
-## Philosophy
-
-Information bubbles and echo chambers are a growing threat to informed public discourse. Algorithms optimized for engagement often reinforce existing beliefs rather than exposing users to diverse viewpoints.
-
-Unbubble takes a different approach:
-
-1. **Perspective diversity over engagement** — We maximize exposure to different viewpoints, not clicks
-2. **Quality over quantity** — Primary sources and expert analysis rank higher than clickbait
-3. **Transparency** — All ranking signals are explicit and auditable
-4. **Open by design** — The tools are open source so researchers and developers can build upon them
-
-## Features
-
-### Composable Pipelines
-Build custom news diversity pipelines by combining modular components:
-
-- **Query Generators** — Generate diverse search queries targeting different perspectives
-- **Query Aggregators** — Deduplicate and diversify queries using PCA-based clustering
-- **Article Searchers** — Search multiple sources in parallel with automatic deduplication
-
-### Two Pipeline Types
-
-**Composable Pipeline** — Mix and match components:
-```
-generators → aggregator → searchers → deduplicated articles
-```
-
-**Claude E2E Pipeline** — Single Claude call with web search for quick results
-
-### Query Aggregation
-PCA-based algorithm to select maximally diverse queries:
-1. Embed all queries using sentence-transformers
-2. Compute principal components of the embedding space
-3. Select queries with highest cosine similarity to each PC
-4. Return K unique, perspective-diverse queries
-
-### Article Search
-Execute queries across news sources and aggregate results:
-- **ClaudeSearcher** — Uses Claude's built-in web search (recommended, no extra API key needed)
-- **GNewsSearcher** — Uses GNews API (requires separate API key)
-- Concurrent search across multiple queries
-- Automatic deduplication by URL
-- Date range filtering
-- Query tracing (which query found which article)
-
-### Coming Soon
-- **Metadata extraction** — AI-generated perspective and quality signals for each article
-- **Diversity ranking** — Select articles that maximize perspective coverage
-- **Iterative search** — Identify under-represented viewpoints and search for more
-
-## Project Structure
-
-```
-src/
-└── unbubble_core/          # Main package (import as unbubble_core)
-    ├── aggregator/         # Query aggregation
-    │   ├── base.py         # QueryAggregator protocol
-    │   ├── embeddings.py   # Text embedding utilities
-    │   └── pca.py          # PCA-based aggregator
-    ├── config/             # Configuration system
-    │   ├── models.py       # Pydantic config models
-    │   ├── loader.py       # YAML loading
-    │   └── factory.py      # Component factories
-    ├── data/               # Core data models
-    │   └── models.py       # NewsEvent, SearchQuery, Article
-    ├── pipeline/           # End-to-end pipelines
-    │   ├── base.py         # Pipeline protocol
-    │   ├── composable.py   # Composable pipeline
-    │   └── claude_e2e.py   # Claude E2E pipeline
-    ├── query/              # Query generation
-    │   ├── base.py         # QueryGenerator protocol
-    │   └── claude.py       # Claude API implementation
-    ├── search/             # Article search
-    │   ├── base.py         # ArticleSearcher protocol
-    │   ├── claude.py       # Claude web search implementation
-    │   └── gnews.py        # GNews API implementation
-    ├── url.py              # URL utilities (extract_domain)
-    └── __init__.py         # Public API exports
-
-configs/                    # YAML configuration files
-├── default.yaml            # Default composable pipeline
-└── claude_e2e.yaml         # Claude E2E pipeline
-
-planning/                   # Project roadmap
-├── plan_en.md              # English
-└── plan_it.md              # Italian
-
-tests/                      # Test suite
-main.py                     # CLI
-pyproject.toml              # Project configuration
-```
-
-## Installation
-
-Requires Python 3.11+.
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/unbubble.git
-cd unbubble/core
-
-# Install with uv (recommended)
-uv sync
-
-# Or with pip
-pip install -e .
-```
+Unbubble Sources takes a news event as input and returns articles representing a range of viewpoints, helping users break out of information bubbles.
 
 ## Quick Start
 
-### Using YAML Configuration (Recommended)
-
 ```bash
-# Set your Anthropic API key
-export CLAUDE_API_KEY=your-anthropic-key
+# Install
+git clone https://github.com/your-org/unbubble.git
+cd unbubble/sources
+uv sync
 
-# Run with default config (composable pipeline)
+# Run
+export CLAUDE_API_KEY=your-anthropic-key
 uv run python main.py "Climate summit negotiations"
 
-# Run with E2E pipeline config
+# Use a different pipeline config
 uv run python main.py "Climate summit negotiations" -c configs/claude_e2e.yaml
 ```
 
-### Programmatic Usage
+### Programmatic usage
 
 ```python
 import asyncio
-from unbubble_core import load_config, create_from_config, NewsEvent
+from unbubble_sources import load_config, create_from_config, NewsEvent
 
 async def main():
-    # Load config and create pipeline
     config = load_config("configs/default.yaml")
     pipeline = create_from_config(config)
-
-    # Define a news event
-    event = NewsEvent(
-        description="Climate summit negotiations",
-        date="2026-03-15",
-        context="UN conference on carbon emissions targets",
-    )
-
-    # Run the pipeline
-    articles = await pipeline.run(event)
-
-    for article in articles:
-        print(f"{article.title} ({article.source})")
-
-asyncio.run(main())
-```
-
-### Low-Level API
-
-```python
-import asyncio
-from unbubble_core import ClaudeQueryGenerator, ClaudeSearcher, NewsEvent
-
-async def main():
-    # Define a news event
     event = NewsEvent(description="Climate summit negotiations")
-
-    # Generate diverse search queries
-    generator = ClaudeQueryGenerator()
-    queries = await generator.generate(event, num_queries=5)
-
-    # Search for articles
-    searcher = ClaudeSearcher()
-    articles = await searcher.search(queries, from_date=event.date)
-
+    articles = await pipeline.run(event)
     for article in articles:
         print(f"{article.title} ({article.source})")
 
@@ -180,273 +39,55 @@ asyncio.run(main())
 
 ## Configuration
 
-### YAML Configuration Files
+Pipelines are configured via YAML. Two types are available:
 
-Unbubble uses YAML files to configure pipelines. Here's an example:
+**Composable** (`type: composable`) — chain generators, an aggregator, and searchers for full control:
 
 ```yaml
-# configs/default.yaml
 pipeline:
   type: composable
   generators:
     - type: claude
-      model: claude-haiku-4-5-20251001
   aggregator:
     type: pca
     n_components: 5
-    sentence_transformer_model: all-MiniLM-L6-v2
   searchers:
     - type: claude
-      model: claude-haiku-4-5-20251001
-      max_searches_per_query: 1
-  num_queries_per_generator: 5
-  max_results_per_searcher: 10
 ```
 
-### Pipeline Types
-
-**Composable Pipeline** (`type: composable`)
-- Combines multiple generators, an aggregator, and multiple searchers
-- Full control over each component
-- Best for research and customization
-
-**Claude E2E Pipeline** (`type: claude_e2e`)
-- Single Claude call with web search
-- Simpler, faster, lower cost
-- Best for quick lookups
+**Claude E2E** (`type: claude_e2e`) — single Claude call with web search, simpler and faster:
 
 ```yaml
-# configs/claude_e2e.yaml
 pipeline:
   type: claude_e2e
-  model: claude-haiku-4-5-20251001
   target_articles: 10
 ```
 
-### Component Configuration
+### Environment variables
 
-**Generators**
-```yaml
-generators:
-  - type: claude
-    model: claude-haiku-4-5-20251001
-    system_prompt: "Optional custom prompt with {num_queries} placeholder"
-```
+| Variable | Required | Description |
+|---|---|---|
+| `CLAUDE_API_KEY` | Yes | Anthropic API key |
+| `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key |
 
-**Aggregators**
-```yaml
-# PCA-based diversity aggregator
-aggregator:
-  type: pca
-  n_components: 5
-  sentence_transformer_model: all-MiniLM-L6-v2
+## Roadmap
 
-# Or pass-through (no aggregation)
-aggregator:
-  type: noop
-```
-
-**Searchers**
-```yaml
-searchers:
-  # Claude web search (recommended)
-  - type: claude
-    model: claude-haiku-4-5-20251001
-    max_searches_per_query: 1
-
-  # GNews API
-  - type: gnews
-    lang: en
-    country: us
-```
-
-### Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `CLAUDE_API_KEY` | Anthropic API key (required for Claude-based components) |
-| `GNEWS_API_KEY` | GNews API key (only needed if using GNews searcher) |
-
-### Search Backends
-
-**ClaudeSearcher (recommended)**
-- Uses Claude's built-in web search tool
-- Only requires your existing Anthropic API key
-- Cost: $10 per 1,000 searches (plus token costs)
-- Must be enabled in [Anthropic Console settings](https://console.anthropic.com/)
-
-**GNewsSearcher**
-- Uses the GNews API
-- Requires a separate API key from [gnews.io](https://gnews.io/)
-- Free tier: 100 requests/day
-
-## CLI Usage
-
-```bash
-# Set your Anthropic API key
-export CLAUDE_API_KEY=your-anthropic-key
-
-# Run with default config
-uv run python main.py "Climate summit negotiations"
-
-# Run with custom config
-uv run python main.py "Brexit trade negotiations" -c configs/claude_e2e.yaml
-```
-
-### CLI Options
-
-| Flag | Description |
-|------|-------------|
-| `query` | The news event (positional, required) |
-| `-c, --config` | Path to YAML config file (default: configs/default.yaml) |
-
-## Development
-
-```bash
-# Install dev dependencies
-uv sync --all-extras
-
-# Run tests
-uv run pytest -v
-
-# Type checking
-uv run mypy unbubble
-
-# Linting
-uv run ruff check .
-
-# Formatting
-uv run ruff format .
-```
-
-## Extending Unbubble
-
-### Adding a New Query Generator
-
-Implement the `QueryGenerator` protocol:
-
-```python
-from unbubble_core import NewsEvent, SearchQuery
-
-class MyQueryGenerator:
-    async def generate(
-        self, event: NewsEvent, *, num_queries: int = 10
-    ) -> list[SearchQuery]:
-        # Your implementation here
-        return [SearchQuery(text="...", intent="...")]
-```
-
-### Adding a New Article Searcher
-
-Implement the `ArticleSearcher` protocol:
-
-```python
-from unbubble_core import Article, SearchQuery
-
-class MySearcher:
-    async def search(
-        self,
-        queries: list[SearchQuery],
-        *,
-        from_date: str | None = None,
-        to_date: str | None = None,
-        max_results_per_query: int = 10,
-    ) -> list[Article]:
-        # Your implementation here
-        return [Article(title="...", url="...", source="...")]
-```
-
-### Adding a New Aggregator
-
-Implement the `QueryAggregator` protocol:
-
-```python
-from unbubble_core import SearchQuery
-
-class MyAggregator:
-    async def aggregate(self, queries: list[SearchQuery]) -> list[SearchQuery]:
-        # Your diversification logic here
-        return queries[:5]  # Example: just take first 5
-```
-
-### Adding a New Pipeline
-
-Implement the `Pipeline` protocol:
-
-```python
-from unbubble_core import Article, NewsEvent
-
-class MyPipeline:
-    async def run(
-        self,
-        event: NewsEvent,
-        *,
-        from_date: str | None = None,
-        to_date: str | None = None,
-    ) -> list[Article]:
-        # Your pipeline logic here
-        return [Article(title="...", url="...", source="...")]
-```
+- Metadata extraction: AI-generated perspective and quality signals per article
+- Diversity ranking: select articles that maximize perspective coverage
+- Iterative search: identify under-represented viewpoints and search for more
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
+1. Fork, branch, make changes, add tests
+2. `uv run pytest -v && uv run ruff check . && uv run mypy src/`
+3. Open a PR
 
-1. **Fork the repository** and clone your fork
-2. **Create a branch** for your feature or fix: `git checkout -b feature/my-feature`
-3. **Make your changes** and add tests
-4. **Run the test suite**: `uv run pytest -v`
-5. **Run linting and type checks**: `uv run ruff check . && uv run mypy unbubble`
-6. **Commit your changes** with a clear message
-7. **Push to your fork** and open a Pull Request
+### Ideas
 
-### Guidelines
-
-- Follow the existing code style (enforced by ruff)
-- Add tests for new functionality
-- Update documentation as needed
-- Keep PRs focused on a single change
-
-### Ideas for Contributions
-
-- Additional search API integrations (NewsAPI, Bing News, etc.)
+- Additional search backends (NewsAPI, Bing News, etc.)
 - Alternative query generators (OpenAI, local LLMs)
-- Metadata extraction for perspective/quality scoring
-- Visualization tools for perspective diversity
-- Language support beyond English
+- Perspective/quality scoring and ranking
 
 ## License
 
-MIT License
-
-Copyright (c) 2026 Unbubble Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-## Acknowledgments
-
-Built with:
-- [Anthropic Claude](https://www.anthropic.com/) for query generation and web search
-- [GNews API](https://gnews.io/) for news search (optional)
-- [Sentence Transformers](https://www.sbert.net/) for text embeddings
-- [Pydantic](https://docs.pydantic.dev/) for configuration
-- [httpx](https://www.python-httpx.org/) for async HTTP
-- [pytest](https://pytest.org/) for testing
-- [ruff](https://docs.astral.sh/ruff/) for linting and formatting
-- [mypy](https://mypy-lang.org/) for type checking
+MIT License -- Copyright (c) 2026 Unbubble Contributors

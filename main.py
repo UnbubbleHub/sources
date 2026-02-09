@@ -7,34 +7,43 @@ import logging
 import sys
 from pathlib import Path
 
-from unbubble_core.config import create_from_config, get_default_config_path, load_config
-from unbubble_core.data import NewsEvent
+from pydantic import BaseModel, field_validator
+
+from unbubble_sources.config import create_from_config, get_default_config_path, load_config
+from unbubble_sources.data import NewsEvent
 
 logger = logging.getLogger(__name__)
 
-async def run(query: str, config_path: Path) -> None:
+
+class CLIArgs(BaseModel):
+    """Validated CLI arguments."""
+
+    query: str
+    config: Path
+
+    @field_validator("config")
+    @classmethod
+    def config_must_exist(cls, v: Path) -> Path:
+        if not v.exists():
+            raise ValueError(f"Config file not found: {v}")
+        return v
+
+
+async def run(args: CLIArgs) -> None:
     """Execute the pipeline with the given configuration.
 
     Args:
-        query: Event description or query string.
-        config_path: Path to YAML configuration file.
+        args: Validated CLI arguments.
     """
-    # Load configuration
-    config = load_config(config_path)
-
-    # Create pipeline from config
+    config = load_config(args.config)
     pipeline = create_from_config(config)
+    event = NewsEvent(description=args.query)
 
-    # Create event from query
-    event = NewsEvent(description=query)
+    logger.info(f"Running pipeline for: {args.query}")
+    logger.info(f"Config: {args.config}")
 
-    logger.info(f"Running pipeline for: {query}")
-    logger.info(f"Config: {config_path}")
-
-    # Execute pipeline
     articles = await pipeline.run(event)
 
-    # Print results
     print(f"Found {len(articles)} unique articles:\n")
     for i, article in enumerate(articles, 1):
         logger.info(f"{i}. {article.title}")
@@ -59,17 +68,19 @@ def main() -> None:
         help="Path to YAML config file (default: configs/default.yaml)",
     )
 
-    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    # Resolve config path
-    config_path: Path = args.config if args.config else get_default_config_path()
+    ns = parser.parse_args()
+    config_path: Path = ns.config if ns.config else get_default_config_path()
 
-    if not config_path.exists():
-        logger.error(f"Error: Config file not found: {config_path}")
+    try:
+        args = CLIArgs(query=ns.query, config=config_path)
+    except Exception as e:
+        logger.error(str(e))
         sys.exit(1)
 
     try:
-        asyncio.run(run(args.query, config_path))
+        asyncio.run(run(args))
     except KeyboardInterrupt:
         sys.exit(130)
 

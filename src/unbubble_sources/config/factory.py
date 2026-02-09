@@ -1,7 +1,7 @@
 """Factory functions to create components from configuration."""
 
-from unbubble_core.aggregator.pca import NoOpAggregator, PCAAggregator
-from unbubble_core.config.models import (
+from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.config.models import (
     ClaudeE2EPipelineConfig,
     ClaudeQueryGeneratorConfig,
     ClaudeSearcherConfig,
@@ -11,14 +11,14 @@ from unbubble_core.config.models import (
     PCAAggregatorConfig,
     UnbubbleConfig,
 )
-from unbubble_core.pipeline.base import Pipeline
-from unbubble_core.pipeline.claude_e2e import ClaudeE2EPipeline
-from unbubble_core.pipeline.composable import ComposablePipeline
-from unbubble_core.query.base import QueryGenerator
-from unbubble_core.query.claude import ClaudeQueryGenerator
-from unbubble_core.search.base import ArticleSearcher
-from unbubble_core.search.claude import ClaudeSearcher
-from unbubble_core.search.gnews import GNewsSearcher
+from unbubble_sources.pipeline.base import Pipeline
+from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
+from unbubble_sources.pipeline.composable import ComposablePipeline
+from unbubble_sources.query.base import QueryGenerator
+from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.search.base import ArticleSearcher
+from unbubble_sources.search.claude import ClaudeSearcher
+from unbubble_sources.search.gnews import GNewsSearcher
 
 
 def create_generator(config: ClaudeQueryGeneratorConfig) -> QueryGenerator:

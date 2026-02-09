@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from unbubble_core.aggregator.embeddings import SentenceTransformerEmbedder
-from unbubble_core.data import SearchQuery
+from unbubble_sources.aggregator.embeddings import SentenceTransformerEmbedder
+from unbubble_sources.data import SearchQuery
 
 
 class PCAAggregator:

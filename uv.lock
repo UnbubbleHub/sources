@@ -1510,7 +1510,7 @@ wheels = [
 ]
 
 [[package]]
-name = "unbubble-core"
+name = "unbubble-sources"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

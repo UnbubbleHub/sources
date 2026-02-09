@@ -1,7 +1,7 @@
 
 from typing import Protocol
 
-from unbubble_core.data import NewsEvent, SearchQuery
+from unbubble_sources.data import NewsEvent, SearchQuery
 
 
 class QueryGenerator(Protocol):

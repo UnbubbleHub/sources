@@ -5,7 +5,7 @@ import os
 import anthropic
 from anthropic.types import TextBlock
 
-from unbubble_core.data import NewsEvent, SearchQuery
+from unbubble_sources.data import NewsEvent, SearchQuery
 
 DEFAULT_SYSTEM_PROMPT = """\
 You are a research assistant that generates diverse search queries to find \

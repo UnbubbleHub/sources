@@ -5,7 +5,7 @@ import os
 
 import httpx
 
-from unbubble_core.data import Article, SearchQuery
+from unbubble_sources.data import Article, SearchQuery
 
 GNEWS_API_URL = "https://gnews.io/api/v4/search"
 
