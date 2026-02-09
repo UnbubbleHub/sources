@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from unbubble_core.data import SearchQuery
+from unbubble_sources.data import SearchQuery
 
 
 class QueryAggregator(Protocol):

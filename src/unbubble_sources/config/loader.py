@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from unbubble_core.config.models import UnbubbleConfig
+from unbubble_sources.config.models import UnbubbleConfig
 
 
 def load_config(path: Path | str) -> UnbubbleConfig:

@@ -3,10 +3,10 @@
 import asyncio
 import logging
 
-from unbubble_core.aggregator.base import QueryAggregator
-from unbubble_core.data import Article, NewsEvent, SearchQuery
-from unbubble_core.query.base import QueryGenerator
-from unbubble_core.search.base import ArticleSearcher
+from unbubble_sources.aggregator.base import QueryAggregator
+from unbubble_sources.data import Article, NewsEvent, SearchQuery
+from unbubble_sources.query.base import QueryGenerator
+from unbubble_sources.search.base import ArticleSearcher
 
 logger = logging.getLogger(__name__)
 

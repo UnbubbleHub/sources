@@ -5,8 +5,8 @@ import os
 import anthropic
 from anthropic.types import WebSearchResultBlock
 
-from unbubble_core.data import Article, SearchQuery
-from unbubble_core.url import extract_domain
+from unbubble_sources.data import Article, SearchQuery
+from unbubble_sources.url import extract_domain
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 
 from typing import Protocol
 
-from unbubble_core.data import Article, SearchQuery
+from unbubble_sources.data import Article, SearchQuery
 
 
 class ArticleSearcher(Protocol):

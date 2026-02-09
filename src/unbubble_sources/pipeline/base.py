@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from unbubble_core.data import Article, NewsEvent
+from unbubble_sources.data import Article, NewsEvent
 
 
 class Pipeline(Protocol):

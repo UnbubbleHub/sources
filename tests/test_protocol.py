@@ -3,8 +3,8 @@
 
 from typing import TYPE_CHECKING
 
-from unbubble_core.data import NewsEvent, SearchQuery
-from unbubble_core.query.claude import ClaudeQueryGenerator
+from unbubble_sources.data import NewsEvent, SearchQuery
+from unbubble_sources.query.claude import ClaudeQueryGenerator
 
 if TYPE_CHECKING:
     pass
