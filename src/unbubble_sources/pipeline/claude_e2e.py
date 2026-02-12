@@ -1,12 +1,14 @@
 """Claude E2E pipeline implementation."""
-
 import logging
 import os
+import time
 
 import anthropic
 from anthropic.types import WebSearchToolResultBlock
 
 from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery, Usage
+from unbubble_sources.pricing import PriceCache
+from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.url import extract_domain
 
 logger = logging.getLogger(__name__)
@@ -22,6 +24,8 @@ class ClaudeE2EPipeline:
         model: Anthropic model to use.
         api_key: API key (defaults to CLAUDE_API_KEY env var).
         target_articles: Target number of diverse articles to find.
+        run_logger: Optional RunLogger for intermediate result logging.
+        price_cache: Optional PriceCache for cost estimation.
     """
 
     SYSTEM_PROMPT = """\
@@ -44,11 +48,15 @@ the same underlying facts but from genuinely different angles.\
         model: str = "claude-haiku-4-5-20251001",
         api_key: str | None = None,
         target_articles: int = 10,
+        run_logger: RunLogger | None = None,
+        price_cache: PriceCache | None = None,
     ) -> None:
         resolved_key = api_key or os.environ.get("CLAUDE_API_KEY")
         self._client = anthropic.AsyncAnthropic(api_key=resolved_key)
         self._model = model
         self._target = target_articles
+        self._run_logger = run_logger
+        self._price_cache = price_cache
 
     async def run(
         self,
@@ -67,6 +75,13 @@ the same underlying facts but from genuinely different angles.\
         Returns:
             Tuple of (diverse articles, usage).
         """
+        if self._run_logger:
+            self._run_logger.start_run("claude_e2e", event)
+
+        # Ensure prices are fetched before pipeline starts
+        if self._price_cache:
+            await self._price_cache.get()
+
         # Build user prompt
         date_context = ""
         if from_date and to_date:
@@ -83,6 +98,7 @@ the same underlying facts but from genuinely different angles.\
             user_prompt += f"\nContext: {event.context}"
         user_prompt += date_context
 
+        t0 = time.monotonic()
         response = await self._client.messages.create(
             model=self._model,
             max_tokens=4096,
@@ -144,4 +160,21 @@ the same underlying facts but from genuinely different angles.\
                             )
                         )
 
-        return (articles[: self._target], usage)
+        final_articles = articles[: self._target]
+        e2e_duration = time.monotonic() - t0
+
+        if self._price_cache:
+            self._price_cache.stamp_usage(usage)
+
+        if self._run_logger:
+            self._run_logger.log_stage(
+                stage="e2e",
+                component="ClaudeE2EPipeline",
+                input_data=event,
+                output_data=final_articles,
+                usage=usage,
+                duration_seconds=e2e_duration,
+            )
+            self._run_logger.finish_run(final_articles, usage)
+
+        return (final_articles, usage)

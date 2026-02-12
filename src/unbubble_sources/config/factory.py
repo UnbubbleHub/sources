@@ -1,5 +1,7 @@
 """Factory functions to create components from configuration."""
 
+from pathlib import Path
+
 from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
 from unbubble_sources.config.models import (
     ClaudeE2EPipelineConfig,
@@ -14,8 +16,10 @@ from unbubble_sources.config.models import (
 from unbubble_sources.pipeline.base import Pipeline
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
+from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import ArticleSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
@@ -63,6 +67,8 @@ def create_aggregator(
 
 def create_pipeline(
     config: ComposablePipelineConfig | ClaudeE2EPipelineConfig,
+    run_logger: RunLogger | None = None,
+    price_cache: PriceCache | None = None,
 ) -> Pipeline:
     """Create a pipeline from config."""
     if isinstance(config, ComposablePipelineConfig):
@@ -76,16 +82,44 @@ def create_pipeline(
             searchers=searchers,
             num_queries_per_generator=config.num_queries_per_generator,
             max_results_per_searcher=config.max_results_per_searcher,
+            run_logger=run_logger,
+            price_cache=price_cache,
         )
     if isinstance(config, ClaudeE2EPipelineConfig):
         return ClaudeE2EPipeline(
             model=config.model,
             target_articles=config.target_articles,
+            run_logger=run_logger,
+            price_cache=price_cache,
         )
     msg = f"Unknown pipeline config type: {type(config)}"
     raise ValueError(msg)
 
 
-def create_from_config(config: UnbubbleConfig) -> Pipeline:
-    """Create a complete pipeline from root config."""
-    return create_pipeline(config.pipeline)
+def create_from_config(
+    config: UnbubbleConfig,
+    *,
+    log_override: bool | None = None,
+    log_dir_override: str | None = None,
+) -> tuple[Pipeline, RunLogger | None, PriceCache]:
+    """Create a complete pipeline from root config.
+
+    Args:
+        config: Root configuration.
+        log_override: Override the config's logging.enabled setting.
+        log_dir_override: Override the config's logging.log_dir setting.
+
+    Returns:
+        Tuple of (pipeline, run_logger, price_cache).
+        run_logger is None if logging is disabled.
+    """
+    log_enabled = log_override if log_override is not None else config.logging.enabled
+    log_dir = Path(log_dir_override if log_dir_override is not None else config.logging.log_dir)
+
+    run_logger: RunLogger | None = None
+    if log_enabled:
+        run_logger = RunLogger(log_dir=log_dir, enabled=True)
+
+    price_cache = PriceCache()
+    pipeline = create_pipeline(config.pipeline, run_logger=run_logger, price_cache=price_cache)
+    return (pipeline, run_logger, price_cache)

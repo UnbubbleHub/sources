@@ -2,9 +2,10 @@
 
 import pytest
 
-from unbubble_sources.data import APICallUsage
+from unbubble_sources.data import APICallUsage, Usage
 from unbubble_sources.pricing import (
     ModelPricing,
+    PriceCache,
     _display_name_to_model_prefix,
     _parse_price,
     _parse_pricing_table,
@@ -192,3 +193,59 @@ def test_estimate_usage_cost_with_gnews(
     ]
     cost = estimate_usage_cost(api_calls, gnews_requests=10, prices=sample_prices)
     assert abs(cost - 1.0) < 0.001
+
+
+# -- PriceCache tests --
+
+
+def test_price_cache_get_sync_raises_without_fetch() -> None:
+    cache = PriceCache()
+    with pytest.raises(RuntimeError, match="not yet fetched"):
+        cache.get_sync()
+
+
+async def test_price_cache_get_fetches_and_caches() -> None:
+    cache = PriceCache()
+    prices = await cache.get()
+    assert isinstance(prices, dict)
+    assert len(prices) > 0
+    # Second call returns same object (cached)
+    prices2 = await cache.get()
+    assert prices is prices2
+
+
+async def test_price_cache_get_sync_after_fetch() -> None:
+    cache = PriceCache()
+    await cache.get()
+    prices = cache.get_sync()
+    assert isinstance(prices, dict)
+
+
+def test_price_cache_stamp_usage(
+    sample_prices: dict[str, ModelPricing],
+) -> None:
+    cache = PriceCache()
+    cache._prices = sample_prices  # pre-populate to avoid network call
+
+    usage = Usage(
+        api_calls=[
+            APICallUsage(
+                model="claude-haiku-4-5-20251001",
+                input_tokens=1_000_000,
+                output_tokens=0,
+            ),
+        ],
+    )
+    assert usage.estimated_cost == 0.0
+
+    cache.stamp_usage(usage)
+
+    # 1M input tokens at $1/MTok = $1.00
+    assert usage.estimated_cost == pytest.approx(1.0)
+
+
+def test_price_cache_stamp_usage_ignores_non_usage() -> None:
+    cache = PriceCache()
+    cache._prices = {}
+    # Should not raise on non-Usage objects
+    cache.stamp_usage("not a usage object")

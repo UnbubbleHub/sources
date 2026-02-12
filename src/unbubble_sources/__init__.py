@@ -9,6 +9,7 @@ from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.pricing import (
     ModelPricing,
+    PriceCache,
     estimate_api_call_cost,
     estimate_usage_cost,
     fetch_model_prices,
@@ -16,6 +17,7 @@ from unbubble_sources.pricing import (
 )
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import DEFAULT_SYSTEM_PROMPT, ClaudeQueryGenerator
+from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import ArticleSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
@@ -30,6 +32,7 @@ __all__ = [
     "Usage",
     # Pricing
     "ModelPricing",
+    "PriceCache",
     "estimate_api_call_cost",
     "estimate_usage_cost",
     "fetch_model_prices",
@@ -53,6 +56,8 @@ __all__ = [
     # Pipelines
     "ClaudeE2EPipeline",
     "ComposablePipeline",
+    # Logging
+    "RunLogger",
     # Config
     "UnbubbleConfig",
     "create_from_config",

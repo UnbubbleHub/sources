@@ -121,6 +121,20 @@ PipelineConfig = Annotated[
 
 
 # ============================================================
+# Logging Config
+# ============================================================
+
+
+class LoggingConfig(BaseModel):
+    """Configuration for intermediate pipeline logging."""
+
+    enabled: bool = False
+    log_dir: str = "logs"
+
+    model_config = {"frozen": True}
+
+
+# ============================================================
 # Root Config
 # ============================================================
 
@@ -129,5 +143,6 @@ class UnbubbleConfig(BaseModel):
     """Root configuration for Unbubble."""
 
     pipeline: ComposablePipelineConfig | ClaudeE2EPipelineConfig
+    logging: LoggingConfig = Field(default_factory=LoggingConfig)
 
     model_config = {"frozen": True}
