@@ -1,7 +1,6 @@
-
 from typing import Protocol
 
-from unbubble_sources.data import Article, SearchQuery
+from unbubble_sources.data import Article, SearchQuery, Usage
 
 
 class ArticleSearcher(Protocol):
@@ -14,7 +13,7 @@ class ArticleSearcher(Protocol):
         from_date: str | None = None,
         to_date: str | None = None,
         max_results_per_query: int = 10,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Search for articles matching the given queries.
 
         Args:
@@ -24,6 +23,6 @@ class ArticleSearcher(Protocol):
             max_results_per_query: Maximum articles to return per query.
 
         Returns:
-            Deduplicated list of articles found across all queries.
+            Tuple of (deduplicated articles, usage).
         """
         ...

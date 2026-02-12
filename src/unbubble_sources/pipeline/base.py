@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from unbubble_sources.data import Article, NewsEvent
+from unbubble_sources.data import Article, NewsEvent, Usage
 
 
 class Pipeline(Protocol):
@@ -14,7 +14,7 @@ class Pipeline(Protocol):
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Execute the pipeline to find diverse articles about an event.
 
         Args:
@@ -23,6 +23,6 @@ class Pipeline(Protocol):
             to_date: Optional end date filter.
 
         Returns:
-            List of diverse, deduplicated articles.
+            Tuple of (diverse deduplicated articles, usage).
         """
         ...

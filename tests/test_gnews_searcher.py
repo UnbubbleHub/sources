@@ -1,13 +1,12 @@
 """Tests for GNewsSearcher."""
 
-
 from typing import Any
 from unittest.mock import MagicMock
 
 import httpx
 import pytest
 
-from unbubble_sources.data import Article, SearchQuery
+from unbubble_sources.data import Article, SearchQuery, Usage
 from unbubble_sources.search.gnews import GNewsSearcher
 
 
@@ -71,13 +70,39 @@ async def test_search_returns_articles(
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
 
     queries = [SearchQuery(text="test query", intent="test intent")]
-    articles = await gnews_searcher.search(queries)
+    articles, usage = await gnews_searcher.search(queries)
 
     assert len(articles) == 2
     assert all(isinstance(a, Article) for a in articles)
     assert articles[0].title == "Article 1"
     assert articles[0].source == "Example News"
     assert articles[0].query == queries[0]
+
+
+async def test_search_returns_usage(
+    gnews_searcher: GNewsSearcher,
+    mock_response_data: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Should return usage with gnews_requests count."""
+    mock_response = MagicMock()
+    mock_response.json.return_value = mock_response_data
+    mock_response.raise_for_status = MagicMock()
+
+    async def mock_get(*args: Any, **kwargs: Any) -> MagicMock:
+        return mock_response
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+    queries = [
+        SearchQuery(text="query 1", intent="intent 1"),
+        SearchQuery(text="query 2", intent="intent 2"),
+    ]
+    articles, usage = await gnews_searcher.search(queries)
+
+    assert isinstance(usage, Usage)
+    assert usage.gnews_requests == 2
+    assert len(usage.api_calls) == 0  # No Claude API calls
 
 
 async def test_search_deduplicates_by_url(
@@ -99,7 +124,7 @@ async def test_search_deduplicates_by_url(
         SearchQuery(text="query 1", intent="intent 1"),
         SearchQuery(text="query 2", intent="intent 2"),
     ]
-    articles = await gnews_searcher.search(queries)
+    articles, usage = await gnews_searcher.search(queries)
 
     assert len(articles) == 2
 
@@ -161,9 +186,11 @@ async def test_search_handles_failed_queries(
         SearchQuery(text="failing query", intent="will fail"),
         SearchQuery(text="working query", intent="will work"),
     ]
-    articles = await gnews_searcher.search(queries)
+    articles, usage = await gnews_searcher.search(queries)
 
     assert len(articles) == 2
+    # Only 1 request succeeded
+    assert usage.gnews_requests == 1
 
 
 async def test_search_caps_max_results(

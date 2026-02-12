@@ -31,7 +31,7 @@ class SentenceTransformerEmbedder:
 
     def embed(self, texts: list[str]) -> NDArray[np.float32]:
         """Embed texts using sentence-transformers."""
-        embeddings: NDArray[np.float32] = self._model.encode(
-            texts, convert_to_numpy=True
-        ).astype(np.float32)
+        embeddings: NDArray[np.float32] = self._model.encode(texts, convert_to_numpy=True).astype(
+            np.float32
+        )
         return embeddings

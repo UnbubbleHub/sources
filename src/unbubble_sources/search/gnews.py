@@ -1,16 +1,16 @@
-
 import asyncio
 import logging
 import os
 
 import httpx
 
-from unbubble_sources.data import Article, SearchQuery
+from unbubble_sources.data import Article, SearchQuery, Usage
 
 GNEWS_API_URL = "https://gnews.io/api/v4/search"
 
 
 logger = logging.getLogger(__name__)
+
 
 class GNewsSearcher:
     """Search for news articles using the GNews API.
@@ -38,7 +38,7 @@ class GNewsSearcher:
         from_date: str | None = None,
         to_date: str | None = None,
         max_results_per_query: int = 10,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Search for articles matching the given queries.
 
         Args:
@@ -48,7 +48,7 @@ class GNewsSearcher:
             max_results_per_query: Maximum articles to return per query (max 100).
 
         Returns:
-            Deduplicated list of articles found across all queries.
+            Tuple of (deduplicated articles, usage).
         """
         async with httpx.AsyncClient(timeout=30.0) as client:
             tasks = [
@@ -66,18 +66,21 @@ class GNewsSearcher:
         # Flatten and deduplicate by URL
         seen_urls: set[str] = set()
         articles: list[Article] = []
+        successful_requests = 0
         for result in results:
             if isinstance(result, BaseException):
                 # Log or handle errors; for now skip failed queries
                 logger.warning(f"Error processing query. Error: {result}")
                 continue
+            successful_requests += 1
             # result is list[Article] here
             for article in result:
                 if article.url not in seen_urls:
                     seen_urls.add(article.url)
                     articles.append(article)
 
-        return articles
+        usage = Usage(gnews_requests=successful_requests)
+        return (articles, usage)
 
     async def _search_single(
         self,

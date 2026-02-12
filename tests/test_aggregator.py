@@ -56,9 +56,7 @@ def pca_aggregator(mock_embedder: MagicMock) -> PCAAggregator:
 
 
 async def test_pca_returns_n_components_queries(pca_aggregator: PCAAggregator) -> None:
-    queries = [
-        SearchQuery(text=f"query {i}", intent=f"intent {i}") for i in range(5)
-    ]
+    queries = [SearchQuery(text=f"query {i}", intent=f"intent {i}") for i in range(5)]
     result = await pca_aggregator.aggregate(queries)
     assert len(result) == 3  # n_components
 
@@ -78,9 +76,7 @@ async def test_pca_returns_all_if_fewer_than_n_components(
 async def test_pca_returns_unique_queries(
     pca_aggregator: PCAAggregator,
 ) -> None:
-    queries = [
-        SearchQuery(text=f"query {i}", intent=f"intent {i}") for i in range(5)
-    ]
+    queries = [SearchQuery(text=f"query {i}", intent=f"intent {i}") for i in range(5)]
     result = await pca_aggregator.aggregate(queries)
     assert len(result) == len(set(result))
 
@@ -90,12 +86,8 @@ async def test_pca_empty_list(pca_aggregator: PCAAggregator) -> None:
     assert result == []
 
 
-async def test_pca_single_query(
-    pca_aggregator: PCAAggregator, mock_embedder: MagicMock
-) -> None:
-    mock_embedder.embed.return_value = np.array(
-        [[1.0, 0.0, 0.0]], dtype=np.float32
-    )
+async def test_pca_single_query(pca_aggregator: PCAAggregator, mock_embedder: MagicMock) -> None:
+    mock_embedder.embed.return_value = np.array([[1.0, 0.0, 0.0]], dtype=np.float32)
     queries = [SearchQuery(text="only one", intent="single")]
     result = await pca_aggregator.aggregate(queries)
     assert result == queries

@@ -1,14 +1,14 @@
-
 import logging
 import os
 
 import anthropic
 from anthropic.types import WebSearchResultBlock
 
-from unbubble_sources.data import Article, SearchQuery
+from unbubble_sources.data import APICallUsage, Article, SearchQuery, Usage
 from unbubble_sources.url import extract_domain
 
 logger = logging.getLogger(__name__)
+
 
 class ClaudeSearcher:
     """Search for news articles using Claude's built-in web search tool.
@@ -44,7 +44,7 @@ class ClaudeSearcher:
         from_date: str | None = None,
         to_date: str | None = None,
         max_results_per_query: int = 10,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Search for articles matching the given queries.
 
         Args:
@@ -54,19 +54,21 @@ class ClaudeSearcher:
             max_results_per_query: Maximum articles to return per query.
 
         Returns:
-            Deduplicated list of articles found across all queries.
+            Tuple of (deduplicated articles, usage).
         """
         seen_urls: set[str] = set()
         articles: list[Article] = []
+        total_usage = Usage()
 
         for query in queries:
             try:
-                query_articles = await self._search_single(
+                query_articles, query_usage = await self._search_single(
                     query,
                     from_date=from_date,
                     to_date=to_date,
                     max_results=max_results_per_query,
                 )
+                total_usage += query_usage
                 for article in query_articles:
                     if article.url not in seen_urls:
                         seen_urls.add(article.url)
@@ -76,7 +78,7 @@ class ClaudeSearcher:
                 logger.warning(f"Failed query {query}. Error: {e}")
                 continue
 
-        return articles
+        return (articles, total_usage)
 
     async def _search_single(
         self,
@@ -85,7 +87,7 @@ class ClaudeSearcher:
         from_date: str | None,
         to_date: str | None,
         max_results: int,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Execute a single search query using Claude's web search."""
         # Build the search prompt
         date_context = ""
@@ -117,6 +119,29 @@ class ClaudeSearcher:
             messages=[{"role": "user", "content": user_prompt}],
         )
 
+        # Count web searches from server_tool_use in usage
+        web_searches = 0
+        server_tool_use = getattr(response.usage, "server_tool_use", None)
+        if server_tool_use is not None:
+            web_searches = getattr(server_tool_use, "web_search_requests", 0) or 0
+
+        usage = Usage(
+            api_calls=[
+                APICallUsage(
+                    model=self._model,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cache_creation_input_tokens=getattr(
+                        response.usage, "cache_creation_input_tokens", 0
+                    )
+                    or 0,
+                    cache_read_input_tokens=getattr(response.usage, "cache_read_input_tokens", 0)
+                    or 0,
+                    web_searches=web_searches,
+                ),
+            ],
+        )
+
         # Extract articles from web search results
         articles: list[Article] = []
 
@@ -128,7 +153,7 @@ class ClaudeSearcher:
                         article = self._parse_search_result(result, query)
                         articles.append(article)
 
-        return articles[:max_results]
+        return (articles[:max_results], usage)
 
     def _parse_search_result(self, result: WebSearchResultBlock, query: SearchQuery) -> Article:
         """Parse a web search result into an Article."""
