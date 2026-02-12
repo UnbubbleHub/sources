@@ -207,5 +207,16 @@ def test_create_pipeline_e2e() -> None:
 
 def test_create_from_config() -> None:
     config = UnbubbleConfig(pipeline=ClaudeE2EPipelineConfig())
-    pipeline = create_from_config(config)
+    pipeline, run_logger, price_cache = create_from_config(config)
     assert isinstance(pipeline, ClaudeE2EPipeline)
+    assert run_logger is None  # Logging disabled by default
+    assert price_cache is not None
+
+
+def test_create_from_config_with_logging() -> None:
+    config = UnbubbleConfig(pipeline=ClaudeE2EPipelineConfig())
+    pipeline, run_logger, price_cache = create_from_config(config, log_override=True)
+    assert isinstance(pipeline, ClaudeE2EPipeline)
+    assert run_logger is not None
+    assert run_logger.enabled
+    assert price_cache is not None

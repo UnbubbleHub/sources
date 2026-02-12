@@ -1,5 +1,7 @@
 """Tests for Usage and APICallUsage data models."""
 
+import pytest
+
 from unbubble_sources.data import APICallUsage, Usage
 
 
@@ -44,6 +46,7 @@ def test_usage_empty() -> None:
     assert usage.cache_read_input_tokens == 0
     assert usage.web_searches == 0
     assert usage.gnews_requests == 0
+    assert usage.estimated_cost == 0.0
     assert len(usage.api_calls) == 0
 
 
@@ -65,16 +68,19 @@ def test_usage_add() -> None:
     u1 = Usage(
         api_calls=[APICallUsage(model="m1", input_tokens=100)],
         gnews_requests=1,
+        estimated_cost=0.50,
     )
     u2 = Usage(
         api_calls=[APICallUsage(model="m2", input_tokens=200)],
         gnews_requests=2,
+        estimated_cost=1.00,
     )
     combined = u1 + u2
 
     assert len(combined.api_calls) == 2
     assert combined.input_tokens == 300
     assert combined.gnews_requests == 3
+    assert combined.estimated_cost == pytest.approx(1.50)
     # Original objects unchanged
     assert len(u1.api_calls) == 1
     assert len(u2.api_calls) == 1
@@ -84,16 +90,19 @@ def test_usage_iadd() -> None:
     u1 = Usage(
         api_calls=[APICallUsage(model="m1", input_tokens=100)],
         gnews_requests=1,
+        estimated_cost=0.25,
     )
     u2 = Usage(
         api_calls=[APICallUsage(model="m2", input_tokens=200)],
         gnews_requests=2,
+        estimated_cost=0.75,
     )
     u1 += u2
 
     assert len(u1.api_calls) == 2
     assert u1.input_tokens == 300
     assert u1.gnews_requests == 3
+    assert u1.estimated_cost == pytest.approx(1.00)
 
 
 def test_usage_add_empty() -> None:

@@ -18,6 +18,10 @@ uv run python main.py "Climate summit negotiations"
 
 # Use a different pipeline config
 uv run python main.py "Climate summit negotiations" -c configs/claude_e2e.yaml
+
+# Enable intermediate logging (writes a JSON file per run)
+uv run python main.py "Climate summit negotiations" --log
+uv run python main.py "Climate summit negotiations" --log --log-dir my_logs/
 ```
 
 ### Programmatic usage
@@ -25,14 +29,21 @@ uv run python main.py "Climate summit negotiations" -c configs/claude_e2e.yaml
 ```python
 import asyncio
 from unbubble_sources import load_config, create_from_config, NewsEvent
+from unbubble_sources.pricing import fetch_model_prices, estimate_usage_cost
 
 async def main():
     config = load_config("configs/default.yaml")
-    pipeline = create_from_config(config)
+    pipeline, run_logger = create_from_config(config)
     event = NewsEvent(description="Climate summit negotiations")
-    articles = await pipeline.run(event)
+    articles, usage = await pipeline.run(event)
+
     for article in articles:
         print(f"{article.title} ({article.source})")
+
+    # Cost estimation
+    prices = await fetch_model_prices()
+    cost = estimate_usage_cost(usage.api_calls, usage.gnews_requests, prices)
+    print(f"Estimated cost: ${cost:.4f}")
 
 asyncio.run(main())
 ```
@@ -69,6 +80,38 @@ pipeline:
 |---|---|---|
 | `CLAUDE_API_KEY` | Yes | Anthropic API key |
 | `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key |
+
+## Usage Tracking & Cost Estimation
+
+Every pipeline run returns a `Usage` object alongside the articles, tracking:
+
+- **API calls**: per-call token counts (input, output, cache read/write) and model IDs
+- **Web searches**: number of Claude web search tool invocations
+- **GNews requests**: number of GNews API HTTP requests
+
+Costs are estimated by dynamically fetching the latest pricing from the Anthropic docs. A hardcoded fallback is used if the fetch fails.
+
+## Run Logging
+
+Pass `--log` to write a JSON file per run with the input, output, and usage of every pipeline stage:
+
+```bash
+uv run python main.py "Climate summit negotiations" --log
+# → logs/run_2026-02-12T14-30-00.json
+```
+
+The log file contains a `stages` array — one entry per pipeline element (query generation, aggregation, search, deduplication) — each with serialized input/output, usage breakdown, and wall-clock duration.
+
+You can also enable logging via YAML config:
+
+```yaml
+pipeline:
+  type: composable
+  # ...
+logging:
+  enabled: true
+  log_dir: logs
+```
 
 ## Roadmap
 

@@ -6,9 +6,12 @@ estimation utilities. Falls back to hardcoded prices when offline.
 
 import logging
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import httpx
+
+from unbubble_sources.data.models import APICallUsage, Usage
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +138,71 @@ async def fetch_model_prices() -> dict[str, ModelPricing]:
     return dict(_FALLBACK_PRICES)
 
 
+class PriceCache:
+    """Lazily fetches and caches model pricing for the lifetime of a run.
+
+    Usage::
+
+        cache = PriceCache()
+        prices = await cache.get()   # fetches on first call, cached after
+        cost = cache.estimate_usage_cost(usage)
+    """
+
+    def __init__(self) -> None:
+        self._prices: dict[str, ModelPricing] | None = None
+
+    async def get(self) -> dict[str, ModelPricing]:
+        """Return cached prices, fetching on first call."""
+        if self._prices is None:
+            self._prices = await fetch_model_prices()
+        return self._prices
+
+    def get_sync(self) -> dict[str, ModelPricing]:
+        """Return cached prices synchronously.
+
+        Raises RuntimeError if ``get()`` has not been awaited yet.
+        """
+        if self._prices is None:
+            msg = "Prices not yet fetched — await get() first"
+            raise RuntimeError(msg)
+        return self._prices
+
+    def estimate_call_cost(
+        self,
+        model: str,
+        input_tokens: int,
+        output_tokens: int,
+        cache_creation_input_tokens: int,
+        cache_read_input_tokens: int,
+        web_searches: int,
+    ) -> float:
+        """Estimate cost for a single API call using cached prices.
+
+        Raises RuntimeError if prices have not been fetched yet.
+        """
+        prices = self.get_sync()
+        return estimate_api_call_cost(
+            model=model,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            cache_creation_input_tokens=cache_creation_input_tokens,
+            cache_read_input_tokens=cache_read_input_tokens,
+            web_searches=web_searches,
+            prices=prices,
+        )
+
+    def stamp_usage(self, usage: object) -> None:
+        """Compute and set ``estimated_cost`` on a Usage object in-place.
+
+        Requires prices to have been fetched already (via ``await get()``).
+        """
+
+        if not isinstance(usage, Usage):
+            return
+        prices = self.get_sync()
+        usage.estimated_cost = estimate_usage_cost(usage.api_calls, usage.gnews_requests, prices)
+
+
 def get_model_pricing(
     model_id: str,
     prices: dict[str, ModelPricing],
@@ -186,7 +254,7 @@ def estimate_api_call_cost(
 
 
 def estimate_usage_cost(
-    api_calls: list[object],
+    api_calls: Sequence[object],
     gnews_requests: int,
     prices: dict[str, ModelPricing],
 ) -> float:
@@ -197,7 +265,6 @@ def estimate_usage_cost(
         gnews_requests: Number of GNews API requests.
         prices: Model pricing dict from fetch_model_prices().
     """
-    from unbubble_sources.data.models import APICallUsage
 
     total = 0.0
     for call in api_calls:
