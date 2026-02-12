@@ -72,14 +72,14 @@ class Usage:
     def web_searches(self) -> int:
         return sum(c.web_searches for c in self.api_calls)
 
-    def __add__(self, other: Usage) -> Usage:
+    def __add__(self, other: "Usage") -> "Usage":
         return Usage(
             api_calls=self.api_calls + other.api_calls,
             gnews_requests=self.gnews_requests + other.gnews_requests,
             estimated_cost=self.estimated_cost + other.estimated_cost,
         )
 
-    def __iadd__(self, other: Usage) -> Usage:
+    def __iadd__(self, other: "Usage") -> "Usage":
         self.api_calls.extend(other.api_calls)
         self.gnews_requests += other.gnews_requests
         self.estimated_cost += other.estimated_cost
