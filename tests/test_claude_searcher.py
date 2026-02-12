@@ -4,9 +4,26 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from unbubble_sources.data import Article, SearchQuery
+from unbubble_sources.data import Article, SearchQuery, Usage
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.url import extract_domain
+
+
+def _make_mock_usage(
+    input_tokens: int = 200,
+    output_tokens: int = 100,
+    web_search_requests: int = 1,
+) -> MagicMock:
+    """Create a mock usage object with server_tool_use."""
+    usage = MagicMock()
+    usage.input_tokens = input_tokens
+    usage.output_tokens = output_tokens
+    usage.cache_creation_input_tokens = 0
+    usage.cache_read_input_tokens = 0
+    server_tool_use = MagicMock()
+    server_tool_use.web_search_requests = web_search_requests
+    usage.server_tool_use = server_tool_use
+    return usage
 
 
 @pytest.fixture
@@ -29,6 +46,7 @@ def mock_response(mock_web_search_result: MagicMock) -> MagicMock:
 
     response = MagicMock()
     response.content = [tool_result]
+    response.usage = _make_mock_usage()
     return response
 
 
@@ -42,12 +60,23 @@ def searcher(mock_response: MagicMock) -> ClaudeSearcher:
 
 async def test_search_returns_articles(searcher: ClaudeSearcher) -> None:
     queries = [SearchQuery(text="test query", intent="test intent")]
-    articles = await searcher.search(queries)
+    articles, usage = await searcher.search(queries)
 
     assert len(articles) == 1
     assert isinstance(articles[0], Article)
     assert articles[0].title == "Test Article"
     assert articles[0].url == "https://example.com/article1"
+
+
+async def test_search_returns_usage(searcher: ClaudeSearcher) -> None:
+    queries = [SearchQuery(text="test query", intent="test intent")]
+    articles, usage = await searcher.search(queries)
+
+    assert isinstance(usage, Usage)
+    assert len(usage.api_calls) == 1
+    assert usage.input_tokens == 200
+    assert usage.output_tokens == 100
+    assert usage.web_searches == 1
 
 
 async def test_search_deduplicates_by_url(
@@ -60,7 +89,7 @@ async def test_search_deduplicates_by_url(
         SearchQuery(text="query 1", intent="intent 1"),
         SearchQuery(text="query 2", intent="intent 2"),
     ]
-    articles = await searcher.search(queries)
+    articles, usage = await searcher.search(queries)
 
     assert len(articles) == 1
 
@@ -101,22 +130,22 @@ async def test_search_handles_failed_queries(
             raise Exception("API error")
         return mock_response
 
-    object.__setattr__(
-        searcher._client.messages, "create", AsyncMock(side_effect=mock_create)
-    )
+    object.__setattr__(searcher._client.messages, "create", AsyncMock(side_effect=mock_create))
 
     queries = [
         SearchQuery(text="failing query", intent="will fail"),
         SearchQuery(text="working query", intent="will work"),
     ]
-    articles = await searcher.search(queries)
+    articles, usage = await searcher.search(queries)
 
     assert len(articles) == 1
+    # Only 1 API call succeeded
+    assert len(usage.api_calls) == 1
 
 
 async def test_search_attaches_query_to_article(searcher: ClaudeSearcher) -> None:
     query = SearchQuery(text="specific query", intent="specific intent")
-    articles = await searcher.search([query])
+    articles, usage = await searcher.search([query])
 
     assert len(articles) == 1
     assert articles[0].query == query

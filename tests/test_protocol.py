@@ -1,9 +1,8 @@
 """Tests for the QueryGenerator protocol."""
 
-
 from typing import TYPE_CHECKING
 
-from unbubble_sources.data import NewsEvent, SearchQuery
+from unbubble_sources.data import NewsEvent, SearchQuery, Usage
 from unbubble_sources.query.claude import ClaudeQueryGenerator
 
 if TYPE_CHECKING:
@@ -22,8 +21,10 @@ def test_claude_generator_matches_protocol() -> None:
 class MockQueryGenerator:
     """A minimal implementation to verify protocol requirements."""
 
-    async def generate(self, event: NewsEvent, *, num_queries: int = 10) -> list[SearchQuery]:
-        return [SearchQuery(text="mock", intent="mock")]
+    async def generate(
+        self, event: NewsEvent, *, num_queries: int = 10
+    ) -> tuple[list[SearchQuery], Usage]:
+        return ([SearchQuery(text="mock", intent="mock")], Usage())
 
 
 def test_mock_generator_satisfies_protocol() -> None:

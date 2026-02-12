@@ -4,11 +4,12 @@ import asyncio
 import logging
 
 from unbubble_sources.aggregator.base import QueryAggregator
-from unbubble_sources.data import Article, NewsEvent, SearchQuery
+from unbubble_sources.data import Article, NewsEvent, SearchQuery, Usage
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.search.base import ArticleSearcher
 
 logger = logging.getLogger(__name__)
+
 
 class ComposablePipeline:
     """Pipeline composed of multiple generators, an aggregator, and multiple searchers.
@@ -47,7 +48,7 @@ class ComposablePipeline:
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Execute the composable pipeline.
 
         Args:
@@ -56,8 +57,10 @@ class ComposablePipeline:
             to_date: Optional end date filter.
 
         Returns:
-            List of diverse, deduplicated articles.
+            Tuple of (diverse deduplicated articles, usage).
         """
+        total_usage = Usage()
+
         # Step 1: Generate queries from all generators in parallel
         generation_tasks = [
             gen.generate(event, num_queries=self._num_queries) for gen in self._generators
@@ -70,10 +73,12 @@ class ComposablePipeline:
             if isinstance(result, BaseException):
                 logger.warning(f"Error in query generation: {str(result)}")
                 continue
-            all_queries.extend(result)
+            queries, gen_usage = result
+            all_queries.extend(queries)
+            total_usage += gen_usage
 
         if not all_queries:
-            return []
+            return ([], total_usage)
 
         # Step 2: Aggregate queries
         aggregated_queries = await self._aggregator.aggregate(all_queries)
@@ -98,11 +103,11 @@ class ComposablePipeline:
             if isinstance(search_result, BaseException):
                 logger.warning(f"Error during search: {str(search_result)}")
                 continue
-            # search_result is list[Article] at this point
-            article_list: list[Article] = search_result
+            article_list, search_usage = search_result
+            total_usage += search_usage
             for article in article_list:
                 if article.url not in seen_urls:
                     seen_urls.add(article.url)
                     articles.append(article)
 
-        return articles
+        return (articles, total_usage)

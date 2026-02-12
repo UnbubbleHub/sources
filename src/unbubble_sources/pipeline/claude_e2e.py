@@ -6,10 +6,11 @@ import os
 import anthropic
 from anthropic.types import WebSearchToolResultBlock
 
-from unbubble_sources.data import Article, NewsEvent, SearchQuery
+from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery, Usage
 from unbubble_sources.url import extract_domain
 
 logger = logging.getLogger(__name__)
+
 
 class ClaudeE2EPipeline:
     """Single Claude call that generates queries and searches in one pass.
@@ -55,7 +56,7 @@ the same underlying facts but from genuinely different angles.\
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> list[Article]:
+    ) -> tuple[list[Article], Usage]:
         """Execute the E2E pipeline.
 
         Args:
@@ -64,7 +65,7 @@ the same underlying facts but from genuinely different angles.\
             to_date: Optional end date filter.
 
         Returns:
-            List of diverse articles.
+            Tuple of (diverse articles, usage).
         """
         # Build user prompt
         date_context = ""
@@ -96,6 +97,29 @@ the same underlying facts but from genuinely different angles.\
             messages=[{"role": "user", "content": user_prompt}],
         )
 
+        # Extract usage from response
+        web_searches = 0
+        server_tool_use = getattr(response.usage, "server_tool_use", None)
+        if server_tool_use is not None:
+            web_searches = getattr(server_tool_use, "web_search_requests", 0) or 0
+
+        usage = Usage(
+            api_calls=[
+                APICallUsage(
+                    model=self._model,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cache_creation_input_tokens=getattr(
+                        response.usage, "cache_creation_input_tokens", 0
+                    )
+                    or 0,
+                    cache_read_input_tokens=getattr(response.usage, "cache_read_input_tokens", 0)
+                    or 0,
+                    web_searches=web_searches,
+                ),
+            ],
+        )
+
         # Extract articles from search results
         articles: list[Article] = []
         seen_urls: set[str] = set()
@@ -120,4 +144,4 @@ the same underlying facts but from genuinely different angles.\
                             )
                         )
 
-        return articles[: self._target]
+        return (articles[: self._target], usage)

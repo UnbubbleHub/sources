@@ -1,11 +1,10 @@
-
 import json
 import os
 
 import anthropic
 from anthropic.types import TextBlock
 
-from unbubble_sources.data import NewsEvent, SearchQuery
+from unbubble_sources.data import APICallUsage, NewsEvent, SearchQuery, Usage
 
 DEFAULT_SYSTEM_PROMPT = """\
 You are a research assistant that generates diverse search queries to find \
@@ -54,7 +53,9 @@ class ClaudeQueryGenerator:
         self._client = anthropic.AsyncAnthropic(api_key=resolved_key)
         self._system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 
-    async def generate(self, event: NewsEvent, *, num_queries: int = 10) -> list[SearchQuery]:
+    async def generate(
+        self, event: NewsEvent, *, num_queries: int = 10
+    ) -> tuple[list[SearchQuery], Usage]:
         user_content = f"News event: {event.description}"
         if event.date:
             user_content += f"\nDate: {event.date}"
@@ -68,6 +69,22 @@ class ClaudeQueryGenerator:
             messages=[{"role": "user", "content": user_content}],
         )
 
+        usage = Usage(
+            api_calls=[
+                APICallUsage(
+                    model=self._model,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cache_creation_input_tokens=getattr(
+                        response.usage, "cache_creation_input_tokens", 0
+                    )
+                    or 0,
+                    cache_read_input_tokens=getattr(response.usage, "cache_read_input_tokens", 0)
+                    or 0,
+                ),
+            ],
+        )
+
         content_block = response.content[0]
         if not isinstance(content_block, TextBlock):
             raise ValueError(f"Expected TextBlock, got {type(content_block).__name__}")
@@ -77,4 +94,5 @@ class ClaudeQueryGenerator:
             raw = raw.split("\n", 1)[1].rsplit("```", 1)[0]
 
         items = json.loads(raw)
-        return [SearchQuery(text=item["text"], intent=item["intent"]) for item in items]
+        queries = [SearchQuery(text=item["text"], intent=item["intent"]) for item in items]
+        return (queries, usage)

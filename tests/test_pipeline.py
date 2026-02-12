@@ -5,10 +5,30 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from anthropic.types import WebSearchResultBlock, WebSearchToolResultBlock
 
-from unbubble_sources.data import Article, NewsEvent, SearchQuery
+from unbubble_sources.data import Article, NewsEvent, SearchQuery, Usage
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.url import extract_domain
+
+# -- Helpers --
+
+
+def _make_mock_usage(
+    input_tokens: int = 200,
+    output_tokens: int = 100,
+    web_search_requests: int = 1,
+) -> MagicMock:
+    """Create a mock usage object with server_tool_use."""
+    usage = MagicMock()
+    usage.input_tokens = input_tokens
+    usage.output_tokens = output_tokens
+    usage.cache_creation_input_tokens = 0
+    usage.cache_read_input_tokens = 0
+    server_tool_use = MagicMock()
+    server_tool_use.web_search_requests = web_search_requests
+    usage.server_tool_use = server_tool_use
+    return usage
+
 
 # -- Composable pipeline fixtures --
 
@@ -18,10 +38,13 @@ def mock_generator() -> MagicMock:
     """Create a mock query generator."""
     gen = MagicMock()
     gen.generate = AsyncMock(
-        return_value=[
-            SearchQuery(text="query 1", intent="intent 1"),
-            SearchQuery(text="query 2", intent="intent 2"),
-        ]
+        return_value=(
+            [
+                SearchQuery(text="query 1", intent="intent 1"),
+                SearchQuery(text="query 2", intent="intent 2"),
+            ],
+            Usage(),
+        )
     )
     return gen
 
@@ -39,18 +62,21 @@ def mock_searcher() -> MagicMock:
     """Create a mock searcher."""
     searcher = MagicMock()
     searcher.search = AsyncMock(
-        return_value=[
-            Article(
-                title="Article 1",
-                url="https://example.com/1",
-                source="Example",
-            ),
-            Article(
-                title="Article 2",
-                url="https://example.com/2",
-                source="Example",
-            ),
-        ]
+        return_value=(
+            [
+                Article(
+                    title="Article 1",
+                    url="https://example.com/1",
+                    source="Example",
+                ),
+                Article(
+                    title="Article 2",
+                    url="https://example.com/2",
+                    source="Example",
+                ),
+            ],
+            Usage(),
+        )
     )
     return searcher
 
@@ -78,9 +104,17 @@ async def test_composable_run_returns_articles(
     composable_pipeline: ComposablePipeline,
 ) -> None:
     event = NewsEvent(description="Test event")
-    articles = await composable_pipeline.run(event)
+    articles, usage = await composable_pipeline.run(event)
     assert len(articles) == 2
     assert all(isinstance(a, Article) for a in articles)
+
+
+async def test_composable_run_returns_usage(
+    composable_pipeline: ComposablePipeline,
+) -> None:
+    event = NewsEvent(description="Test event")
+    articles, usage = await composable_pipeline.run(event)
+    assert isinstance(usage, Usage)
 
 
 async def test_composable_run_calls_generator(
@@ -115,15 +149,17 @@ async def test_composable_run_deduplicates_by_url(
 ) -> None:
     searcher1 = MagicMock()
     searcher1.search = AsyncMock(
-        return_value=[
-            Article(title="Article 1", url="https://example.com/1", source="A"),
-        ]
+        return_value=(
+            [Article(title="Article 1", url="https://example.com/1", source="A")],
+            Usage(),
+        )
     )
     searcher2 = MagicMock()
     searcher2.search = AsyncMock(
-        return_value=[
-            Article(title="Article 1", url="https://example.com/1", source="B"),
-        ]
+        return_value=(
+            [Article(title="Article 1", url="https://example.com/1", source="B")],
+            Usage(),
+        )
     )
 
     pipeline = ComposablePipeline(
@@ -133,7 +169,7 @@ async def test_composable_run_deduplicates_by_url(
     )
 
     event = NewsEvent(description="Test event")
-    articles = await pipeline.run(event)
+    articles, usage = await pipeline.run(event)
     assert len(articles) == 1  # Deduplicated
 
 
@@ -146,7 +182,10 @@ async def test_composable_run_handles_generator_failure(
 
     working_gen = MagicMock()
     working_gen.generate = AsyncMock(
-        return_value=[SearchQuery(text="query", intent="intent")]
+        return_value=(
+            [SearchQuery(text="query", intent="intent")],
+            Usage(),
+        )
     )
 
     pipeline = ComposablePipeline(
@@ -156,7 +195,7 @@ async def test_composable_run_handles_generator_failure(
     )
 
     event = NewsEvent(description="Test event")
-    articles = await pipeline.run(event)
+    articles, usage = await pipeline.run(event)
     assert len(articles) == 2
 
 
@@ -174,8 +213,9 @@ async def test_composable_run_returns_empty_if_no_queries(
     )
 
     event = NewsEvent(description="Test event")
-    articles = await pipeline.run(event)
+    articles, usage = await pipeline.run(event)
     assert articles == []
+    assert isinstance(usage, Usage)
 
 
 # -- Claude E2E pipeline fixtures --
@@ -198,6 +238,7 @@ def e2e_mock_response() -> MagicMock:
 
     response = MagicMock()
     response.content = [tool_result]
+    response.usage = _make_mock_usage()
     return response
 
 
@@ -222,6 +263,19 @@ async def test_e2e_run_calls_api_with_web_search(
     call_kwargs = dict(mock_create.call_args.kwargs)
     assert "tools" in call_kwargs
     assert call_kwargs["tools"][0]["type"] == "web_search_20250305"
+
+
+async def test_e2e_run_returns_usage(
+    e2e_pipeline: ClaudeE2EPipeline,
+) -> None:
+    event = NewsEvent(description="Test event")
+    articles, usage = await e2e_pipeline.run(event)
+
+    assert isinstance(usage, Usage)
+    assert len(usage.api_calls) == 1
+    assert usage.input_tokens == 200
+    assert usage.output_tokens == 100
+    assert usage.web_searches == 1
 
 
 async def test_e2e_run_includes_event_in_prompt(

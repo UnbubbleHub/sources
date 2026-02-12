@@ -5,8 +5,18 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from anthropic.types import TextBlock
 
-from unbubble_sources.data import NewsEvent, SearchQuery
+from unbubble_sources.data import NewsEvent, SearchQuery, Usage
 from unbubble_sources.query.claude import DEFAULT_SYSTEM_PROMPT, ClaudeQueryGenerator
+
+
+def _make_mock_usage(input_tokens: int = 100, output_tokens: int = 50) -> MagicMock:
+    """Create a mock usage object."""
+    usage = MagicMock()
+    usage.input_tokens = input_tokens
+    usage.output_tokens = output_tokens
+    usage.cache_creation_input_tokens = 0
+    usage.cache_read_input_tokens = 0
+    return usage
 
 
 @pytest.fixture
@@ -19,6 +29,7 @@ def mock_response() -> MagicMock:
             text='[{"text": "query 1", "intent": "intent 1"}, {"text": "query 2", "intent": "intent 2"}]',
         )
     ]
+    response.usage = _make_mock_usage()
     return response
 
 
@@ -32,12 +43,23 @@ def generator(mock_response: MagicMock) -> ClaudeQueryGenerator:
 
 async def test_generate_returns_search_queries(generator: ClaudeQueryGenerator) -> None:
     event = NewsEvent(description="Test event")
-    queries = await generator.generate(event, num_queries=2)
+    queries, usage = await generator.generate(event, num_queries=2)
 
     assert len(queries) == 2
     assert all(isinstance(q, SearchQuery) for q in queries)
     assert queries[0].text == "query 1"
     assert queries[0].intent == "intent 1"
+
+
+async def test_generate_returns_usage(generator: ClaudeQueryGenerator) -> None:
+    event = NewsEvent(description="Test event")
+    queries, usage = await generator.generate(event, num_queries=2)
+
+    assert isinstance(usage, Usage)
+    assert len(usage.api_calls) == 1
+    assert usage.input_tokens == 100
+    assert usage.output_tokens == 50
+    assert usage.api_calls[0].model == "claude-haiku-4-5-20251001"
 
 
 async def test_generate_calls_api_with_correct_params(
@@ -73,10 +95,11 @@ async def test_generate_handles_markdown_code_fences() -> None:
             text='```json\n[{"text": "q", "intent": "i"}]\n```',
         )
     ]
+    response.usage = _make_mock_usage()
     object.__setattr__(gen._client.messages, "create", AsyncMock(return_value=response))
 
     event = NewsEvent(description="Test")
-    queries = await gen.generate(event)
+    queries, usage = await gen.generate(event)
 
     assert len(queries) == 1
     assert queries[0].text == "q"
@@ -94,6 +117,7 @@ async def test_custom_system_prompt() -> None:
             text='[{"text": "q", "intent": "i"}]',
         )
     ]
+    response.usage = _make_mock_usage()
     object.__setattr__(gen._client.messages, "create", AsyncMock(return_value=response))
 
     event = NewsEvent(description="Test")
@@ -115,6 +139,7 @@ async def test_custom_model() -> None:
             text='[{"text": "q", "intent": "i"}]',
         )
     ]
+    response.usage = _make_mock_usage()
     object.__setattr__(gen._client.messages, "create", AsyncMock(return_value=response))
 
     event = NewsEvent(description="Test")
