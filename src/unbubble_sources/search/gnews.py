@@ -4,7 +4,7 @@ import os
 
 import httpx
 
-from unbubble_sources.data import Article, SearchQuery, Usage
+from unbubble_sources.data import Article, SearchQuery, Source, Usage
 
 GNEWS_API_URL = "https://gnews.io/api/v4/search"
 
@@ -38,7 +38,7 @@ class GNewsSearcher:
         from_date: str | None = None,
         to_date: str | None = None,
         max_results_per_query: int = 10,
-    ) -> tuple[list[Article], Usage]:
+    ) -> tuple[list[Source], Usage]:
         """Search for articles matching the given queries.
 
         Args:
@@ -65,7 +65,7 @@ class GNewsSearcher:
 
         # Flatten and deduplicate by URL
         seen_urls: set[str] = set()
-        articles: list[Article] = []
+        articles: list[Source] = []
         successful_requests = 0
         for result in results:
             if isinstance(result, BaseException):

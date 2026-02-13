@@ -12,6 +12,7 @@ from unbubble_sources.config.models import (
     NoOpAggregatorConfig,
     PCAAggregatorConfig,
     UnbubbleConfig,
+    XSearcherConfig,
 )
 from unbubble_sources.pipeline.base import Pipeline
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
@@ -20,9 +21,10 @@ from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
 from unbubble_sources.run_logger import RunLogger
-from unbubble_sources.search.base import ArticleSearcher
+from unbubble_sources.search.base import SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
+from unbubble_sources.search.x import XSearcher
 
 
 def create_generator(config: ClaudeQueryGeneratorConfig) -> QueryGenerator:
@@ -36,8 +38,10 @@ def create_generator(config: ClaudeQueryGeneratorConfig) -> QueryGenerator:
     )
 
 
-def create_searcher(config: ClaudeSearcherConfig | GNewsSearcherConfig) -> ArticleSearcher:
-    """Create an article searcher from config."""
+def create_searcher(
+    config: ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig,
+) -> SourceSearcher:
+    """Create a source searcher from config."""
     if isinstance(config, ClaudeSearcherConfig):
         return ClaudeSearcher(
             model=config.model,
@@ -45,6 +49,8 @@ def create_searcher(config: ClaudeSearcherConfig | GNewsSearcherConfig) -> Artic
         )
     if isinstance(config, GNewsSearcherConfig):
         return GNewsSearcher(lang=config.lang)
+    if isinstance(config, XSearcherConfig):
+        return XSearcher(max_results_per_query=config.max_results_per_query)
     # Type checker ensures this is exhaustive
     msg = f"Unknown searcher config type: {type(config)}"
     raise ValueError(msg)

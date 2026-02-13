@@ -49,8 +49,17 @@ class GNewsSearcherConfig(BaseModel):
     model_config = {"frozen": True}
 
 
+class XSearcherConfig(BaseModel):
+    """Configuration for XSearcher (X/Twitter API v2)."""
+
+    type: Literal["x"] = "x"
+    max_results_per_query: int = 10
+
+    model_config = {"frozen": True}
+
+
 SearcherConfig = Annotated[
-    ClaudeSearcherConfig | GNewsSearcherConfig,
+    ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig,
     Field(discriminator="type"),
 ]
 
@@ -97,7 +106,9 @@ class ComposablePipelineConfig(BaseModel):
     aggregator: PCAAggregatorConfig | NoOpAggregatorConfig = Field(
         default_factory=NoOpAggregatorConfig
     )
-    searchers: list[ClaudeSearcherConfig | GNewsSearcherConfig] = Field(default_factory=list)
+    searchers: list[ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig] = Field(
+        default_factory=list
+    )
     num_queries_per_generator: int = 5
     max_results_per_searcher: int = 10
 

@@ -2,7 +2,7 @@
 
 **Surface diverse, high-quality perspectives on any news event.**
 
-Unbubble Sources takes a news event as input and returns articles representing a range of viewpoints, helping users break out of information bubbles.
+Unbubble Sources takes a news event as input and returns sources (news articles, tweets, …) representing a range of viewpoints, helping users break out of information bubbles.
 
 ## Quick Start
 
@@ -28,21 +28,27 @@ uv run python main.py "Climate summit negotiations" --log --log-dir my_logs/
 
 ```python
 import asyncio
-from unbubble_sources import load_config, create_from_config, NewsEvent
+from unbubble_sources import load_config, create_from_config, NewsEvent, Article, Tweet
 from unbubble_sources.pricing import fetch_model_prices, estimate_usage_cost
 
 async def main():
     config = load_config("configs/default.yaml")
     pipeline, run_logger = create_from_config(config)
     event = NewsEvent(description="Climate summit negotiations")
-    articles, usage = await pipeline.run(event)
+    sources, usage = await pipeline.run(event)
 
-    for article in articles:
-        print(f"{article.title} ({article.source})")
+    for src in sources:
+        if isinstance(src, Article):
+            print(f"[article] {src.title} ({src.source})")
+        elif isinstance(src, Tweet):
+            print(f"[tweet] @{src.author_handle}: {src.text[:80]}")
 
     # Cost estimation
     prices = await fetch_model_prices()
-    cost = estimate_usage_cost(usage.api_calls, usage.gnews_requests, prices)
+    cost = estimate_usage_cost(
+        usage.api_calls, usage.gnews_requests, prices,
+        x_api_requests=usage.x_api_requests,
+    )
     print(f"Estimated cost: ${cost:.4f}")
 
 asyncio.run(main())
@@ -64,6 +70,7 @@ pipeline:
     n_components: 5
   searchers:
     - type: claude
+    - type: x          # X/Twitter search (requires TWITTER_BEARER_TOKEN)
 ```
 
 **Claude E2E** (`type: claude_e2e`) — single Claude call with web search, simpler and faster:
@@ -80,14 +87,16 @@ pipeline:
 |---|---|---|
 | `CLAUDE_API_KEY` | Yes | Anthropic API key |
 | `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key |
+| `TWITTER_BEARER_TOKEN` | Only for X searcher | X/Twitter API v2 bearer token |
 
 ## Usage Tracking & Cost Estimation
 
-Every pipeline run returns a `Usage` object alongside the articles, tracking:
+Every pipeline run returns a `Usage` object alongside the sources, tracking:
 
 - **API calls**: per-call token counts (input, output, cache read/write) and model IDs
 - **Web searches**: number of Claude web search tool invocations
 - **GNews requests**: number of GNews API HTTP requests
+- **X API requests**: number of X/Twitter API HTTP requests
 
 Costs are estimated by dynamically fetching the latest pricing from the Anthropic docs. A hardcoded fallback is used if the fetch fails.
 
@@ -127,7 +136,7 @@ logging:
 
 ### Ideas
 
-- Additional search backends (NewsAPI, Bing News, etc.)
+- Additional search backends (NewsAPI, Bing News, Reddit, etc.)
 - Alternative query generators (OpenAI, local LLMs)
 - Perspective/quality scoring and ranking
 

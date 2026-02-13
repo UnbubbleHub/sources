@@ -21,15 +21,34 @@ class SearchQuery:
 
 
 @dataclass(frozen=True)
-class Article:
-    """A news article retrieved from search."""
+class Source:
+    """Base type for any retrieved source (article, tweet, etc.)."""
 
-    title: str
     url: str
     source: str
     published_at: str | None = None
+    query: SearchQuery | None = None
+
+
+@dataclass(frozen=True)
+class Article(Source):
+    """A news article retrieved from search."""
+
+    title: str = ""
     description: str | None = None
-    query: SearchQuery | None = None  # the query that found this article
+
+
+@dataclass(frozen=True)
+class Tweet(Source):
+    """A tweet retrieved from X/Twitter search."""
+
+    tweet_id: str = ""
+    author_handle: str = ""
+    author_name: str = ""
+    text: str = ""
+    retweet_count: int = 0
+    like_count: int = 0
+    reply_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -50,6 +69,7 @@ class Usage:
 
     api_calls: list[APICallUsage] = field(default_factory=list)
     gnews_requests: int = 0
+    x_api_requests: int = 0
     estimated_cost: float = 0.0
 
     @property
@@ -76,11 +96,13 @@ class Usage:
         return Usage(
             api_calls=self.api_calls + other.api_calls,
             gnews_requests=self.gnews_requests + other.gnews_requests,
+            x_api_requests=self.x_api_requests + other.x_api_requests,
             estimated_cost=self.estimated_cost + other.estimated_cost,
         )
 
     def __iadd__(self, other: "Usage") -> "Usage":
         self.api_calls.extend(other.api_calls)
         self.gnews_requests += other.gnews_requests
+        self.x_api_requests += other.x_api_requests
         self.estimated_cost += other.estimated_cost
         return self

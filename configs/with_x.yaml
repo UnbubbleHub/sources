@@ -1,0 +1,15 @@
+pipeline:
+  type: composable
+  generators:
+    - type: claude
+      model: claude-haiku-4-5-20251001
+  aggregator:
+    type: noop
+  searchers:
+    - type: claude
+      model: claude-haiku-4-5-20251001
+      max_searches_per_query: 1
+    - type: x
+      max_results_per_query: 10
+  num_queries_per_generator: 5
+  max_results_per_searcher: 10
