@@ -83,11 +83,11 @@ pipeline:
 
 ### Environment variables
 
-| Variable | Required | Description |
-|---|---|---|
-| `CLAUDE_API_KEY` | Yes | Anthropic API key |
-| `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key |
-| `TWITTER_BEARER_TOKEN` | Only for X searcher | X/Twitter API v2 bearer token |
+| Variable | Required | Description | Where to get |
+|---|---|---|---|
+| `CLAUDE_API_KEY` | Yes | Anthropic API key | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+| `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key | [gnews.io/dashboard](https://gnews.io/dashboard) |
+| `TWITTER_BEARER_TOKEN` | Only for X searcher | X/Twitter API v2 bearer token | [developer.x.com](https://developer.x.com/en/portal/dashboard) |
 
 ## Usage Tracking & Cost Estimation
 
