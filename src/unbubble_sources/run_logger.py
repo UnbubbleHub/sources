@@ -33,7 +33,7 @@ class RunRecord(BaseModel):
     started_at: str
     completed_at: str | None = None
     stages: list[StageRecord] = []
-    final_article_count: int = 0
+    final_source_count: int = 0
     total_usage: dict[str, Any] | None = None
     total_cost_usd: float | None = None
 
@@ -51,6 +51,7 @@ def _serialize(obj: Any) -> Any:
         return {
             "api_calls": [_serialize(c) for c in obj.api_calls],
             "gnews_requests": obj.gnews_requests,
+            "x_api_requests": obj.x_api_requests,
             "input_tokens": obj.input_tokens,
             "output_tokens": obj.output_tokens,
             "cache_creation_input_tokens": obj.cache_creation_input_tokens,
@@ -151,13 +152,13 @@ class RunLogger:
 
     def finish_run(
         self,
-        articles: list[Any],
+        sources: list[Any],
         usage: Usage | None,
     ) -> Path | None:
         """Write the run record to a JSON file.
 
         Args:
-            articles: Final list of articles produced by the pipeline.
+            sources: Final list of sources produced by the pipeline.
             usage: Total accumulated usage.
 
         Returns:
@@ -167,7 +168,7 @@ class RunLogger:
             return None
 
         self._record.completed_at = datetime.now(tz=UTC).isoformat()
-        self._record.final_article_count = len(articles)
+        self._record.final_source_count = len(sources)
         self._record.total_usage = _serialize(usage) if usage is not None else None
         self._record.total_cost_usd = usage.estimated_cost if usage is not None else None
 

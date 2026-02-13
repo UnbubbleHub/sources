@@ -10,7 +10,7 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator
 
 from unbubble_sources.config import create_from_config, get_default_config_path, load_config
-from unbubble_sources.data import NewsEvent
+from unbubble_sources.data import Article, NewsEvent, Tweet
 
 logger = logging.getLogger(__name__)
 
@@ -48,15 +48,26 @@ async def run(args: CLIArgs) -> None:
     logger.info(f"Running pipeline for: {args.query}")
     logger.info(f"Config: {args.config}")
 
-    articles, usage = await pipeline.run(event)
+    sources, usage = await pipeline.run(event)
 
-    print(f"\nFound {len(articles)} unique articles:\n")
-    for i, article in enumerate(articles, 1):
-        logger.info(f"{i}. {article.title}")
-        logger.info(f"   Source: {article.source}")
-        logger.info(f"   URL: {article.url}")
-        if article.published_at:
-            logger.info(f"   Published: {article.published_at}")
+    print(f"\nFound {len(sources)} unique sources:\n")
+    for i, src in enumerate(sources, 1):
+        if isinstance(src, Article):
+            logger.info(f"{i}. {src.title}")
+            logger.info(f"   Source: {src.source}")
+            logger.info(f"   URL: {src.url}")
+            if src.published_at:
+                logger.info(f"   Published: {src.published_at}")
+        elif isinstance(src, Tweet):
+            text_preview = src.text[:100] + ("..." if len(src.text) > 100 else "")
+            logger.info(f"{i}. @{src.author_handle}: {text_preview}")
+            logger.info(f"   URL: {src.url}")
+            logger.info(f"   Likes: {src.like_count} | Retweets: {src.retweet_count}")
+            if src.published_at:
+                logger.info(f"   Published: {src.published_at}")
+        else:
+            logger.info(f"{i}. {src.url}")
+            logger.info(f"   Source: {src.source}")
 
     # Log usage summary (cost is already computed by the pipeline via PriceCache)
     logger.info("\n--- Usage Summary ---")
@@ -71,6 +82,8 @@ async def run(args: CLIArgs) -> None:
         logger.info(f"Web searches: {usage.web_searches}")
     if usage.gnews_requests:
         logger.info(f"GNews requests: {usage.gnews_requests}")
+    if usage.x_api_requests:
+        logger.info(f"X API requests: {usage.x_api_requests}")
     logger.info(f"Estimated cost: ${usage.estimated_cost:.4f}")
 
     # Log file path if logging was enabled (pipeline calls finish_run internally)

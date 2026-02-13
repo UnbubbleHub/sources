@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 PRICING_URL = "https://docs.anthropic.com/en/docs/about-claude/pricing"
 WEB_SEARCH_PRICE_PER_SEARCH = 10.0 / 1000  # $10 per 1,000 searches
 GNEWS_REQUEST_PRICE = 0.0  # free tier
+X_API_REQUEST_PRICE = 0.0  # free tier (Basic access)
 
 
 @dataclass(frozen=True)
@@ -200,7 +201,9 @@ class PriceCache:
         if not isinstance(usage, Usage):
             return
         prices = self.get_sync()
-        usage.estimated_cost = estimate_usage_cost(usage.api_calls, usage.gnews_requests, prices)
+        usage.estimated_cost = estimate_usage_cost(
+            usage.api_calls, usage.gnews_requests, prices, usage.x_api_requests
+        )
 
 
 def get_model_pricing(
@@ -257,6 +260,7 @@ def estimate_usage_cost(
     api_calls: Sequence[object],
     gnews_requests: int,
     prices: dict[str, ModelPricing],
+    x_api_requests: int = 0,
 ) -> float:
     """Estimate total cost in USD for accumulated usage.
 
@@ -264,6 +268,7 @@ def estimate_usage_cost(
         api_calls: List of APICallUsage objects.
         gnews_requests: Number of GNews API requests.
         prices: Model pricing dict from fetch_model_prices().
+        x_api_requests: Number of X API requests.
     """
 
     total = 0.0
@@ -280,4 +285,5 @@ def estimate_usage_cost(
             prices=prices,
         )
     total += gnews_requests * GNEWS_REQUEST_PRICE
+    total += x_api_requests * X_API_REQUEST_PRICE
     return total

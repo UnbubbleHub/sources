@@ -8,6 +8,7 @@ from unbubble_sources.data import (
     Article,
     NewsEvent,
     SearchQuery,
+    Tweet,
     Usage,
 )
 from unbubble_sources.run_logger import RunLogger, _serialize
@@ -59,6 +60,7 @@ def test_serialize_usage_includes_computed_properties() -> None:
             APICallUsage(model="m2", input_tokens=200, output_tokens=75, web_searches=2),
         ],
         gnews_requests=3,
+        x_api_requests=5,
     )
     result = _serialize(usage)
     assert isinstance(result, dict)
@@ -67,9 +69,27 @@ def test_serialize_usage_includes_computed_properties() -> None:
     assert result["output_tokens"] == 125
     assert result["web_searches"] == 3
     assert result["gnews_requests"] == 3
+    assert result["x_api_requests"] == 5
     assert result["estimated_cost"] == 0.0
     # Raw data
     assert len(result["api_calls"]) == 2
+
+
+def test_serialize_tweet() -> None:
+    tweet = Tweet(
+        url="https://x.com/user/status/123",
+        source="x.com",
+        tweet_id="123",
+        author_handle="user",
+        text="Hello world",
+    )
+    result = _serialize(tweet)
+    assert isinstance(result, dict)
+    assert result["url"] == "https://x.com/user/status/123"
+    assert result["source"] == "x.com"
+    assert result["tweet_id"] == "123"
+    assert result["author_handle"] == "user"
+    assert result["text"] == "Hello world"
 
 
 def test_serialize_nested_list_of_dataclasses() -> None:
@@ -124,7 +144,7 @@ def test_run_logger_start_and_finish(tmp_path: Path) -> None:
     data = json.loads(path.read_text())
     assert data["pipeline_type"] == "composable"
     assert data["event"]["description"] == "Test event"
-    assert data["final_article_count"] == 0
+    assert data["final_source_count"] == 0
     assert data["completed_at"] is not None
 
 
@@ -182,7 +202,7 @@ def test_run_logger_log_stages(tmp_path: Path) -> None:
     assert data["stages"][1]["cost_usd"] is None
     assert data["stages"][1]["duration_seconds"] == 0.01
 
-    assert data["final_article_count"] == 1
+    assert data["final_source_count"] == 1
     assert data["total_usage"]["input_tokens"] == 100
     assert data["total_cost_usd"] == 0.0
 
@@ -285,7 +305,7 @@ def test_run_logger_full_pipeline_integration(tmp_path: Path) -> None:
     assert data["pipeline_type"] == "composable"
     assert data["event"]["description"] == "US tariffs on China"
     assert len(data["stages"]) == 4
-    assert data["final_article_count"] == 2
+    assert data["final_source_count"] == 2
     assert data["total_usage"]["input_tokens"] == 350
     assert data["total_usage"]["web_searches"] == 2
     assert data["total_usage"]["estimated_cost"] > 0

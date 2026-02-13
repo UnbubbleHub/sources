@@ -16,6 +16,7 @@ from unbubble_sources.config.models import (
     QueryGeneratorConfig,
     SearcherConfig,
     UnbubbleConfig,
+    XSearcherConfig,
 )
 
 __all__ = [
@@ -32,6 +33,7 @@ __all__ = [
     "QueryGeneratorConfig",
     "SearcherConfig",
     "UnbubbleConfig",
+    "XSearcherConfig",
     "create_from_config",
     "get_default_config_path",
     "load_config",

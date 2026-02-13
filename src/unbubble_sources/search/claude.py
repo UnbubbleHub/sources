@@ -4,7 +4,7 @@ import os
 import anthropic
 from anthropic.types import WebSearchResultBlock
 
-from unbubble_sources.data import APICallUsage, Article, SearchQuery, Usage
+from unbubble_sources.data import APICallUsage, Article, SearchQuery, Source, Usage
 from unbubble_sources.url import extract_domain
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class ClaudeSearcher:
         from_date: str | None = None,
         to_date: str | None = None,
         max_results_per_query: int = 10,
-    ) -> tuple[list[Article], Usage]:
+    ) -> tuple[list[Source], Usage]:
         """Search for articles matching the given queries.
 
         Args:
@@ -57,7 +57,7 @@ class ClaudeSearcher:
             Tuple of (deduplicated articles, usage).
         """
         seen_urls: set[str] = set()
-        articles: list[Article] = []
+        articles: list[Source] = []
         total_usage = Usage()
 
         for query in queries:
@@ -87,7 +87,7 @@ class ClaudeSearcher:
         from_date: str | None,
         to_date: str | None,
         max_results: int,
-    ) -> tuple[list[Article], Usage]:
+    ) -> tuple[list[Source], Usage]:
         """Execute a single search query using Claude's web search."""
         # Build the search prompt
         date_context = ""
@@ -143,7 +143,7 @@ class ClaudeSearcher:
         )
 
         # Extract articles from web search results
-        articles: list[Article] = []
+        articles: list[Source] = []
 
         for block in response.content:
             if block.type == "web_search_tool_result":

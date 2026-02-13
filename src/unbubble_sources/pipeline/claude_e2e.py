@@ -1,4 +1,5 @@
 """Claude E2E pipeline implementation."""
+
 import logging
 import os
 import time
@@ -6,7 +7,7 @@ import time
 import anthropic
 from anthropic.types import WebSearchToolResultBlock
 
-from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery, Usage
+from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery, Source, Usage
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.url import extract_domain
@@ -64,7 +65,7 @@ the same underlying facts but from genuinely different angles.\
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> tuple[list[Article], Usage]:
+    ) -> tuple[list[Source], Usage]:
         """Execute the E2E pipeline.
 
         Args:
@@ -73,7 +74,7 @@ the same underlying facts but from genuinely different angles.\
             to_date: Optional end date filter.
 
         Returns:
-            Tuple of (diverse articles, usage).
+            Tuple of (diverse sources, usage).
         """
         if self._run_logger:
             self._run_logger.start_run("claude_e2e", event)
@@ -137,7 +138,7 @@ the same underlying facts but from genuinely different angles.\
         )
 
         # Extract articles from search results
-        articles: list[Article] = []
+        articles: list[Source] = []
         seen_urls: set[str] = set()
 
         # Create a dummy query for attribution

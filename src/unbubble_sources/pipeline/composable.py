@@ -5,11 +5,11 @@ import logging
 import time
 
 from unbubble_sources.aggregator.base import QueryAggregator
-from unbubble_sources.data import Article, NewsEvent, SearchQuery, Usage
+from unbubble_sources.data import NewsEvent, SearchQuery, Source, Usage
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.run_logger import RunLogger
-from unbubble_sources.search.base import ArticleSearcher
+from unbubble_sources.search.base import SourceSearcher
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class ComposablePipeline:
     Args:
         generators: List of query generators.
         aggregator: Query aggregator for deduplication/diversification.
-        searchers: List of article searchers.
+        searchers: List of source searchers.
         num_queries_per_generator: Queries to request from each generator.
         max_results_per_searcher: Max results per query for each searcher.
         run_logger: Optional RunLogger for intermediate result logging.
@@ -37,7 +37,7 @@ class ComposablePipeline:
         self,
         generators: list[QueryGenerator],
         aggregator: QueryAggregator,
-        searchers: list[ArticleSearcher],
+        searchers: list[SourceSearcher],
         num_queries_per_generator: int = 5,
         max_results_per_searcher: int = 10,
         run_logger: RunLogger | None = None,
@@ -57,7 +57,7 @@ class ComposablePipeline:
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> tuple[list[Article], Usage]:
+    ) -> tuple[list[Source], Usage]:
         """Execute the composable pipeline.
 
         Args:
@@ -66,7 +66,7 @@ class ComposablePipeline:
             to_date: Optional end date filter.
 
         Returns:
-            Tuple of (diverse deduplicated articles, usage).
+            Tuple of (diverse deduplicated sources, usage).
         """
         if self._run_logger:
             self._run_logger.start_run("composable", event)
@@ -144,18 +144,18 @@ class ComposablePipeline:
 
         # Step 4: Deduplicate by URL
         seen_urls: set[str] = set()
-        articles: list[Article] = []
+        sources: list[Source] = []
         pre_dedup_count = 0
 
         for i, search_result in enumerate(search_results):
             if isinstance(search_result, BaseException):
                 logger.warning(f"Error during search: {str(search_result)}")
                 continue
-            article_list, search_usage = search_result
+            source_list, search_usage = search_result
             if self._price_cache:
                 self._price_cache.stamp_usage(search_usage)
             total_usage += search_usage
-            pre_dedup_count += len(article_list)
+            pre_dedup_count += len(source_list)
 
             if self._run_logger:
                 component = type(self._searchers[i]).__name__
@@ -163,15 +163,15 @@ class ComposablePipeline:
                     stage="search",
                     component=component,
                     input_data=aggregated_queries,
-                    output_data=article_list,
+                    output_data=source_list,
                     usage=search_usage,
                     duration_seconds=search_duration,
                 )
 
-            for article in article_list:
-                if article.url not in seen_urls:
-                    seen_urls.add(article.url)
-                    articles.append(article)
+            for src in source_list:
+                if src.url not in seen_urls:
+                    seen_urls.add(src.url)
+                    sources.append(src)
 
         if self._run_logger:
             t0_dedup = time.monotonic()
@@ -179,11 +179,11 @@ class ComposablePipeline:
             self._run_logger.log_stage(
                 stage="deduplication",
                 component="url_dedup",
-                input_data={"article_count": pre_dedup_count},
-                output_data={"article_count": len(articles)},
+                input_data={"source_count": pre_dedup_count},
+                output_data={"source_count": len(sources)},
                 usage=None,
                 duration_seconds=dedup_duration,
             )
-            self._run_logger.finish_run(articles, total_usage)
+            self._run_logger.finish_run(sources, total_usage)
 
-        return (articles, total_usage)
+        return (sources, total_usage)

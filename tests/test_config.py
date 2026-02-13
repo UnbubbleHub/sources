@@ -15,6 +15,7 @@ from unbubble_sources.config import (
     NoOpAggregatorConfig,
     PCAAggregatorConfig,
     UnbubbleConfig,
+    XSearcherConfig,
     create_from_config,
     get_default_config_path,
     load_config,
@@ -30,6 +31,7 @@ from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.query.claude import ClaudeQueryGenerator
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
+from unbubble_sources.search.x import XSearcher
 
 # -- Config model tests --
 
@@ -52,6 +54,12 @@ def test_gnews_searcher_config_defaults() -> None:
     config = GNewsSearcherConfig()
     assert config.type == "gnews"
     assert config.lang == "en"
+
+
+def test_x_searcher_config_defaults() -> None:
+    config = XSearcherConfig()
+    assert config.type == "x"
+    assert config.max_results_per_query == 10
 
 
 def test_pca_aggregator_config_defaults() -> None:
@@ -211,6 +219,13 @@ def test_create_from_config() -> None:
     assert isinstance(pipeline, ClaudeE2EPipeline)
     assert run_logger is None  # Logging disabled by default
     assert price_cache is not None
+
+
+def test_create_searcher_x(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TWITTER_BEARER_TOKEN", "test-token")
+    config = XSearcherConfig(max_results_per_query=20)
+    searcher = create_searcher(config)
+    assert isinstance(searcher, XSearcher)
 
 
 def test_create_from_config_with_logging() -> None:

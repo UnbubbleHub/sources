@@ -195,6 +195,17 @@ def test_estimate_usage_cost_with_gnews(
     assert abs(cost - 1.0) < 0.001
 
 
+def test_estimate_usage_cost_with_x_api(
+    sample_prices: dict[str, ModelPricing],
+) -> None:
+    # X API is free tier ($0), so cost should just be API call cost
+    api_calls = [
+        APICallUsage(model="claude-haiku-4-5", input_tokens=1_000_000, output_tokens=0),
+    ]
+    cost = estimate_usage_cost(api_calls, gnews_requests=0, prices=sample_prices, x_api_requests=5)
+    assert abs(cost - 1.0) < 0.001
+
+
 # -- PriceCache tests --
 
 
