@@ -11,6 +11,7 @@ from unbubble_sources.config.models import (
     GNewsSearcherConfig,
     NoOpAggregatorConfig,
     PCAAggregatorConfig,
+    SearcherConfig,
     UnbubbleConfig,
     XSearcherConfig,
 )
@@ -39,7 +40,7 @@ def create_generator(config: ClaudeQueryGeneratorConfig) -> QueryGenerator:
 
 
 def create_searcher(
-    config: ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig,
+    config: SearcherConfig,
 ) -> SourceSearcher:
     """Create a source searcher from config."""
     if isinstance(config, ClaudeSearcherConfig):

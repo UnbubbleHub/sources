@@ -106,9 +106,7 @@ class ComposablePipelineConfig(BaseModel):
     aggregator: PCAAggregatorConfig | NoOpAggregatorConfig = Field(
         default_factory=NoOpAggregatorConfig
     )
-    searchers: list[ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig] = Field(
-        default_factory=list
-    )
+    searchers: list[SearcherConfig] = Field(default_factory=list)
     num_queries_per_generator: int = 5
     max_results_per_searcher: int = 10
 
