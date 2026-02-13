@@ -19,6 +19,7 @@ PRICING_URL = "https://docs.anthropic.com/en/docs/about-claude/pricing"
 WEB_SEARCH_PRICE_PER_SEARCH = 10.0 / 1000  # $10 per 1,000 searches
 GNEWS_REQUEST_PRICE = 0.0  # free tier
 X_API_REQUEST_PRICE = 0.0  # free tier (Basic access)
+EXA_REQUEST_PRICE = 0.0  # included in Exa plan
 
 
 @dataclass(frozen=True)
@@ -202,7 +203,11 @@ class PriceCache:
             return
         prices = self.get_sync()
         usage.estimated_cost = estimate_usage_cost(
-            usage.api_calls, usage.gnews_requests, prices, usage.x_api_requests
+            usage.api_calls,
+            usage.gnews_requests,
+            prices,
+            usage.x_api_requests,
+            exa_requests=usage.exa_requests,
         )
 
 
@@ -261,6 +266,7 @@ def estimate_usage_cost(
     gnews_requests: int,
     prices: dict[str, ModelPricing],
     x_api_requests: int = 0,
+    exa_requests: int = 0,
 ) -> float:
     """Estimate total cost in USD for accumulated usage.
 
@@ -269,6 +275,7 @@ def estimate_usage_cost(
         gnews_requests: Number of GNews API requests.
         prices: Model pricing dict from fetch_model_prices().
         x_api_requests: Number of X API requests.
+        exa_requests: Number of Exa API requests.
     """
 
     total = 0.0
@@ -286,4 +293,5 @@ def estimate_usage_cost(
         )
     total += gnews_requests * GNEWS_REQUEST_PRICE
     total += x_api_requests * X_API_REQUEST_PRICE
+    total += exa_requests * EXA_REQUEST_PRICE
     return total

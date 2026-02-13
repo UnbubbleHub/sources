@@ -61,6 +61,7 @@ def test_serialize_usage_includes_computed_properties() -> None:
         ],
         gnews_requests=3,
         x_api_requests=5,
+        exa_requests=2,
     )
     result = _serialize(usage)
     assert isinstance(result, dict)
@@ -70,6 +71,7 @@ def test_serialize_usage_includes_computed_properties() -> None:
     assert result["web_searches"] == 3
     assert result["gnews_requests"] == 3
     assert result["x_api_requests"] == 5
+    assert result["exa_requests"] == 2
     assert result["estimated_cost"] == 0.0
     # Raw data
     assert len(result["api_calls"]) == 2

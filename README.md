@@ -48,6 +48,7 @@ async def main():
     cost = estimate_usage_cost(
         usage.api_calls, usage.gnews_requests, prices,
         x_api_requests=usage.x_api_requests,
+        exa_requests=usage.exa_requests,
     )
     print(f"Estimated cost: ${cost:.4f}")
 
@@ -64,13 +65,15 @@ Pipelines are configured via YAML. Two types are available:
 pipeline:
   type: composable
   generators:
-    - type: claude
+    - type: claude       # uses Claude API to expand queries
+    # - type: noop       # pass-through (no API call, free)
   aggregator:
     type: pca
     n_components: 5
   searchers:
     - type: claude
     - type: x          # X/Twitter search (requires TWITTER_BEARER_TOKEN)
+    - type: exa        # Exa neural search (requires EXA_API_KEY)
 ```
 
 **Claude E2E** (`type: claude_e2e`) — single Claude call with web search, simpler and faster:
@@ -88,6 +91,7 @@ pipeline:
 | `CLAUDE_API_KEY` | Yes | Anthropic API key | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
 | `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key | [gnews.io/dashboard](https://gnews.io/dashboard) |
 | `TWITTER_BEARER_TOKEN` | Only for X searcher | X/Twitter API v2 bearer token | [developer.x.com](https://developer.x.com/en/portal/dashboard) |
+| `EXA_API_KEY` | Only for Exa searcher | [exa.ai](https://exa.ai/) API key | [dashboard.exa.ai](https://dashboard.exa.ai/api-keys) |
 
 ## Usage Tracking & Cost Estimation
 
@@ -97,6 +101,7 @@ Every pipeline run returns a `Usage` object alongside the sources, tracking:
 - **Web searches**: number of Claude web search tool invocations
 - **GNews requests**: number of GNews API HTTP requests
 - **X API requests**: number of X/Twitter API HTTP requests
+- **Exa requests**: number of Exa API search requests
 
 Costs are estimated by dynamically fetching the latest pricing from the Anthropic docs. A hardcoded fallback is used if the fetch fails.
 
