@@ -52,6 +52,7 @@ def _serialize(obj: Any) -> Any:
             "api_calls": [_serialize(c) for c in obj.api_calls],
             "gnews_requests": obj.gnews_requests,
             "x_api_requests": obj.x_api_requests,
+            "exa_requests": obj.exa_requests,
             "input_tokens": obj.input_tokens,
             "output_tokens": obj.output_tokens,
             "cache_creation_input_tokens": obj.cache_creation_input_tokens,

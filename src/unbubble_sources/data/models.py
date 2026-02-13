@@ -70,6 +70,7 @@ class Usage:
     api_calls: list[APICallUsage] = field(default_factory=list)
     gnews_requests: int = 0
     x_api_requests: int = 0
+    exa_requests: int = 0
     estimated_cost: float = 0.0
 
     @property
@@ -97,6 +98,7 @@ class Usage:
             api_calls=self.api_calls + other.api_calls,
             gnews_requests=self.gnews_requests + other.gnews_requests,
             x_api_requests=self.x_api_requests + other.x_api_requests,
+            exa_requests=self.exa_requests + other.exa_requests,
             estimated_cost=self.estimated_cost + other.estimated_cost,
         )
 
@@ -104,5 +106,6 @@ class Usage:
         self.api_calls.extend(other.api_calls)
         self.gnews_requests += other.gnews_requests
         self.x_api_requests += other.x_api_requests
+        self.exa_requests += other.exa_requests
         self.estimated_cost += other.estimated_cost
         return self

@@ -8,9 +8,12 @@ from unbubble_sources.config.models import (
     ClaudeQueryGeneratorConfig,
     ClaudeSearcherConfig,
     ComposablePipelineConfig,
+    ExaSearcherConfig,
     GNewsSearcherConfig,
     NoOpAggregatorConfig,
+    NoOpQueryGeneratorConfig,
     PCAAggregatorConfig,
+    QueryGeneratorConfig,
     SearcherConfig,
     UnbubbleConfig,
     XSearcherConfig,
@@ -21,22 +24,29 @@ from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
+from unbubble_sources.search.exa import ExaSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
 from unbubble_sources.search.x import XSearcher
 
 
-def create_generator(config: ClaudeQueryGeneratorConfig) -> QueryGenerator:
+def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
     """Create a query generator from config.
 
     Uses explicit type matching rather than getattr.
     """
-    return ClaudeQueryGenerator(
-        model=config.model,
-        system_prompt=config.system_prompt,
-    )
+    if isinstance(config, ClaudeQueryGeneratorConfig):
+        return ClaudeQueryGenerator(
+            model=config.model,
+            system_prompt=config.system_prompt,
+        )
+    if isinstance(config, NoOpQueryGeneratorConfig):
+        return NoOpQueryGenerator()
+    msg = f"Unknown generator config type: {type(config)}"
+    raise ValueError(msg)
 
 
 def create_searcher(
@@ -52,6 +62,8 @@ def create_searcher(
         return GNewsSearcher(lang=config.lang)
     if isinstance(config, XSearcherConfig):
         return XSearcher(max_results_per_query=config.max_results_per_query)
+    if isinstance(config, ExaSearcherConfig):
+        return ExaSearcher(max_results_per_query=config.max_results_per_query)
     # Type checker ensures this is exhaustive
     msg = f"Unknown searcher config type: {type(config)}"
     raise ValueError(msg)

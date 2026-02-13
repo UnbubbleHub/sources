@@ -47,6 +47,7 @@ def test_usage_empty() -> None:
     assert usage.web_searches == 0
     assert usage.gnews_requests == 0
     assert usage.x_api_requests == 0
+    assert usage.exa_requests == 0
     assert usage.estimated_cost == 0.0
     assert len(usage.api_calls) == 0
 
@@ -70,12 +71,14 @@ def test_usage_add() -> None:
         api_calls=[APICallUsage(model="m1", input_tokens=100)],
         gnews_requests=1,
         x_api_requests=2,
+        exa_requests=1,
         estimated_cost=0.50,
     )
     u2 = Usage(
         api_calls=[APICallUsage(model="m2", input_tokens=200)],
         gnews_requests=2,
         x_api_requests=3,
+        exa_requests=2,
         estimated_cost=1.00,
     )
     combined = u1 + u2
@@ -84,6 +87,7 @@ def test_usage_add() -> None:
     assert combined.input_tokens == 300
     assert combined.gnews_requests == 3
     assert combined.x_api_requests == 5
+    assert combined.exa_requests == 3
     assert combined.estimated_cost == pytest.approx(1.50)
     # Original objects unchanged
     assert len(u1.api_calls) == 1
@@ -95,12 +99,14 @@ def test_usage_iadd() -> None:
         api_calls=[APICallUsage(model="m1", input_tokens=100)],
         gnews_requests=1,
         x_api_requests=1,
+        exa_requests=3,
         estimated_cost=0.25,
     )
     u2 = Usage(
         api_calls=[APICallUsage(model="m2", input_tokens=200)],
         gnews_requests=2,
         x_api_requests=4,
+        exa_requests=7,
         estimated_cost=0.75,
     )
     u1 += u2
@@ -109,6 +115,7 @@ def test_usage_iadd() -> None:
     assert u1.input_tokens == 300
     assert u1.gnews_requests == 3
     assert u1.x_api_requests == 5
+    assert u1.exa_requests == 10
     assert u1.estimated_cost == pytest.approx(1.00)
 
 

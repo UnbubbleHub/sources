@@ -1,0 +1,14 @@
+pipeline:
+  type: composable
+  generators:
+    - type: noop
+  aggregator:
+    type: noop
+  searchers:
+    - type: gnews
+    - type: x
+      max_results_per_query: 10
+    - type: exa
+      max_results_per_query: 10
+  num_queries_per_generator: 1
+  max_results_per_searcher: 10

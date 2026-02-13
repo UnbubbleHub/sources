@@ -11,8 +11,10 @@ from unbubble_sources.config import (
     ClaudeQueryGeneratorConfig,
     ClaudeSearcherConfig,
     ComposablePipelineConfig,
+    ExaSearcherConfig,
     GNewsSearcherConfig,
     NoOpAggregatorConfig,
+    NoOpQueryGeneratorConfig,
     PCAAggregatorConfig,
     UnbubbleConfig,
     XSearcherConfig,
@@ -29,7 +31,9 @@ from unbubble_sources.config.factory import (
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.search.claude import ClaudeSearcher
+from unbubble_sources.search.exa import ExaSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
 from unbubble_sources.search.x import XSearcher
 
@@ -41,6 +45,11 @@ def test_claude_generator_config_defaults() -> None:
     assert config.type == "claude"
     assert config.model == "claude-haiku-4-5-20251001"
     assert config.system_prompt is None
+
+
+def test_noop_generator_config_defaults() -> None:
+    config = NoOpQueryGeneratorConfig()
+    assert config.type == "noop"
 
 
 def test_claude_searcher_config_defaults() -> None:
@@ -59,6 +68,12 @@ def test_gnews_searcher_config_defaults() -> None:
 def test_x_searcher_config_defaults() -> None:
     config = XSearcherConfig()
     assert config.type == "x"
+    assert config.max_results_per_query == 10
+
+
+def test_exa_searcher_config_defaults() -> None:
+    config = ExaSearcherConfig()
+    assert config.type == "exa"
     assert config.max_results_per_query == 10
 
 
@@ -172,6 +187,12 @@ def test_create_generator_claude() -> None:
     assert isinstance(gen, ClaudeQueryGenerator)
 
 
+def test_create_generator_noop() -> None:
+    config = NoOpQueryGeneratorConfig()
+    gen = create_generator(config)
+    assert isinstance(gen, NoOpQueryGenerator)
+
+
 def test_create_searcher_claude() -> None:
     config = ClaudeSearcherConfig(model="test-model", max_searches_per_query=2)
     searcher = create_searcher(config)
@@ -226,6 +247,13 @@ def test_create_searcher_x(monkeypatch: pytest.MonkeyPatch) -> None:
     config = XSearcherConfig(max_results_per_query=20)
     searcher = create_searcher(config)
     assert isinstance(searcher, XSearcher)
+
+
+def test_create_searcher_exa(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("EXA_API_KEY", "test-key")
+    config = ExaSearcherConfig(max_results_per_query=15)
+    searcher = create_searcher(config)
+    assert isinstance(searcher, ExaSearcher)
 
 
 def test_create_from_config_with_logging() -> None:

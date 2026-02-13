@@ -84,6 +84,8 @@ async def run(args: CLIArgs) -> None:
         logger.info(f"GNews requests: {usage.gnews_requests}")
     if usage.x_api_requests:
         logger.info(f"X API requests: {usage.x_api_requests}")
+    if usage.exa_requests:
+        logger.info(f"Exa requests: {usage.exa_requests}")
     logger.info(f"Estimated cost: ${usage.estimated_cost:.4f}")
 
     # Log file path if logging was enabled (pipeline calls finish_run internally)

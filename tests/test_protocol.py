@@ -6,6 +6,7 @@ import pytest
 
 from unbubble_sources.data import NewsEvent, SearchQuery, Usage
 from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.search.exa import ExaSearcher
 from unbubble_sources.search.x import XSearcher
 
 if TYPE_CHECKING:
@@ -41,5 +42,12 @@ def test_x_searcher_matches_source_searcher_protocol(
     """Verify XSearcher structurally matches the SourceSearcher protocol."""
     monkeypatch.setenv("TWITTER_BEARER_TOKEN", "test-token")
     searcher = XSearcher()
+    assert hasattr(searcher, "search")
+    assert callable(searcher.search)
+
+
+def test_exa_searcher_matches_source_searcher_protocol() -> None:
+    """Verify ExaSearcher structurally matches the SourceSearcher protocol."""
+    searcher = ExaSearcher(api_key="test-key")
     assert hasattr(searcher, "search")
     assert callable(searcher.search)

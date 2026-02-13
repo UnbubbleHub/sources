@@ -19,8 +19,16 @@ class ClaudeQueryGeneratorConfig(BaseModel):
     model_config = {"frozen": True}
 
 
+class NoOpQueryGeneratorConfig(BaseModel):
+    """Pass-through generator (no API calls)."""
+
+    type: Literal["noop"] = "noop"
+
+    model_config = {"frozen": True}
+
+
 QueryGeneratorConfig = Annotated[
-    ClaudeQueryGeneratorConfig,
+    ClaudeQueryGeneratorConfig | NoOpQueryGeneratorConfig,
     Field(discriminator="type"),
 ]
 
@@ -58,8 +66,17 @@ class XSearcherConfig(BaseModel):
     model_config = {"frozen": True}
 
 
+class ExaSearcherConfig(BaseModel):
+    """Configuration for ExaSearcher (exa.ai)."""
+
+    type: Literal["exa"] = "exa"
+    max_results_per_query: int = 10
+
+    model_config = {"frozen": True}
+
+
 SearcherConfig = Annotated[
-    ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig,
+    ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig | ExaSearcherConfig,
     Field(discriminator="type"),
 ]
 
@@ -102,7 +119,7 @@ class ComposablePipelineConfig(BaseModel):
     """Configuration for composable pipeline."""
 
     type: Literal["composable"] = "composable"
-    generators: list[ClaudeQueryGeneratorConfig] = Field(default_factory=list)
+    generators: list[QueryGeneratorConfig] = Field(default_factory=list)
     aggregator: PCAAggregatorConfig | NoOpAggregatorConfig = Field(
         default_factory=NoOpAggregatorConfig
     )
