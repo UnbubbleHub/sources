@@ -10,7 +10,7 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator
 
 from unbubble_sources.config import create_from_config, get_default_config_path, load_config
-from unbubble_sources.data import Article, NewsEvent, Tweet
+from unbubble_sources.data import AnnotatedSource, Article, NewsEvent, Tweet
 
 logger = logging.getLogger(__name__)
 
@@ -52,22 +52,40 @@ async def run(args: CLIArgs) -> None:
 
     print(f"\nFound {len(sources)} unique sources:\n")
     for i, src in enumerate(sources, 1):
-        if isinstance(src, Article):
-            logger.info(f"{i}. {src.title}")
-            logger.info(f"   Source: {src.source}")
-            logger.info(f"   URL: {src.url}")
-            if src.published_at:
-                logger.info(f"   Published: {src.published_at}")
-        elif isinstance(src, Tweet):
-            text_preview = src.text[:100] + ("..." if len(src.text) > 100 else "")
-            logger.info(f"{i}. @{src.author_handle}: {text_preview}")
-            logger.info(f"   URL: {src.url}")
-            logger.info(f"   Likes: {src.like_count} | Retweets: {src.retweet_count}")
-            if src.published_at:
-                logger.info(f"   Published: {src.published_at}")
+        # Unwrap AnnotatedSource to get the inner source + annotation
+        annotation = None
+        inner = src
+        if isinstance(src, AnnotatedSource):
+            annotation = src.annotation
+            inner = src.source
+
+        if isinstance(inner, Article):
+            logger.info(f"{i}. {inner.title}")
+            logger.info(f"   Source: {inner.source}")
+            logger.info(f"   URL: {inner.url}")
+            if inner.published_at:
+                logger.info(f"   Published: {inner.published_at}")
+        elif isinstance(inner, Tweet):
+            text_preview = inner.text[:100] + ("..." if len(inner.text) > 100 else "")
+            logger.info(f"{i}. @{inner.author_handle}: {text_preview}")
+            logger.info(f"   URL: {inner.url}")
+            logger.info(f"   Likes: {inner.like_count} | Retweets: {inner.retweet_count}")
+            if inner.published_at:
+                logger.info(f"   Published: {inner.published_at}")
         else:
-            logger.info(f"{i}. {src.url}")
-            logger.info(f"   Source: {src.source}")
+            logger.info(f"{i}. {inner.url}")
+            logger.info(f"   Source: {inner.source}")
+
+        if annotation:
+            logger.info(f"   Political lean: {annotation.political_lean.value}")
+            if annotation.policy_frames:
+                frames = ", ".join(f.value for f in annotation.policy_frames)
+                logger.info(f"   Frames: {frames}")
+            logger.info(f"   Stakeholder: {annotation.stakeholder_type.value}")
+            if annotation.stance_summary:
+                logger.info(f"   Stance: {annotation.stance_summary}")
+            if annotation.geographic_focus:
+                logger.info(f"   Geo focus: {annotation.geographic_focus}")
 
     # Log usage summary (cost is already computed by the pipeline via PriceCache)
     logger.info("\n--- Usage Summary ---")

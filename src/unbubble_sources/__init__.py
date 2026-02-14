@@ -2,13 +2,20 @@
 
 from unbubble_sources.aggregator.base import QueryAggregator
 from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.annotator.base import SourceAnnotator
+from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config import UnbubbleConfig, create_from_config, load_config
 from unbubble_sources.data import (
+    AnnotatedSource,
     APICallUsage,
     Article,
     NewsEvent,
+    PerspectiveAnnotation,
+    PolicyFrame,
+    PoliticalLean,
     SearchQuery,
     Source,
+    StakeholderType,
     Tweet,
     Usage,
 )
@@ -26,6 +33,8 @@ from unbubble_sources.pricing import (
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import DEFAULT_SYSTEM_PROMPT, ClaudeQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
+from unbubble_sources.ranker.base import SourceRanker
+from unbubble_sources.ranker.mmr import MMRRanker, perspective_distance
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import ArticleSearcher, SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
@@ -37,10 +46,15 @@ from unbubble_sources.url import extract_domain
 __all__ = [
     # Models
     "APICallUsage",
+    "AnnotatedSource",
     "Article",
     "NewsEvent",
+    "PerspectiveAnnotation",
+    "PoliticalLean",
+    "PolicyFrame",
     "SearchQuery",
     "Source",
+    "StakeholderType",
     "Tweet",
     "Usage",
     # Pricing
@@ -52,11 +66,14 @@ __all__ = [
     "get_model_pricing",
     # Functions
     "extract_domain",
+    "perspective_distance",
     # Protocols
     "ArticleSearcher",
     "Pipeline",
     "QueryAggregator",
     "QueryGenerator",
+    "SourceAnnotator",
+    "SourceRanker",
     "SourceSearcher",
     # Query Generators
     "ClaudeQueryGenerator",
@@ -70,6 +87,10 @@ __all__ = [
     # Aggregators
     "NoOpAggregator",
     "PCAAggregator",
+    # Annotators
+    "ClaudeAnnotator",
+    # Rankers
+    "MMRRanker",
     # Pipelines
     "ClaudeE2EPipeline",
     "ComposablePipeline",

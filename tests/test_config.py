@@ -6,13 +6,16 @@ from tempfile import NamedTemporaryFile
 import pytest
 
 from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config import (
+    ClaudeAnnotatorConfig,
     ClaudeE2EPipelineConfig,
     ClaudeQueryGeneratorConfig,
     ClaudeSearcherConfig,
     ComposablePipelineConfig,
     ExaSearcherConfig,
     GNewsSearcherConfig,
+    MMRRankerConfig,
     NoOpAggregatorConfig,
     NoOpQueryGeneratorConfig,
     PCAAggregatorConfig,
@@ -24,14 +27,17 @@ from unbubble_sources.config import (
 )
 from unbubble_sources.config.factory import (
     create_aggregator,
+    create_annotator,
     create_generator,
     create_pipeline,
+    create_ranker,
     create_searcher,
 )
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.query.claude import ClaudeQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
+from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.exa import ExaSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
@@ -263,3 +269,90 @@ def test_create_from_config_with_logging() -> None:
     assert run_logger is not None
     assert run_logger.enabled
     assert price_cache is not None
+
+
+# -- Annotator & Ranker config tests --
+
+
+def test_claude_annotator_config_defaults() -> None:
+    config = ClaudeAnnotatorConfig()
+    assert config.type == "claude"
+    assert config.model == "claude-haiku-4-5-20251001"
+    assert config.batch_size == 20
+
+
+def test_mmr_ranker_config_defaults() -> None:
+    config = MMRRankerConfig()
+    assert config.type == "mmr"
+    assert config.lambda_param == 0.5
+    assert config.top_k == 10
+
+
+def test_composable_pipeline_config_with_annotator_ranker() -> None:
+    config = ComposablePipelineConfig(
+        annotator=ClaudeAnnotatorConfig(model="test-model"),
+        ranker=MMRRankerConfig(lambda_param=0.7, top_k=5),
+    )
+    assert config.annotator is not None
+    assert config.annotator.model == "test-model"
+    assert config.ranker is not None
+    assert config.ranker.lambda_param == 0.7
+    assert config.ranker.top_k == 5
+
+
+def test_composable_pipeline_config_without_annotator_ranker() -> None:
+    config = ComposablePipelineConfig()
+    assert config.annotator is None
+    assert config.ranker is None
+
+
+def test_e2e_pipeline_config_with_annotator_ranker() -> None:
+    config = ClaudeE2EPipelineConfig(
+        annotator=ClaudeAnnotatorConfig(),
+        ranker=MMRRankerConfig(top_k=5),
+    )
+    assert config.annotator is not None
+    assert config.ranker is not None
+    assert config.ranker.top_k == 5
+
+
+def test_create_annotator() -> None:
+    config = ClaudeAnnotatorConfig(model="test-model", batch_size=10)
+    annotator = create_annotator(config)
+    assert isinstance(annotator, ClaudeAnnotator)
+
+
+def test_create_ranker() -> None:
+    config = MMRRankerConfig(lambda_param=0.3)
+    ranker = create_ranker(config)
+    assert isinstance(ranker, MMRRanker)
+
+
+def test_load_config_with_annotator_ranker() -> None:
+    yaml_content = """
+pipeline:
+  type: composable
+  generators:
+    - type: claude
+  searchers:
+    - type: claude
+  annotator:
+    type: claude
+    model: claude-haiku-4-5-20251001
+    batch_size: 15
+  ranker:
+    type: mmr
+    lambda_param: 0.6
+    top_k: 8
+"""
+    with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        f.write(yaml_content)
+        f.flush()
+        config = load_config(Path(f.name))
+
+    assert isinstance(config.pipeline, ComposablePipelineConfig)
+    assert config.pipeline.annotator is not None
+    assert config.pipeline.annotator.batch_size == 15
+    assert config.pipeline.ranker is not None
+    assert config.pipeline.ranker.lambda_param == 0.6
+    assert config.pipeline.ranker.top_k == 8

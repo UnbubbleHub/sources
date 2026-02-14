@@ -3,11 +3,14 @@
 import asyncio
 import logging
 import time
+from typing import cast
 
 from unbubble_sources.aggregator.base import QueryAggregator
+from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.data import NewsEvent, SearchQuery, Source, Usage
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
+from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import SourceSearcher
 
@@ -22,11 +25,16 @@ class ComposablePipeline:
     2. Aggregator reduces/diversifies the combined query set
     3. All searchers execute the aggregated queries in parallel
     4. Results are deduplicated by URL
+    5. (Optional) Annotator extracts perspective metadata via Claude
+    6. (Optional) MMR ranker selects top-k diverse sources
 
     Args:
         generators: List of query generators.
         aggregator: Query aggregator for deduplication/diversification.
         searchers: List of source searchers.
+        annotator: Optional Claude-based source annotator.
+        ranker: Optional MMR diversity ranker.
+        ranker_top_k: Number of sources to return from ranker.
         num_queries_per_generator: Queries to request from each generator.
         max_results_per_searcher: Max results per query for each searcher.
         run_logger: Optional RunLogger for intermediate result logging.
@@ -38,6 +46,10 @@ class ComposablePipeline:
         generators: list[QueryGenerator],
         aggregator: QueryAggregator,
         searchers: list[SourceSearcher],
+        *,
+        annotator: ClaudeAnnotator | None = None,
+        ranker: MMRRanker | None = None,
+        ranker_top_k: int = 10,
         num_queries_per_generator: int = 5,
         max_results_per_searcher: int = 10,
         run_logger: RunLogger | None = None,
@@ -46,6 +58,9 @@ class ComposablePipeline:
         self._generators = generators
         self._aggregator = aggregator
         self._searchers = searchers
+        self._annotator = annotator
+        self._ranker = ranker
+        self._ranker_top_k = ranker_top_k
         self._num_queries = num_queries_per_generator
         self._max_results = max_results_per_searcher
         self._run_logger = run_logger
@@ -67,6 +82,8 @@ class ComposablePipeline:
 
         Returns:
             Tuple of (diverse deduplicated sources, usage).
+            When annotator + ranker are configured, returns AnnotatedSource
+            objects (which are also valid Source-compatible dataclasses).
         """
         if self._run_logger:
             self._run_logger.start_run("composable", event)
@@ -184,6 +201,52 @@ class ComposablePipeline:
                 usage=None,
                 duration_seconds=dedup_duration,
             )
-            self._run_logger.finish_run(sources, total_usage)
 
-        return (sources, total_usage)
+        # Step 5: Annotate sources (optional)
+        if self._annotator and sources:
+            t0 = time.monotonic()
+            annotated_sources, annotation_usage = await self._annotator.annotate(
+                sources, event.description
+            )
+            annotation_duration = time.monotonic() - t0
+
+            if self._price_cache:
+                self._price_cache.stamp_usage(annotation_usage)
+            total_usage += annotation_usage
+
+            if self._run_logger:
+                self._run_logger.log_stage(
+                    stage="annotation",
+                    component="ClaudeAnnotator",
+                    input_data={"source_count": len(sources)},
+                    output_data=annotated_sources,
+                    usage=annotation_usage,
+                    duration_seconds=annotation_duration,
+                )
+
+            # Step 6: Rank by diversity (optional, requires annotation)
+            if self._ranker:
+                t0 = time.monotonic()
+                ranked = self._ranker.rank(annotated_sources, self._ranker_top_k)
+                rank_duration = time.monotonic() - t0
+
+                if self._run_logger:
+                    self._run_logger.log_stage(
+                        stage="ranking",
+                        component="MMRRanker",
+                        input_data={"source_count": len(annotated_sources)},
+                        output_data=ranked,
+                        usage=None,
+                        duration_seconds=rank_duration,
+                    )
+
+                final_sources: list[Source] = cast(list[Source], ranked)
+            else:
+                final_sources = cast(list[Source], annotated_sources)
+        else:
+            final_sources = sources
+
+        if self._run_logger:
+            self._run_logger.finish_run(final_sources, total_usage)
+
+        return (final_sources, total_usage)

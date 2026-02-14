@@ -5,3 +5,13 @@ pipeline:
   type: claude_e2e
   model: claude-haiku-4-5-20251001
   target_articles: 10
+
+  annotator:
+    type: claude
+    model: claude-haiku-4-5-20251001
+    batch_size: 20
+
+  ranker:
+    type: mmr
+    lambda_param: 0.5
+    top_k: 10
