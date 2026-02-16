@@ -40,8 +40,33 @@ journalist, citizen, international_org, other
 - "stance_summary": 1-2 sentence summary of the source's position on the event
 - "topic": short topic label (e.g. "climate policy", "immigration")
 - "geographic_focus": primary country or region
-- "relevance_score": float 0.0-1.0 indicating how relevant this source is to \
-the event
+- "relevance_score": float 0.0-1.0 measuring how directly and substantively \
+the source covers the specific event. Use the full range of the scale:
+  - 0.9-1.0: A primary source — the source is a direct participant, eyewitness, \
+or the originator of the news (e.g. the official press release announcing a \
+policy, a firsthand account from someone involved, the leaked document itself).
+  - 0.7-0.8: In-depth original reporting — a dedicated article or thread that \
+thoroughly reports on the event with original investigation, exclusive quotes, \
+or significant new context not found elsewhere (e.g. an investigative piece \
+with insider interviews, a detailed breakdown adding substantial new insight).
+  - 0.5-0.6: Standard secondary coverage — a straightforward report on the event \
+that covers the key facts but mostly aggregates or repackages information from \
+other sources without much original analysis (e.g. a wire-service-style recap, \
+a news article that summarizes what other outlets have already reported).
+  - 0.3-0.4: Brief or shallow mention — the source acknowledges the event but \
+covers it only superficially, or the event is a minor part of a broader piece \
+(e.g. a weekly news roundup with one paragraph on the event, a related-topic \
+article that briefly mentions it for context).
+  - 0.2: Tangential — the source's main topic is adjacent to the event but the \
+event itself is not the focus; the connection requires some inference \
+(e.g. an article about broader industry trends that doesn't name the event \
+but discusses its consequences indirectly).
+  - 0.1: Barely related — the source covers the same general domain or theme \
+but does not discuss this specific event; the connection is only thematic \
+(e.g. a general op-ed about immigration policy when the event is a specific \
+border incident, a background explainer published before the event occurred).
+  - 0.0: Completely unrelated — the source has no meaningful connection to the \
+event whatsoever.
 
 Return a JSON array with one object per source, in the same order as the input.\
 """
