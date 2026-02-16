@@ -3,13 +3,16 @@
 from pathlib import Path
 
 from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config.models import (
+    ClaudeAnnotatorConfig,
     ClaudeE2EPipelineConfig,
     ClaudeQueryGeneratorConfig,
     ClaudeSearcherConfig,
     ComposablePipelineConfig,
     ExaSearcherConfig,
     GNewsSearcherConfig,
+    MMRRankerConfig,
     NoOpAggregatorConfig,
     NoOpQueryGeneratorConfig,
     PCAAggregatorConfig,
@@ -25,6 +28,7 @@ from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
+from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
@@ -84,6 +88,19 @@ def create_aggregator(
     raise ValueError(msg)
 
 
+def create_annotator(config: ClaudeAnnotatorConfig) -> ClaudeAnnotator:
+    """Create a source annotator from config."""
+    return ClaudeAnnotator(
+        model=config.model,
+        batch_size=config.batch_size,
+    )
+
+
+def create_ranker(config: MMRRankerConfig) -> MMRRanker:
+    """Create a source ranker from config."""
+    return MMRRanker(lambda_param=config.lambda_param)
+
+
 def create_pipeline(
     config: ComposablePipelineConfig | ClaudeE2EPipelineConfig,
     run_logger: RunLogger | None = None,
@@ -94,20 +111,33 @@ def create_pipeline(
         generators = [create_generator(g) for g in config.generators]
         aggregator = create_aggregator(config.aggregator)
         searchers = [create_searcher(s) for s in config.searchers]
+        annotator = create_annotator(config.annotator) if config.annotator else None
+        ranker = create_ranker(config.ranker) if config.ranker else None
+        ranker_top_k = config.ranker.top_k if config.ranker else 10
 
         return ComposablePipeline(
             generators=generators,
             aggregator=aggregator,
             searchers=searchers,
+            annotator=annotator,
+            ranker=ranker,
+            ranker_top_k=ranker_top_k,
             num_queries_per_generator=config.num_queries_per_generator,
             max_results_per_searcher=config.max_results_per_searcher,
             run_logger=run_logger,
             price_cache=price_cache,
         )
     if isinstance(config, ClaudeE2EPipelineConfig):
+        annotator = create_annotator(config.annotator) if config.annotator else None
+        ranker = create_ranker(config.ranker) if config.ranker else None
+        ranker_top_k = config.ranker.top_k if config.ranker else 10
+
         return ClaudeE2EPipeline(
             model=config.model,
             target_articles=config.target_articles,
+            annotator=annotator,
+            ranker=ranker,
+            ranker_top_k=ranker_top_k,
             run_logger=run_logger,
             price_cache=price_cache,
         )

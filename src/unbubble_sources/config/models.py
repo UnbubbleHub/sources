@@ -111,6 +111,42 @@ AggregatorConfig = Annotated[
 
 
 # ============================================================
+# Annotator Configs
+# ============================================================
+
+
+class ClaudeAnnotatorConfig(BaseModel):
+    """Configuration for Claude-based source annotator."""
+
+    type: Literal["claude"] = "claude"
+    model: str = "claude-haiku-4-5-20251001"
+    batch_size: int = 20
+
+    model_config = {"frozen": True}
+
+
+AnnotatorConfig = ClaudeAnnotatorConfig
+
+
+# ============================================================
+# Ranker Configs
+# ============================================================
+
+
+class MMRRankerConfig(BaseModel):
+    """Configuration for MMR diversity ranker."""
+
+    type: Literal["mmr"] = "mmr"
+    lambda_param: float = 0.5
+    top_k: int = 10
+
+    model_config = {"frozen": True}
+
+
+RankerConfig = MMRRankerConfig
+
+
+# ============================================================
 # Pipeline Configs
 # ============================================================
 
@@ -124,6 +160,8 @@ class ComposablePipelineConfig(BaseModel):
         default_factory=NoOpAggregatorConfig
     )
     searchers: list[SearcherConfig] = Field(default_factory=list)
+    annotator: ClaudeAnnotatorConfig | None = None
+    ranker: MMRRankerConfig | None = None
     num_queries_per_generator: int = 5
     max_results_per_searcher: int = 10
 
@@ -136,6 +174,8 @@ class ClaudeE2EPipelineConfig(BaseModel):
     type: Literal["claude_e2e"] = "claude_e2e"
     model: str = "claude-haiku-4-5-20251001"
     target_articles: int = 10
+    annotator: ClaudeAnnotatorConfig | None = None
+    ranker: MMRRankerConfig | None = None
 
     model_config = {"frozen": True}
 

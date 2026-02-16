@@ -3,12 +3,15 @@
 import logging
 import os
 import time
+from typing import cast
 
 import anthropic
 from anthropic.types import WebSearchToolResultBlock
 
+from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery, Source, Usage
 from unbubble_sources.pricing import PriceCache
+from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.url import extract_domain
 
@@ -20,11 +23,15 @@ class ClaudeE2EPipeline:
 
     This pipeline uses Claude's web search tool directly, instructing it to
     find diverse articles about a news event in a single API call.
+    Optionally annotates and ranks results by perspective diversity.
 
     Args:
         model: Anthropic model to use.
         api_key: API key (defaults to CLAUDE_API_KEY env var).
         target_articles: Target number of diverse articles to find.
+        annotator: Optional Claude-based source annotator.
+        ranker: Optional MMR diversity ranker.
+        ranker_top_k: Number of sources to return from ranker.
         run_logger: Optional RunLogger for intermediate result logging.
         price_cache: Optional PriceCache for cost estimation.
     """
@@ -49,6 +56,10 @@ the same underlying facts but from genuinely different angles.\
         model: str = "claude-haiku-4-5-20251001",
         api_key: str | None = None,
         target_articles: int = 10,
+        *,
+        annotator: ClaudeAnnotator | None = None,
+        ranker: MMRRanker | None = None,
+        ranker_top_k: int = 10,
         run_logger: RunLogger | None = None,
         price_cache: PriceCache | None = None,
     ) -> None:
@@ -56,6 +67,9 @@ the same underlying facts but from genuinely different angles.\
         self._client = anthropic.AsyncAnthropic(api_key=resolved_key)
         self._model = model
         self._target = target_articles
+        self._annotator = annotator
+        self._ranker = ranker
+        self._ranker_top_k = ranker_top_k
         self._run_logger = run_logger
         self._price_cache = price_cache
 
@@ -176,6 +190,54 @@ the same underlying facts but from genuinely different angles.\
                 usage=usage,
                 duration_seconds=e2e_duration,
             )
-            self._run_logger.finish_run(final_articles, usage)
 
-        return (final_articles, usage)
+        total_usage = usage
+
+        # Annotate sources (optional)
+        if self._annotator and final_articles:
+            t0 = time.monotonic()
+            annotated_sources, annotation_usage = await self._annotator.annotate(
+                final_articles, event.description
+            )
+            annotation_duration = time.monotonic() - t0
+
+            if self._price_cache:
+                self._price_cache.stamp_usage(annotation_usage)
+            total_usage += annotation_usage
+
+            if self._run_logger:
+                self._run_logger.log_stage(
+                    stage="annotation",
+                    component="ClaudeAnnotator",
+                    input_data={"source_count": len(final_articles)},
+                    output_data=annotated_sources,
+                    usage=annotation_usage,
+                    duration_seconds=annotation_duration,
+                )
+
+            # Rank by diversity (optional, requires annotation)
+            if self._ranker:
+                t0 = time.monotonic()
+                ranked = self._ranker.rank(annotated_sources, self._ranker_top_k)
+                rank_duration = time.monotonic() - t0
+
+                if self._run_logger:
+                    self._run_logger.log_stage(
+                        stage="ranking",
+                        component="MMRRanker",
+                        input_data={"source_count": len(annotated_sources)},
+                        output_data=ranked,
+                        usage=None,
+                        duration_seconds=rank_duration,
+                    )
+
+                final_sources: list[Source] = cast(list[Source], ranked)
+            else:
+                final_sources = cast(list[Source], annotated_sources)
+        else:
+            final_sources = final_articles
+
+        if self._run_logger:
+            self._run_logger.finish_run(final_sources, total_usage)
+
+        return (final_sources, total_usage)
