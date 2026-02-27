@@ -1,0 +1,23 @@
+pipeline:
+  type: composable
+
+  generators:
+    - type: mistral
+      model: mistral-small-latest
+
+  aggregator:
+    type: pca
+    n_components: 5
+    sentence_transformer_model: all-MiniLM-L6-v2
+
+  searchers:
+    - type: exa
+      lang: en
+
+  ranker:
+    type: mmr
+    lambda_param: 0.5
+    top_k: 10
+
+  num_queries_per_generator: 1
+  max_results_per_searcher: 10

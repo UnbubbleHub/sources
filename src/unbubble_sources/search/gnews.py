@@ -51,17 +51,23 @@ class GNewsSearcher:
             Tuple of (deduplicated articles, usage).
         """
         async with httpx.AsyncClient(timeout=30.0) as client:
-            tasks = [
-                self._search_single(
+            results: list[list[Article] | BaseException] = []
+            for q in queries:
+                print("QUERIES", q)
+                try:
+                    res = await self._search_single(
                     client,
-                    query,
+                    q,
                     from_date=from_date,
                     to_date=to_date,
                     max_results=max_results_per_query,
                 )
-                for query in queries
-            ]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+                    results.append(res)
+                except BaseException as e:
+                    results.append(e)
+
+                # ~1 request/second for free-tier safety
+                await asyncio.sleep(1.1)
 
         # Flatten and deduplicate by URL
         seen_urls: set[str] = set()
