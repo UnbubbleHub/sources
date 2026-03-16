@@ -1,0 +1,36 @@
+# Unbubble Configuration — with Grok x_search
+# Uses xAI's Grok API to search X posts instead of the Twitter API v2.
+# Requires: XAI_API_KEY env var (no Twitter bearer token needed).
+
+pipeline:
+  type: composable
+
+  generators:
+    - type: claude
+      model: claude-haiku-4-5-20251001
+
+  aggregator:
+    type: pca
+    n_components: 5
+    sentence_transformer_model: all-MiniLM-L6-v2
+
+  searchers:
+    - type: claude
+      model: claude-haiku-4-5-20251001
+      max_searches_per_query: 1
+    - type: grok
+      model: grok-4-1-fast
+      max_results_per_query: 10
+
+  annotator:
+    type: claude
+    model: claude-haiku-4-5-20251001
+    batch_size: 20
+
+  ranker:
+    type: mmr
+    lambda_param: 0.5
+    top_k: 10
+
+  num_queries_per_generator: 5
+  max_results_per_searcher: 10

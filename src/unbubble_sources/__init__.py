@@ -40,6 +40,7 @@ from unbubble_sources.search.base import ArticleSearcher, SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.exa import ExaSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
+from unbubble_sources.search.grok import GrokSearcher
 from unbubble_sources.search.x import XSearcher
 from unbubble_sources.url import extract_domain
 
@@ -83,6 +84,7 @@ __all__ = [
     "ClaudeSearcher",
     "ExaSearcher",
     "GNewsSearcher",
+    "GrokSearcher",
     "XSearcher",
     # Aggregators
     "NoOpAggregator",

@@ -74,6 +74,7 @@ async def test_search_returns_articles(
 
     assert len(articles) == 2
     assert all(isinstance(a, Article) for a in articles)
+    assert isinstance(articles[0], Article)
     assert articles[0].title == "Article 1"
     assert articles[0].source == "Example News"
     assert articles[0].query == queries[0]
