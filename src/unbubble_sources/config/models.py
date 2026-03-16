@@ -75,8 +75,18 @@ class ExaSearcherConfig(BaseModel):
     model_config = {"frozen": True}
 
 
+class GrokSearcherConfig(BaseModel):
+    """Configuration for GrokSearcher (xAI Grok x_search tool)."""
+
+    type: Literal["grok"] = "grok"
+    model: str = "grok-4-1-fast"
+    max_results_per_query: int = 10
+
+    model_config = {"frozen": True}
+
+
 SearcherConfig = Annotated[
-    ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig | ExaSearcherConfig,
+    ClaudeSearcherConfig | GNewsSearcherConfig | XSearcherConfig | ExaSearcherConfig | GrokSearcherConfig,
     Field(discriminator="type"),
 ]
 

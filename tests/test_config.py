@@ -148,6 +148,7 @@ pipeline:
 
     assert isinstance(config.pipeline, ComposablePipelineConfig)
     assert len(config.pipeline.generators) == 1
+    assert isinstance(config.pipeline.generators[0], ClaudeQueryGeneratorConfig)
     assert config.pipeline.generators[0].model == "claude-sonnet-4-20250514"
     assert isinstance(config.pipeline.aggregator, PCAAggregatorConfig)
     assert config.pipeline.aggregator.n_components == 3

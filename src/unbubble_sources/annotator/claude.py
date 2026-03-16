@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+from collections.abc import Sequence
 
 import anthropic
 
@@ -160,7 +161,7 @@ class ClaudeAnnotator:
 
     async def annotate(
         self,
-        sources: list[Source],
+        sources: Sequence[Source],
         event_description: str,
     ) -> tuple[list[AnnotatedSource], Usage]:
         """Annotate sources with perspective metadata.
@@ -178,7 +179,7 @@ class ClaudeAnnotator:
         # Split into batches
         batches: list[list[Source]] = []
         for i in range(0, len(sources), self._batch_size):
-            batches.append(sources[i : i + self._batch_size])
+            batches.append(list(sources[i : i + self._batch_size]))
 
         # Process batches concurrently
         tasks = [self._annotate_batch(batch, event_description) for batch in batches]
