@@ -33,12 +33,8 @@ dependencies = [
     "anthropic>=0.40",
     "exa-py>=1.0",
     "httpx>=0.27",
-    "numpy>=1.24,<2.0", # torch 2.2.x requires numpy 1.x
     "pydantic>=2.0",
     "pyyaml>=6.0",
-    "sentence-transformers>=2.2,<4.0", # 4.0+ requires torch>=2.4
-    "torch>=2.0,<2.3", # 2.3+ dropped x86_64 macOS wheels
-    "transformers>=4.40,<5.0", # 5.0+ requires torch>=2.4
 ]
 
 [project.urls]
@@ -47,6 +43,14 @@ Repository = "https://github.com/UnbubbleHub/sources"
 "Bug Tracker" = "https://github.com/UnbubbleHub/sources/issues"
 
 [project.optional-dependencies]
+ml = [
+    # Required for PCAAggregator (PCA-based query diversity selection).
+    # Version pins are conservative due to wheel availability on macOS x86_64.
+    "numpy>=1.24,<2.0",           # torch 2.2.x requires numpy 1.x
+    "sentence-transformers>=2.2,<4.0",  # 4.0+ requires torch>=2.4
+    "torch>=2.0,<2.3",            # 2.3+ dropped x86_64 macOS wheels
+    "transformers>=4.40,<5.0",    # 5.0+ requires torch>=2.4
+]
 dev = [
     "mypy>=1.13",
     "pytest>=8.0",

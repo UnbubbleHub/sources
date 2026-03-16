@@ -1,7 +1,11 @@
 """Unbubble Sources: Open tools for research and applications against social polarization."""
 
 from unbubble_sources.aggregator.base import QueryAggregator
-from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.aggregator.noop import NoOpAggregator
+
+# PCAAggregator requires the 'ml' extras and is NOT exported here to keep
+# the base install importable without torch / sentence-transformers.
+# Use it via:  from unbubble_sources.aggregator.pca import PCAAggregator
 from unbubble_sources.annotator.base import SourceAnnotator
 from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config import UnbubbleConfig, create_from_config, load_config
@@ -88,7 +92,7 @@ __all__ = [
     "XSearcher",
     # Aggregators
     "NoOpAggregator",
-    "PCAAggregator",
+    # PCAAggregator requires 'ml' extras — import from unbubble_sources.aggregator.pca
     # Annotators
     "ClaudeAnnotator",
     # Rankers

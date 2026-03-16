@@ -1,5 +1,12 @@
-"""PCA-based query aggregation."""
+"""PCA-based query aggregation.
 
+Requires the ``ml`` extras::
+
+    pip install "unbubble-sources[ml]"
+"""
+
+# This import triggers the helpful ImportError from embeddings.py if ML
+# extras are not installed, so no separate guard is needed here.
 import numpy as np
 
 from unbubble_sources.aggregator.embeddings import SentenceTransformerEmbedder
@@ -84,16 +91,3 @@ class PCAAggregator:
         return [queries[i] for i in selected_indices]
 
 
-class NoOpAggregator:
-    """Pass-through aggregator that returns queries unchanged."""
-
-    async def aggregate(self, queries: list[SearchQuery]) -> list[SearchQuery]:
-        """Return queries unchanged.
-
-        Args:
-            queries: Input queries.
-
-        Returns:
-            Same queries, unchanged.
-        """
-        return queries
