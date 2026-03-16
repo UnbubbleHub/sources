@@ -2,7 +2,8 @@
 
 from pathlib import Path
 
-from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.aggregator.noop import NoOpAggregator
+from unbubble_sources.aggregator.pca import PCAAggregator
 from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config.models import (
     ClaudeAnnotatorConfig,

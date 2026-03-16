@@ -7,10 +7,13 @@ Unbubble Sources takes a news event as input and returns sources (news articles,
 ## Quick Start
 
 ```bash
-# Install
+# Install (base — no ML dependencies)
 git clone https://github.com/your-org/unbubble.git
 cd unbubble/sources
 uv sync
+
+# Install with ML extras (required for PCAAggregator / type: pca)
+uv sync --extra ml
 
 # Run
 export CLAUDE_API_KEY=your-anthropic-key
@@ -139,7 +142,7 @@ pipeline:
     - type: claude       # uses Claude API to expand queries
     # - type: noop       # pass-through (no API call, free)
   aggregator:
-    type: pca
+    type: pca          # requires [ml] extras: uv sync --extra ml
     n_components: 5
   searchers:
     - type: claude

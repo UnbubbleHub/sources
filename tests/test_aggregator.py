@@ -5,7 +5,8 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.aggregator.noop import NoOpAggregator
+from unbubble_sources.aggregator.pca import PCAAggregator
 from unbubble_sources.data import SearchQuery
 
 # -- NoOpAggregator tests --
