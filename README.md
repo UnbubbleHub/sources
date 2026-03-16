@@ -244,6 +244,72 @@ logging:
 - Source credibility scoring (NewsGuard, Ad Fontes integration)
 - Claim-level fact-checking integration
 
+## Publishing to PyPI
+
+The package is configured for [PyPI](https://pypi.org/) distribution using [uv](https://github.com/astral-sh/uv) + [build](https://build.pypa.io/) + [twine](https://twine.readthedocs.io/).
+
+### Prerequisites
+
+```bash
+uv sync --all-extras   # installs build + twine from the dev extras
+```
+
+You'll also need a PyPI account with 2FA enabled and an API token scoped to this project.
+
+### Bump the version
+
+Edit the `version` field in `pyproject.toml`:
+
+```toml
+[project]
+version = "0.2.0"   # ← increment
+```
+
+### Build
+
+```bash
+python -m build
+# produces:
+#   dist/unbubble_sources-0.2.0.tar.gz     (sdist)
+#   dist/unbubble_sources-0.2.0-py3-none-any.whl  (wheel)
+```
+
+### Validate before uploading
+
+```bash
+twine check dist/*
+```
+
+Fix any warnings before proceeding. PyPI rejects uploads with invalid metadata.
+
+### Upload to TestPyPI first
+
+```bash
+twine upload --repository testpypi dist/*
+# username: __token__
+# password: <your TestPyPI API token>
+```
+
+Verify the package installs correctly from TestPyPI:
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ unbubble-sources
+```
+
+### Upload to PyPI
+
+```bash
+twine upload dist/*
+# username: __token__
+# password: <your PyPI API token>
+```
+
+> PyPI does not allow re-uploading the same version. Always bump the version before building.
+
+### Notes on the build backend
+
+The project uses `uv_build` as its build backend (declared in `[build-system]`). This is fully compatible with the standard `python -m build` workflow — no changes needed. The `src/` layout ensures the package is importable only after installation, catching packaging bugs early.
+
 ## Contributing
 
 1. Fork, branch, make changes, add tests
