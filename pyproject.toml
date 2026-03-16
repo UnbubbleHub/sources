@@ -29,12 +29,6 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
     "Typing :: Typed",
 ]
-
-[project.urls]
-Homepage = "https://github.com/UnbubbleHub/sources"
-Repository = "https://github.com/UnbubbleHub/sources"
-"Bug Tracker" = "https://github.com/UnbubbleHub/sources/issues"
-
 dependencies = [
     "anthropic>=0.40",
     "exa-py>=1.0",
@@ -46,6 +40,11 @@ dependencies = [
     "torch>=2.0,<2.3", # 2.3+ dropped x86_64 macOS wheels
     "transformers>=4.40,<5.0", # 5.0+ requires torch>=2.4
 ]
+
+[project.urls]
+Homepage = "https://github.com/UnbubbleHub/sources"
+Repository = "https://github.com/UnbubbleHub/sources"
+"Bug Tracker" = "https://github.com/UnbubbleHub/sources/issues"
 
 [project.optional-dependencies]
 dev = [
