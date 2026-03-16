@@ -251,7 +251,7 @@ class GrokSearcher:
                 Tweet(
                     url=url,
                     source=extract_domain(url) or "x.com",
-                    published_at=item.get("published_at") or None,  # type: ignore[arg-type]
+                    published_at=item.get("published_at") or None,
                     query=query,
                     tweet_id=_extract_tweet_id(url),
                     author_handle=author_handle,
