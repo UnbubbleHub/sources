@@ -126,15 +126,28 @@ class GrokSearcher:
         prompt = (
             f"Search X for posts about: {query.text}{date_context}\n\n"
             f"Find up to {max_results} relevant, diverse posts. "
-            "Return ONLY a JSON array (no other text) where each element has:\n"
-            '- "url": full X post URL (https://x.com/<handle>/status/<id>)\n'
-            '- "author_handle": username without @\n'
-            '- "author_name": display name\n'
-            '- "text": full post text\n'
-            '- "published_at": ISO timestamp if available, else null\n'
-            '- "like_count": integer\n'
-            '- "retweet_count": integer\n'
-            '- "reply_count": integer\n'
+            "Return ONLY a valid JSON array — no prose, no markdown fences, nothing else.\n\n"
+            "Each element must follow this exact structure:\n"
+            "[\n"
+            "  {\n"
+            '    "url": "https://x.com/janedoe/status/1234567890123456789",\n'
+            '    "author_handle": "janedoe",\n'
+            '    "author_name": "Jane Doe",\n'
+            '    "text": "Full text of the post goes here, including any hashtags or mentions.",\n'
+            '    "published_at": "2026-01-15T10:30:00Z",\n'
+            '    "like_count": 142,\n'
+            '    "retweet_count": 37,\n'
+            '    "reply_count": 12\n'
+            "  },\n"
+            "  ...\n"
+            "]\n\n"
+            "Field rules:\n"
+            '- "url": full post URL in the form https://x.com/<handle>/status/<id>\n'
+            '- "author_handle": username without the leading @\n'
+            '- "author_name": display name as shown on the profile\n'
+            '- "text": complete post text\n'
+            '- "published_at": ISO-8601 timestamp if known, otherwise null\n'
+            '- "like_count", "retweet_count", "reply_count": integers (0 if unknown)\n'
         )
 
         payload = {
