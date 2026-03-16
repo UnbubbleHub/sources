@@ -7,7 +7,6 @@ import pytest
 from unbubble_sources.data import SearchQuery, Tweet
 from unbubble_sources.search.grok import GrokSearcher, _extract_tweet_id
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
