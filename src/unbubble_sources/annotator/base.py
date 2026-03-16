@@ -1,5 +1,6 @@
 """Protocol for source annotation."""
 
+from collections.abc import Sequence
 from typing import Protocol
 
 from unbubble_sources.data import AnnotatedSource, Source, Usage
@@ -10,7 +11,7 @@ class SourceAnnotator(Protocol):
 
     async def annotate(
         self,
-        sources: list[Source],
+        sources: Sequence[Source],
         event_description: str,
     ) -> tuple[list[AnnotatedSource], Usage]:
         """Annotate sources with perspective metadata.

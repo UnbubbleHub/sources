@@ -4,6 +4,31 @@ version = "0.1.0"
 description = "Open tools for research and applications against social polarization"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Unbubble Contributors" },
+]
+keywords = [
+    "news",
+    "diversity",
+    "media bias",
+    "information bubbles",
+    "filter bubbles",
+    "search",
+    "NLP",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Typing :: Typed",
+]
 dependencies = [
     "anthropic>=0.40",
     "exa-py>=1.0",
@@ -11,6 +36,11 @@ dependencies = [
     "pydantic>=2.0",
     "pyyaml>=6.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/UnbubbleHub/sources"
+Repository = "https://github.com/UnbubbleHub/sources"
+"Bug Tracker" = "https://github.com/UnbubbleHub/sources/issues"
 
 [project.optional-dependencies]
 ml = [
