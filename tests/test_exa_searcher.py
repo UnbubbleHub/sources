@@ -63,7 +63,7 @@ async def test_search_returns_articles(
 ) -> None:
     """Should return list of Article objects."""
     mock_response = _make_mock_response()
-    exa_searcher._client.search = AsyncMock(return_value=mock_response)
+    exa_searcher._client.search = AsyncMock(return_value=mock_response)  # type: ignore[method-assign]
 
     queries = [SearchQuery(text="test query", intent="test intent")]
     sources, usage = await exa_searcher.search(queries)
@@ -83,7 +83,7 @@ async def test_search_returns_usage(
 ) -> None:
     """Should return usage with exa_requests count."""
     mock_response = _make_mock_response()
-    exa_searcher._client.search = AsyncMock(return_value=mock_response)
+    exa_searcher._client.search = AsyncMock(return_value=mock_response)  # type: ignore[method-assign]
 
     queries = [
         SearchQuery(text="query 1", intent="intent 1"),
@@ -101,7 +101,7 @@ async def test_search_deduplicates_by_url(
 ) -> None:
     """Should deduplicate articles with same URL across queries."""
     mock_response = _make_mock_response()
-    exa_searcher._client.search = AsyncMock(return_value=mock_response)
+    exa_searcher._client.search = AsyncMock(return_value=mock_response)  # type: ignore[method-assign]
 
     queries = [
         SearchQuery(text="query 1", intent="intent 1"),
@@ -118,7 +118,7 @@ async def test_search_passes_date_params(
 ) -> None:
     """Should pass start/end published date to Exa API."""
     mock_response = _make_mock_response()
-    exa_searcher._client.search = AsyncMock(return_value=mock_response)
+    exa_searcher._client.search = AsyncMock(return_value=mock_response)  # type: ignore[method-assign]
 
     queries = [SearchQuery(text="test", intent="test")]
     await exa_searcher.search(
@@ -149,7 +149,7 @@ async def test_search_handles_failed_queries(
             raise RuntimeError("API error")
         return mock_response
 
-    exa_searcher._client.search = mock_search  # type: ignore[assignment]
+    exa_searcher._client.search = mock_search  # type: ignore[method-assign]
 
     queries = [
         SearchQuery(text="failing query", intent="will fail"),
@@ -168,7 +168,7 @@ async def test_search_handles_missing_title(
     result = _make_mock_result()
     result.title = None
     mock_response = _make_mock_response(results=[result])
-    exa_searcher._client.search = AsyncMock(return_value=mock_response)
+    exa_searcher._client.search = AsyncMock(return_value=mock_response)  # type: ignore[method-assign]
 
     queries = [SearchQuery(text="test", intent="test")]
     sources, usage = await exa_searcher.search(queries)

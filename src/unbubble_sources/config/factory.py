@@ -2,7 +2,8 @@
 
 from pathlib import Path
 
-from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.aggregator.noop import NoOpAggregator
+from unbubble_sources.aggregator.pca import PCAAggregator
 from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config.models import (
     ClaudeAnnotatorConfig,
@@ -13,6 +14,7 @@ from unbubble_sources.config.models import (
     ExaSearcherConfig,
     GNewsSearcherConfig,
     MistralQueryGeneratorConfig,
+    GrokSearcherConfig,
     MMRRankerConfig,
     NoOpAggregatorConfig,
     NoOpQueryGeneratorConfig,
@@ -36,6 +38,7 @@ from unbubble_sources.search.base import SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.exa import ExaSearcher
 from unbubble_sources.search.gnews import GNewsSearcher
+from unbubble_sources.search.grok import GrokSearcher
 from unbubble_sources.search.x import XSearcher
 
 
@@ -75,6 +78,11 @@ def create_searcher(
         return XSearcher(max_results_per_query=config.max_results_per_query)
     if isinstance(config, ExaSearcherConfig):
         return ExaSearcher(max_results_per_query=config.max_results_per_query)
+    if isinstance(config, GrokSearcherConfig):
+        return GrokSearcher(
+            model=config.model,
+            max_results_per_query=config.max_results_per_query,
+        )
     # Type checker ensures this is exhaustive
     msg = f"Unknown searcher config type: {type(config)}"
     raise ValueError(msg)

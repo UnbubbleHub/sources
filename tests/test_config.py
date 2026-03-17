@@ -5,7 +5,8 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from unbubble_sources.aggregator.pca import NoOpAggregator, PCAAggregator
+from unbubble_sources.aggregator.noop import NoOpAggregator
+from unbubble_sources.aggregator.pca import PCAAggregator
 from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config import (
     ClaudeAnnotatorConfig,
@@ -148,6 +149,7 @@ pipeline:
 
     assert isinstance(config.pipeline, ComposablePipelineConfig)
     assert len(config.pipeline.generators) == 1
+    assert isinstance(config.pipeline.generators[0], ClaudeQueryGeneratorConfig)
     assert config.pipeline.generators[0].model == "claude-sonnet-4-20250514"
     assert isinstance(config.pipeline.aggregator, PCAAggregatorConfig)
     assert config.pipeline.aggregator.n_components == 3

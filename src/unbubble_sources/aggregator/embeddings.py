@@ -1,10 +1,22 @@
-"""Text embedding utilities for query aggregation."""
+"""Text embedding utilities for query aggregation.
+
+Requires the ``ml`` extras::
+
+    pip install "unbubble-sources[ml]"
+"""
 
 from typing import Protocol
 
-import numpy as np
-from numpy.typing import NDArray
-from sentence_transformers import SentenceTransformer
+try:
+    import numpy as np
+    from numpy.typing import NDArray
+    from sentence_transformers import SentenceTransformer
+except ImportError as _exc:
+    raise ImportError(
+        "PCAAggregator requires the 'ml' extras.\n"
+        "Install with:  pip install \"unbubble-sources[ml]\"\n"
+        "Or:            uv sync --extra ml"
+    ) from _exc
 
 
 class TextEmbedder(Protocol):

@@ -7,10 +7,13 @@ Unbubble Sources takes a news event as input and returns sources (news articles,
 ## Quick Start
 
 ```bash
-# Install
+# Install (base — no ML dependencies)
 git clone https://github.com/your-org/unbubble.git
 cd unbubble/sources
 uv sync
+
+# Install with ML extras (required for PCAAggregator / type: pca)
+uv sync --extra ml
 
 # Run
 export CLAUDE_API_KEY=your-anthropic-key
@@ -139,7 +142,7 @@ pipeline:
     - type: claude       # uses Claude API to expand queries
     # - type: noop       # pass-through (no API call, free)
   aggregator:
-    type: pca
+    type: pca          # requires [ml] extras: uv sync --extra ml
     n_components: 5
   searchers:
     - type: claude
@@ -237,6 +240,76 @@ logging:
 - Boydstun, A.E., Gross, J.H., Resnik, P., & Smith, N.A. (2014). "Tracking the Development of Media Frames within and across Policy Issues." Carnegie Mellon University. — *Policy Frames Codebook (15 generic frames)*
 - Baly, R., Da San Martino, G., Glass, J., & Nakov, P. (2020). "We Can Detect Your Bias: Predicting the Political Ideology of News Media." EMNLP 2020. — *MBFC-derived political lean scale*
 - Carbonell, J. & Goldstein, J. (1998). "The Use of MMR, Diversity-Based Reranking for Reordering Documents and Producing Summaries." SIGIR '98. — *Maximal Marginal Relevance algorithm*
+
+## Deploying to Vercel
+
+No library-level code changes are needed to use Unbubble Sources inside a [Vercel Python serverless function](https://vercel.com/docs/functions/serverless-functions/runtimes/python). Install the package as a regular dependency and call the pipeline from your handler.
+
+### Bundle size constraint
+
+Vercel Python functions have an uncompressed bundle size limit of 500 MB. The default composable pipeline uses `PCAAggregator`, which depends on `sentence-transformers`, `torch`, and `transformers` — together these exceed the limit and will cause deployment to fail.
+
+**Use a Vercel-compatible config instead** — either `claude_e2e.yaml` (single Claude call, no ML deps) or a composable pipeline with `aggregator: {type: noop}`:
+
+```yaml
+# vercel-compatible composable config
+pipeline:
+  type: composable
+  generators:
+    - type: claude
+      model: claude-haiku-4-5-20251001
+  aggregator:
+    type: noop          # ← no torch / sentence-transformers
+  searchers:
+    - type: claude
+      model: claude-haiku-4-5-20251001
+  annotator:
+    type: claude
+    model: claude-haiku-4-5-20251001
+  ranker:
+    type: mmr
+    lambda_param: 0.5
+    top_k: 10
+```
+
+### Example Vercel handler
+
+```python
+# api/search.py
+import asyncio, json
+from http.server import BaseHTTPRequestHandler
+
+from unbubble_sources import load_config, create_from_config, NewsEvent
+
+
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self) -> None:
+        from urllib.parse import urlparse, parse_qs
+        query = parse_qs(urlparse(self.path).query).get("q", [""])[0]
+
+        config = load_config("configs/claude_e2e.yaml")
+        pipeline, _, _ = create_from_config(config)
+        sources, usage = asyncio.run(pipeline.run(NewsEvent(description=query)))
+
+        body = json.dumps(
+            [{"url": s.source.url if hasattr(s, "source") else s.url} for s in sources]
+        ).encode()
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(body)
+```
+
+### requirements.txt for Vercel
+
+```
+unbubble-sources>=0.1.0
+```
+
+Vercel picks up `requirements.txt` (or `pyproject.toml` with `[project].dependencies`) automatically. Do **not** add `torch`, `sentence-transformers`, or `transformers` — these are declared as optional-at-runtime via the package's own dependency spec but are only needed when using `PCAAggregator`.
+
+> If you need PCA-based query aggregation inside a Vercel function, consider running the aggregation step as a separate service (e.g., a larger compute endpoint), or use a streaming approach where queries are generated and searched without aggregation.
 
 ## Roadmap
 
