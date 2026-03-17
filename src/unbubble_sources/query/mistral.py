@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from mistralai import Mistral
 from mistralai.models import SystemMessage, UserMessage  # typed messages
 
 from unbubble_sources.data import APICallUsage, NewsEvent, SearchQuery, Usage
-
 
 DEFAULT_SYSTEM_PROMPT = """\
 You are a research assistant that generates diverse search queries to find \
@@ -43,7 +43,7 @@ def _chunks_to_text(chunks: Iterable[Any]) -> str:
 
 
 def _content_to_text(content: Any) -> str:
-    # Mistral chat message content can be a string or a list of chunks. [web:116]
+    # Mistral chat message content can be a string or a list of chunks.
     if isinstance(content, str):
         return content
     if isinstance(content, list):
@@ -51,20 +51,17 @@ def _content_to_text(content: Any) -> str:
     return ""
 
 
-def _strip_markdown_fences(s: str) -> str:
-    s = s.strip()
-    if s.startswith("```"):
-        # Drop the opening fence line (``` or ```json)
-        parts = s.split("\n", 1)
-        if len(parts) == 2:
-            s = parts[1]
-        # Drop the closing fence
-        s = s.rsplit("```", 1)[0]
-    return s.strip()
-
-
 class MistralQueryGenerator:
-    """Generate search queries using Mistral chat completions. [web:116]"""
+    """Generate search queries using Mistral API.
+    
+    Args:
+        model: Mistral model ID to use.
+        api_key: API key (defaults to MISTRAL_API_KEY env var).
+        system_prompt: Custom system prompt template. Must contain a
+            ``{num_queries}`` placeholder. If *None*, the built-in
+            default is used. The prompt must instruct the model to return
+            a JSON array of objects with ``"text"`` and ``"intent"`` keys.
+    """
 
     def __init__(
         self,
@@ -94,22 +91,16 @@ class MistralQueryGenerator:
         ]
 
         async with Mistral(api_key=self._api_key) as client:
-            res = await client.chat.complete_async(
+            response = await client.chat.complete_async(
                 model=self._model,
                 messages=messages,
                 stream=False,
             )
-            if res is None:
+            if response is None:
                 raise RuntimeError("Mistral returned no response")
-
-        raw = _strip_markdown_fences(_content_to_text(res.choices[0].message.content))
-        items = json.loads(raw)
-
-        queries = [SearchQuery(text=i["text"], intent=i["intent"]) for i in items]
-
-        # Usage can be missing depending on settings; default to 0. [web:308]
-        prompt_tokens = int(getattr(res.usage, "prompt_tokens", 0) or 0)
-        completion_tokens = int(getattr(res.usage, "completion_tokens", 0) or 0)
+            
+        prompt_tokens = int(getattr(response.usage, "prompt_tokens", 0) or 0)
+        completion_tokens = int(getattr(response.usage, "completion_tokens", 0) or 0)
 
         usage = Usage(
             api_calls=[
@@ -123,4 +114,12 @@ class MistralQueryGenerator:
             ]
         )
 
-        return queries, usage
+        raw: str = _content_to_text(response.choices[0].message.content)
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[1].rsplit("```", 1)[0]
+            
+        items = json.loads(raw)
+        queries = [SearchQuery(text=item["text"], intent=item["intent"]) for item in items]
+
+        return (queries, usage)

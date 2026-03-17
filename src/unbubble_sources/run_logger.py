@@ -69,7 +69,7 @@ def _serialize(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {k: _serialize(v) for k, v in obj.items()}
     if isinstance(obj, Path):
-        return obj.as_posix()
+        return str(obj)
     return obj
 
 

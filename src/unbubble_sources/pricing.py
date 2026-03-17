@@ -43,7 +43,7 @@ _FALLBACK_PRICES: dict[str, ModelPricing] = {
     "claude-opus-4-5": ModelPricing(5.0, 25.0, 6.25, 0.50),
     "claude-opus-4-1": ModelPricing(15.0, 75.0, 18.75, 1.50),
     "claude-opus-4": ModelPricing(15.0, 75.0, 18.75, 1.50),
-    "mistral-small-latest": ModelPricing(15.0, 75.0, 18.75, 1.50), # TO CHANGE
+    "mistral-small-latest": ModelPricing(0.15, 0.6, 0.0, 0.0), # TO CHANGE
 }
 
 

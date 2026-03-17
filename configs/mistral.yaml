@@ -19,5 +19,5 @@ pipeline:
     lambda_param: 0.5
     top_k: 10
 
-  num_queries_per_generator: 1
+  num_queries_per_generator: 5
   max_results_per_searcher: 10

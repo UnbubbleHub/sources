@@ -8,11 +8,11 @@ from unbubble_sources.config.models import (
     ClaudeAnnotatorConfig,
     ClaudeE2EPipelineConfig,
     ClaudeQueryGeneratorConfig,
-    MistralQueryGeneratorConfig,
     ClaudeSearcherConfig,
     ComposablePipelineConfig,
     ExaSearcherConfig,
     GNewsSearcherConfig,
+    MistralQueryGeneratorConfig,
     MMRRankerConfig,
     NoOpAggregatorConfig,
     NoOpQueryGeneratorConfig,
@@ -28,8 +28,8 @@ from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
-from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.query.mistral import MistralQueryGenerator
+from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import SourceSearcher
