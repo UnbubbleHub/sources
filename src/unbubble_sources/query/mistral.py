@@ -53,7 +53,7 @@ def _content_to_text(content: Any) -> str:
 
 class MistralQueryGenerator:
     """Generate search queries using Mistral API.
-    
+
     Args:
         model: Mistral model ID to use.
         api_key: API key (defaults to MISTRAL_API_KEY env var).
@@ -98,7 +98,7 @@ class MistralQueryGenerator:
             )
             if response is None:
                 raise RuntimeError("Mistral returned no response")
-            
+
         prompt_tokens = int(getattr(response.usage, "prompt_tokens", 0) or 0)
         completion_tokens = int(getattr(response.usage, "completion_tokens", 0) or 0)
 
@@ -118,7 +118,7 @@ class MistralQueryGenerator:
         # Strip markdown code fences if present
         if raw.startswith("```"):
             raw = raw.split("\n", 1)[1].rsplit("```", 1)[0]
-            
+
         items = json.loads(raw)
         queries = [SearchQuery(text=item["text"], intent=item["intent"]) for item in items]
 
