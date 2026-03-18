@@ -197,7 +197,8 @@ def test_create_generator_claude() -> None:
     assert isinstance(gen, ClaudeQueryGenerator)
 
 
-def test_create_generator_mistral() -> None:
+def test_create_generator_mistral(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MISTRAL_API_KEY", "test-key")
     config = MistralQueryGeneratorConfig(model="mistral-small-latest")
     gen = create_generator(config)
     assert isinstance(gen, MistralQueryGenerator)
