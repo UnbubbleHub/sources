@@ -1748,7 +1748,6 @@ dependencies = [
     { name = "exa-py" },
     { name = "httpx" },
     { name = "mistralai" },
-    { name = "numpy" },
     { name = "pydantic" },
     { name = "pyyaml" },
 ]
@@ -1775,7 +1774,6 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.27" },
     { name = "mistralai", specifier = ">=1.12.4" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13" },
-    { name = "numpy", specifier = ">=1.24,<2.0" },
     { name = "numpy", marker = "extra == 'ml'", specifier = ">=1.24,<2.0" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },

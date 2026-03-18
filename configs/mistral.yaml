@@ -2,9 +2,13 @@ pipeline:
   type: composable
 
   generators:
+    # Requires MISTRAL_API_KEY to be set in the environment (or configure an explicit api_key)
     - type: mistral
       model: mistral-small-latest
 
+  # NOTE: `type: pca` requires the `ml` extras. Install with one of:
+  #   uv sync --extra ml
+  #   pip install "unbubble-sources[ml]"
   aggregator:
     type: pca
     n_components: 5

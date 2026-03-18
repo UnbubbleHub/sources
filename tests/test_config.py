@@ -16,6 +16,7 @@ from unbubble_sources.config import (
     ComposablePipelineConfig,
     ExaSearcherConfig,
     GNewsSearcherConfig,
+    MistralQueryGeneratorConfig,
     MMRRankerConfig,
     NoOpAggregatorConfig,
     NoOpQueryGeneratorConfig,
@@ -37,6 +38,7 @@ from unbubble_sources.config.factory import (
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.query.mistral import MistralQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.search.claude import ClaudeSearcher
@@ -195,6 +197,12 @@ def test_create_generator_claude() -> None:
     assert isinstance(gen, ClaudeQueryGenerator)
 
 
+def test_create_generator_mistral() -> None:
+    config = MistralQueryGeneratorConfig(model="mistral-small-latest")
+    gen = create_generator(config)
+    assert isinstance(gen, MistralQueryGenerator)
+
+
 def test_create_generator_noop() -> None:
     config = NoOpQueryGeneratorConfig()
     gen = create_generator(config)
@@ -283,6 +291,12 @@ def test_claude_annotator_config_defaults() -> None:
     assert config.batch_size == 20
 
 
+def test_mistral_generator_config_defaults() -> None:
+    config = MistralQueryGeneratorConfig()
+    assert config.type == "mistral"
+    assert config.model == "mistral-small-latest"
+
+
 def test_mmr_ranker_config_defaults() -> None:
     config = MMRRankerConfig()
     assert config.type == "mmr"
@@ -358,3 +372,23 @@ pipeline:
     assert config.pipeline.ranker is not None
     assert config.pipeline.ranker.lambda_param == 0.6
     assert config.pipeline.ranker.top_k == 8
+
+
+def test_load_config_composable_with_mistral_generator() -> None:
+    yaml_content = """
+pipeline:
+  type: composable
+  generators:
+    - type: mistral
+      model: mistral-small-latest
+"""
+    with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        f.write(yaml_content)
+        f.flush()
+        config = load_config(Path(f.name))
+
+    assert isinstance(config.pipeline, ComposablePipelineConfig)
+    assert len(config.pipeline.generators) == 1
+    assert isinstance(config.pipeline.generators[0], MistralQueryGeneratorConfig)
+    assert config.pipeline.generators[0].model == "mistral-small-latest"
+
