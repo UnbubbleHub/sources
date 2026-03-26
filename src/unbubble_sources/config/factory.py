@@ -1,9 +1,14 @@
 """Factory functions to create components from configuration."""
 
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from unbubble_sources.aggregator.pca import PCAAggregator
 
 from unbubble_sources.aggregator.noop import NoOpAggregator
-from unbubble_sources.aggregator.pca import PCAAggregator
 from unbubble_sources.annotator.claude import ClaudeAnnotator
 from unbubble_sources.config.models import (
     ClaudeAnnotatorConfig,
@@ -93,6 +98,8 @@ def create_aggregator(
 ) -> PCAAggregator | NoOpAggregator:
     """Create a query aggregator from config."""
     if isinstance(config, PCAAggregatorConfig):
+        from unbubble_sources.aggregator.pca import PCAAggregator
+
         return PCAAggregator(
             n_components=config.n_components,
             sentence_transformer_model=config.sentence_transformer_model,
