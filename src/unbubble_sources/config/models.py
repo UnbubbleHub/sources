@@ -26,9 +26,17 @@ class NoOpQueryGeneratorConfig(BaseModel):
 
     model_config = {"frozen": True}
 
+class MistralQueryGeneratorConfig(BaseModel):
+    """Configuration for MistralQueryGenerator."""
+
+    type: Literal["mistral"] = "mistral"
+    model: str = "mistral-small-latest"
+    system_prompt: str | None = None
+
+    model_config = {"frozen": True}
 
 QueryGeneratorConfig = Annotated[
-    ClaudeQueryGeneratorConfig | NoOpQueryGeneratorConfig,
+    ClaudeQueryGeneratorConfig | MistralQueryGeneratorConfig | NoOpQueryGeneratorConfig,
     Field(discriminator="type"),
 ]
 

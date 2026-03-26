@@ -17,6 +17,7 @@ uv sync --extra ml
 
 # Run
 export CLAUDE_API_KEY=your-anthropic-key
+export MISTRAL_API_KEY=your-mistral-key # for mistral usage
 uv run python main.py "Climate summit negotiations"
 
 # Use a different pipeline config
@@ -179,6 +180,7 @@ To disable annotation and ranking, simply omit the `annotator` and `ranker` keys
 | Variable | Required | Description | Where to get |
 |---|---|---|---|
 | `CLAUDE_API_KEY` | Yes | Anthropic API key | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+| `MISTRAL_API_KEY` | Only for Mistral | Mistral API key | [admin.mistral.ai](https://admin.mistral.ai/organization/api-keys) |
 | `GNEWS_API_KEY` | Only for GNews searcher | [gnews.io](https://gnews.io/) API key | [gnews.io/dashboard](https://gnews.io/dashboard) |
 | `TWITTER_BEARER_TOKEN` | Only for X searcher | X/Twitter API v2 bearer token | [developer.x.com](https://developer.x.com/en/portal/dashboard) |
 | `EXA_API_KEY` | Only for Exa searcher | [exa.ai](https://exa.ai/) API key | [dashboard.exa.ai](https://dashboard.exa.ai/api-keys) |

@@ -14,6 +14,7 @@ from unbubble_sources.config.models import (
     ExaSearcherConfig,
     GNewsSearcherConfig,
     GrokSearcherConfig,
+    MistralQueryGeneratorConfig,
     MMRRankerConfig,
     NoOpAggregatorConfig,
     NoOpQueryGeneratorConfig,
@@ -29,6 +30,7 @@ from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
+from unbubble_sources.query.mistral import MistralQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
@@ -47,6 +49,11 @@ def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
     """
     if isinstance(config, ClaudeQueryGeneratorConfig):
         return ClaudeQueryGenerator(
+            model=config.model,
+            system_prompt=config.system_prompt,
+        )
+    if isinstance(config, MistralQueryGeneratorConfig):
+        return MistralQueryGenerator(
             model=config.model,
             system_prompt=config.system_prompt,
         )
