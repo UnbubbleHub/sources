@@ -128,7 +128,7 @@ async def fetch_model_prices() -> dict[str, ModelPricing]:
     Falls back to ``_FALLBACK_PRICES`` on failure.
     """
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             response = await client.get(PRICING_URL)
             response.raise_for_status()
             parsed = _parse_pricing_table(response.text)
