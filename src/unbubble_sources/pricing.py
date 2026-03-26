@@ -15,7 +15,7 @@ from unbubble_sources.data.models import APICallUsage, Usage
 
 logger = logging.getLogger(__name__)
 
-PRICING_URL = "https://docs.anthropic.com/en/docs/about-claude/pricing"
+PRICING_URL = "https://platform.claude.com/docs/en/about-claude/pricing"
 WEB_SEARCH_PRICE_PER_SEARCH = 10.0 / 1000  # $10 per 1,000 searches
 GNEWS_REQUEST_PRICE = 0.0  # free tier
 X_API_REQUEST_PRICE = 0.0  # free tier (Basic access)
@@ -37,6 +37,7 @@ _FALLBACK_PRICES: dict[str, ModelPricing] = {
     "claude-haiku-4-5": ModelPricing(1.0, 5.0, 1.25, 0.10),
     "claude-haiku-3-5": ModelPricing(0.80, 4.0, 1.0, 0.08),
     "claude-haiku-3": ModelPricing(0.25, 1.25, 0.30, 0.03),
+    "claude-sonnet-4-6": ModelPricing(3.0, 15.0, 3.75, 0.30),
     "claude-sonnet-4-5": ModelPricing(3.0, 15.0, 3.75, 0.30),
     "claude-sonnet-4": ModelPricing(3.0, 15.0, 3.75, 0.30),
     "claude-opus-4-6": ModelPricing(5.0, 25.0, 6.25, 0.50),
