@@ -2,9 +2,6 @@
   "functions": {
     "api/run.py": {
       "maxDuration": 300
-    },
-    "app/api/generate/route.ts": {
-      "maxDuration": 300
     }
   }
 }
