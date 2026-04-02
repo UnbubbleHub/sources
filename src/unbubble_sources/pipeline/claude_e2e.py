@@ -13,6 +13,7 @@ from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery,
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
+from unbubble_sources.stream_logger import StreamLogger
 from unbubble_sources.url import extract_domain
 
 logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ the same underlying facts but from genuinely different angles.\
         annotator: ClaudeAnnotator | None = None,
         ranker: MMRRanker | None = None,
         ranker_top_k: int = 10,
-        run_logger: RunLogger | None = None,
+        run_logger: RunLogger | StreamLogger | None = None,
         price_cache: PriceCache | None = None,
     ) -> None:
         resolved_key = api_key or os.environ.get("CLAUDE_API_KEY")
