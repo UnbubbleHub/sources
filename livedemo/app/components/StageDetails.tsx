@@ -47,7 +47,7 @@ function UsagePills({
 }
 
 function QueryGenerationDetails({ stage }: { stage: DemoStage }) {
-  const queries = stage.output as Array<{ text: string; intent: string }>;
+  const queries = (stage.output ?? []) as Array<{ text: string; intent: string }>;
   return (
     <div className="space-y-2">
       <UsagePills
@@ -73,8 +73,8 @@ function QueryGenerationDetails({ stage }: { stage: DemoStage }) {
 }
 
 function AggregationDetails({ stage }: { stage: DemoStage }) {
-  const input = stage.input as Array<unknown>;
-  const output = stage.output as Array<unknown>;
+  const input = (stage.input ?? []) as Array<unknown>;
+  const output = (stage.output ?? []) as Array<unknown>;
   return (
     <div>
       <UsagePills duration={stage.duration_seconds} cost={stage.cost_usd} />
@@ -86,7 +86,7 @@ function AggregationDetails({ stage }: { stage: DemoStage }) {
 }
 
 function SearchDetails({ stage }: { stage: DemoStage }) {
-  const sources = stage.output as Array<{
+  const sources = (stage.output ?? []) as Array<{
     url: string;
     source: string;
     title: string;
@@ -156,8 +156,8 @@ function SearchDetails({ stage }: { stage: DemoStage }) {
 }
 
 function DeduplicationDetails({ stage }: { stage: DemoStage }) {
-  const input = stage.input as { source_count: number };
-  const output = stage.output as { source_count: number };
+  const input = (stage.input ?? { source_count: 0 }) as { source_count: number };
+  const output = (stage.output ?? { source_count: 0 }) as { source_count: number };
   const removed = input.source_count - output.source_count;
   return (
     <div>
@@ -186,7 +186,7 @@ const LEAN_COLORS: Record<string, string> = {
 };
 
 function AnnotationDetails({ stage }: { stage: DemoStage }) {
-  const items = stage.output as Array<{
+  const items = (stage.output ?? []) as Array<{
     source: { title: string; source: string };
     annotation: {
       political_lean: string;
@@ -259,7 +259,7 @@ function AnnotationDetails({ stage }: { stage: DemoStage }) {
 }
 
 function RankingDetails({ stage }: { stage: DemoStage }) {
-  const items = stage.output as Array<{
+  const items = (stage.output ?? []) as Array<{
     source: { title: string; source: string; url: string };
     annotation: { political_lean: string; stakeholder_type: string };
     relevance_score: number;

@@ -90,7 +90,7 @@ export function StageIndicator({
       </div>
       <div className={`pb-6 flex-1 min-w-0 ${isLast ? "" : ""}`}>
         {hasDetails ? (
-          <details open={status === "active"} className="group">
+          <details open className="group">
             <summary className="cursor-pointer list-none flex items-center gap-1.5 select-none">
               <ChevronIcon />
               <p className="text-sm font-medium text-foreground transition-colors duration-300">
