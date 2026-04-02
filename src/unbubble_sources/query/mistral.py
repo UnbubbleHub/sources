@@ -5,6 +5,9 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
+# TODO: `from mistralai import Mistral` fails on Vercel (uv resolves a version
+# where the class doesn't exist). Either pin mistralai to a known-good version
+# in pyproject.toml or update this code to match the current mistralai API.
 from mistralai import Mistral
 from mistralai.models import SystemMessage, UserMessage  # typed messages
 

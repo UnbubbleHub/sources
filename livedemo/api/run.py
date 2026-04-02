@@ -21,20 +21,8 @@ from unbubble_sources.stream_logger import StreamLogger
 
 
 def _find_config() -> str:
-    """Locate the livedemo config file relative to the repo root."""
-    # On Vercel the working directory is the project root (livedemo/).
-    # The config lives one level up at the repo root.
-    candidates = [
-        os.path.join(os.path.dirname(__file__), "..", "..", "configs", "livedemo.yaml"),
-        os.path.join(os.path.dirname(__file__), "..", "configs", "livedemo.yaml"),
-        "configs/livedemo.yaml",
-        "../configs/livedemo.yaml",
-    ]
-    for path in candidates:
-        resolved = os.path.abspath(path)
-        if os.path.exists(resolved):
-            return resolved
-    raise FileNotFoundError(f"livedemo.yaml not found, tried: {candidates}")
+    """Locate the livedemo config file next to this file."""
+    return os.path.join(os.path.dirname(__file__), "livedemo.yaml")
 
 
 class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowercase
