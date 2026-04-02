@@ -39,6 +39,16 @@ def _find_config() -> str:
 
 class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowercase
     def do_POST(self) -> None:  # noqa: N802
+        # Verify internal shared secret
+        expected = os.environ.get("INTERNAL_API_SECRET", "")
+        auth = self.headers.get("Authorization", "")
+        if not expected or auth != f"Bearer {expected}":
+            self.send_response(403)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
+            return
+
         content_length = int(self.headers.get("Content-Length", 0))
         body = json.loads(self.rfile.read(content_length))
 

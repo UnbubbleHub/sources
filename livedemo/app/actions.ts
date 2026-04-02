@@ -35,14 +35,26 @@ export async function generate(query: string, apiKey: string) {
     try {
       const res = await fetch(`${baseUrl}/api/run`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.INTERNAL_API_SECRET}`,
+        },
         body: JSON.stringify({ query, api_key: apiKey }),
       });
 
       if (!res.ok || !res.body) {
+        let body = "";
+        try { body = await res.text(); } catch {}
         await put(
           `runs/${id}/_error.json`,
-          JSON.stringify({ error: `Python function returned ${res.status}` }),
+          JSON.stringify({
+            error: `Python function returned ${res.status}`,
+            status: res.status,
+            statusText: res.statusText,
+            body,
+            url: res.url,
+            timestamp: new Date().toISOString(),
+          }),
           { access: "public", contentType: "application/json" },
         );
         return;
@@ -83,7 +95,11 @@ export async function generate(query: string, apiKey: string) {
     } catch (err) {
       await put(
         `runs/${id}/_error.json`,
-        JSON.stringify({ error: String(err) }),
+        JSON.stringify({
+          error: String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+          timestamp: new Date().toISOString(),
+        }),
         { access: "public", contentType: "application/json" },
       );
     }
