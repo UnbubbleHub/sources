@@ -42,11 +42,28 @@ from unbubble_sources.ranker.mmr import MMRRanker, perspective_distance
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.search.base import ArticleSearcher, SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
-from unbubble_sources.search.exa import ExaSearcher
-from unbubble_sources.search.gnews import GNewsSearcher
-from unbubble_sources.search.grok import GrokSearcher
-from unbubble_sources.search.x import XSearcher
 from unbubble_sources.url import extract_domain
+
+# Searchers/generators with external SDK deps are lazy-imported to avoid
+# ImportError when their SDK is not installed (e.g. on Vercel serverless).
+# Use: from unbubble_sources.search.exa import ExaSearcher
+# Or:  from unbubble_sources import ExaSearcher  (triggers lazy import below)
+
+
+def __getattr__(name: str):  # noqa: ANN001
+    """Lazy import for optional-dependency modules."""
+    _lazy = {
+        "ExaSearcher": "unbubble_sources.search.exa",
+        "GNewsSearcher": "unbubble_sources.search.gnews",
+        "GrokSearcher": "unbubble_sources.search.grok",
+        "XSearcher": "unbubble_sources.search.x",
+        "MistralQueryGenerator": "unbubble_sources.query.mistral",
+    }
+    if name in _lazy:
+        import importlib
+        mod = importlib.import_module(_lazy[name])
+        return getattr(mod, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     # Models

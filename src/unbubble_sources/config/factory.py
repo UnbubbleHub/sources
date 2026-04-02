@@ -35,17 +35,12 @@ from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.query.claude import ClaudeQueryGenerator
-from unbubble_sources.query.mistral import MistralQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
 from unbubble_sources.stream_logger import StreamLogger
 from unbubble_sources.search.base import SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
-from unbubble_sources.search.exa import ExaSearcher
-from unbubble_sources.search.gnews import GNewsSearcher
-from unbubble_sources.search.grok import GrokSearcher
-from unbubble_sources.search.x import XSearcher
 
 
 def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
@@ -59,6 +54,8 @@ def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
             system_prompt=config.system_prompt,
         )
     if isinstance(config, MistralQueryGeneratorConfig):
+        from unbubble_sources.query.mistral import MistralQueryGenerator
+
         return MistralQueryGenerator(
             model=config.model,
             system_prompt=config.system_prompt,
@@ -79,12 +76,20 @@ def create_searcher(
             max_searches_per_query=config.max_searches_per_query,
         )
     if isinstance(config, GNewsSearcherConfig):
+        from unbubble_sources.search.gnews import GNewsSearcher
+
         return GNewsSearcher(lang=config.lang)
     if isinstance(config, XSearcherConfig):
+        from unbubble_sources.search.x import XSearcher
+
         return XSearcher(max_results_per_query=config.max_results_per_query)
     if isinstance(config, ExaSearcherConfig):
+        from unbubble_sources.search.exa import ExaSearcher
+
         return ExaSearcher(max_results_per_query=config.max_results_per_query)
     if isinstance(config, GrokSearcherConfig):
+        from unbubble_sources.search.grok import GrokSearcher
+
         return GrokSearcher(
             model=config.model,
             max_results_per_query=config.max_results_per_query,
