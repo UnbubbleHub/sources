@@ -28,9 +28,8 @@ export async function generate(query: string, apiKey: string) {
 
   // Fire pipeline in background — return id immediately
   after(async () => {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+    const baseUrl = process.env.PUBLIC_URL
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
     try {
       const res = await fetch(`${baseUrl}/api/run`, {
