@@ -69,6 +69,7 @@ class StreamLogger:
             "step": STAGE_STEPS.get(stage, 0),
             "stage": stage,
             "component": component,
+            "input": _serialize(input_data),
             "output": _serialize(output_data),
             "usage": _serialize(usage) if usage is not None else None,
             "cost_usd": usage.estimated_cost if usage is not None else None,
