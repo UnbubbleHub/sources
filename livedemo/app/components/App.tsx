@@ -35,35 +35,39 @@ const HOW_IT_WORKS: {
 ];
 
 const EXAMPLE_QUERIES = [
-  "US-Cuba diplomatic tensions over migration policy",
-  "EU AI Act enforcement and tech industry response",
-  "Global semiconductor supply chain restructuring",
-  "Amazon rainforest deforestation policy debate",
-  "NATO expansion and Arctic security concerns",
+  "Supreme Court Strikes Down Trump's Tariffs",
+  "Israel's Death Penalty Law for Palestinians",
+  "Grok AI's Deepfake Crisis",
 ];
 
 export function App() {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [exampleDate, setExampleDate] = useState<string | undefined>();
   const [apiKey, setApiKey] = useState("");
   const [apiKeyError, setApiKeyError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const handleQueryChange = useCallback((v: string) => {
+    setQuery(v);
+    setExampleDate(undefined);
+  }, []);
+
   const handleSubmit = useCallback(async () => {
     if (!query.trim()) return;
-    if (!apiKey.trim()) {
+    if (!exampleDate && !apiKey.trim()) {
       setApiKeyError(true);
       return;
     }
     setApiKeyError(false);
     setSubmitting(true);
     try {
-      const { id } = await generate(query.trim(), apiKey.trim());
+      const { id } = await generate(query.trim(), apiKey.trim(), exampleDate);
       router.push(`/search?id=${id}&q=${encodeURIComponent(query.trim())}`);
     } catch {
       setSubmitting(false);
     }
-  }, [query, apiKey, router]);
+  }, [query, apiKey, exampleDate, router]);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-between px-6 py-12">
@@ -81,7 +85,7 @@ export function App() {
         <div className="w-full mt-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-5 flex flex-col gap-4">
           <SearchBar
             value={query}
-            onChange={setQuery}
+            onChange={handleQueryChange}
             onSubmit={handleSubmit}
             disabled={submitting}
           />
@@ -105,7 +109,7 @@ export function App() {
             <button
               key={q}
               type="button"
-              onClick={() => setQuery(q)}
+              onClick={() => { setQuery(q); setExampleDate("2026-04-02"); }}
               className="text-xs px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-accent hover:text-accent transition-colors cursor-pointer"
             >
               {q}

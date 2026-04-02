@@ -4,9 +4,9 @@ import crypto from "crypto";
 import { after } from "next/server";
 import { list, put } from "@vercel/blob";
 
-export async function generate(query: string, apiKey: string) {
+export async function generate(query: string, apiKey: string, date?: string) {
   // Deterministic ID: hash(query + date) → same query on same day = same id
-  const today = new Date().toISOString().slice(0, 10);
+  const today = date ?? new Date().toISOString().slice(0, 10);
   const id = crypto
     .createHash("sha256")
     .update(query + today)
