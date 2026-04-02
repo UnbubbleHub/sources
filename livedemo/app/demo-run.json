@@ -1,0 +1,2366 @@
+{
+  "run_id": "2316077f-dae6-422a-ada3-d13569d34d87",
+  "pipeline_type": "composable",
+  "event": {
+    "description": "US-Cuba diplomatic tensions over migration policy",
+    "date": null,
+    "context": null
+  },
+  "started_at": "2026-04-02T08:39:17.064359+00:00",
+  "completed_at": "2026-04-02T08:40:52.567109+00:00",
+  "stages": [
+    {
+      "stage": "query_generation",
+      "component": "ClaudeQueryGenerator",
+      "input": {
+        "description": "US-Cuba diplomatic tensions over migration policy",
+        "date": null,
+        "context": null
+      },
+      "output": [
+        {
+          "text": "Biden administration Cuba migration policy border security enforcement",
+          "intent": "Official US government perspective on migration control and national security concerns"
+        },
+        {
+          "text": "Cuba government response US embargo migration restrictions humanitarian",
+          "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+        },
+        {
+          "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+          "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+        },
+        {
+          "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+          "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+        },
+        {
+          "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+          "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+        }
+      ],
+      "usage": {
+        "api_calls": [
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 210,
+            "output_tokens": 223,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 0
+          }
+        ],
+        "gnews_requests": 0,
+        "x_api_requests": 0,
+        "exa_requests": 0,
+        "input_tokens": 210,
+        "output_tokens": 223,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 0,
+        "estimated_cost": 0.0013250000000000002
+      },
+      "cost_usd": 0.0013250000000000002,
+      "timestamp": "2026-04-02T08:39:21.310173+00:00",
+      "duration_seconds": 3.3579
+    },
+    {
+      "stage": "aggregation",
+      "component": "PCAAggregator",
+      "input": [
+        {
+          "text": "Biden administration Cuba migration policy border security enforcement",
+          "intent": "Official US government perspective on migration control and national security concerns"
+        },
+        {
+          "text": "Cuba government response US embargo migration restrictions humanitarian",
+          "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+        },
+        {
+          "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+          "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+        },
+        {
+          "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+          "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+        },
+        {
+          "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+          "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+        }
+      ],
+      "output": [
+        {
+          "text": "Biden administration Cuba migration policy border security enforcement",
+          "intent": "Official US government perspective on migration control and national security concerns"
+        },
+        {
+          "text": "Cuba government response US embargo migration restrictions humanitarian",
+          "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+        },
+        {
+          "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+          "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+        },
+        {
+          "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+          "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+        },
+        {
+          "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+          "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+        }
+      ],
+      "usage": null,
+      "cost_usd": null,
+      "timestamp": "2026-04-02T08:39:21.310408+00:00",
+      "duration_seconds": 0.0
+    },
+    {
+      "stage": "search",
+      "component": "ClaudeSearcher",
+      "input": [
+        {
+          "text": "Biden administration Cuba migration policy border security enforcement",
+          "intent": "Official US government perspective on migration control and national security concerns"
+        },
+        {
+          "text": "Cuba government response US embargo migration restrictions humanitarian",
+          "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+        },
+        {
+          "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+          "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+        },
+        {
+          "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+          "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+        },
+        {
+          "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+          "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+        }
+      ],
+      "output": [
+        {
+          "url": "https://www.pbs.org/newshour/politics/biden-announces-new-border-restrictions-for-nicaraguans-cubans-and-haitians",
+          "source": "pbs.org",
+          "published_at": "January 5, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Biden announces new border restrictions for Nicaraguans, Cubans and Haitians | PBS News",
+          "description": null
+        },
+        {
+          "url": "https://www.cnn.com/2023/01/05/politics/biden-border-programs/index.html",
+          "source": "cnn.com",
+          "published_at": "January 5, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Biden announces new migration programs as he prepares to visit the border on Sunday | CNN Politics",
+          "description": null
+        },
+        {
+          "url": "https://www.axios.com/2023/02/02/bidens-cuban-migrant-policy-unsustainable-border",
+          "source": "axios.com",
+          "published_at": "February 3, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Biden's Cuban migrant policy may not be effective in long-term, experts say",
+          "description": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Immigration_policy_of_the_Biden_administration",
+          "source": "en.wikipedia.org",
+          "published_at": "2 weeks ago",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Immigration policy of the Biden administration - Wikipedia",
+          "description": null
+        },
+        {
+          "url": "https://www.nbcnews.com/news/amp/rcna64418",
+          "source": "nbcnews.com",
+          "published_at": "January 6, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Biden admin will block more Nicaraguans, Cubans, Venezuelans and Haitians at border but also open more legal pathways",
+          "description": null
+        },
+        {
+          "url": "https://www.npr.org/2023/01/05/1146976334/biden-border-security-immigration",
+          "source": "npr.org",
+          "published_at": "January 6, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Biden announces new border control measures and legal pathways to some migrants : NPR",
+          "description": null
+        },
+        {
+          "url": "https://www.cfr.org/blog/unlikely-biden-trump-throughline-cuba",
+          "source": "cfr.org",
+          "published_at": "July 2, 2025",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "The Unlikely Biden-Trump Throughline on Cuba | Council on Foreign Relations",
+          "description": null
+        },
+        {
+          "url": "https://www.weareceda.org/en/us-cuba-news-brief/june6-travelban",
+          "source": "weareceda.org",
+          "published_at": "June 6, 2025",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Trump’s New Travel Ban; CHNV Update; ETECSA Spikes Rates and Sparks Protests — CEDA",
+          "description": null
+        },
+        {
+          "url": "https://www.nbcnews.com/news/latino/cubans-weigh-options-migration-us-new-biden-rules-rcna65264",
+          "source": "nbcnews.com",
+          "published_at": "January 12, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "Cubans weigh options on migration to U.S. after new Biden border rules",
+          "description": null
+        },
+        {
+          "url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2023/01/05/fact-sheet-biden-harris-administration-announces-new-border-enforcement-actions/",
+          "source": "bidenwhitehouse.archives.gov",
+          "published_at": "January 5, 2023",
+          "query": {
+            "text": "Biden administration Cuba migration policy border security enforcement",
+            "intent": "Official US government perspective on migration control and national security concerns"
+          },
+          "title": "FACT SHEET: Biden-Harris Administration Announces New Border Enforcement Actions | The White House",
+          "description": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/United_States_embargo_against_Cuba",
+          "source": "en.wikipedia.org",
+          "published_at": "1 week ago",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "United States embargo against Cuba - Wikipedia",
+          "description": null
+        },
+        {
+          "url": "https://www.wola.org/2026/03/cuba-humanitarian-crisis-governments-response/",
+          "source": "wola.org",
+          "published_at": "2 weeks ago",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "WOLA: U.S. and Cuban governments should center their actions on responding to the Cuban people’s needs and protecting their rights - WOLA",
+          "description": null
+        },
+        {
+          "url": "https://www.weareceda.org/en/us-cuba-news-brief/dec5-trump-freezes-immigration-cases-as-blackouts-and-health-crises-grip-cuba-4sdya",
+          "source": "weareceda.org",
+          "published_at": "December 19, 2025",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Trump Shuts Down the Last Legal Pathway for Cubans to Enter the US — CEDA",
+          "description": null
+        },
+        {
+          "url": "https://www.wola.org/analysis/understanding-failure-of-us-cuba-embargo/",
+          "source": "wola.org",
+          "published_at": "January 27, 2025",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Understanding the Failure of the U.S. Embargo on Cuba",
+          "description": null
+        },
+        {
+          "url": "https://www.state.gov/cuba-sanctions",
+          "source": "state.gov",
+          "published_at": "July 10, 2025",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Cuba Sanctions - United States Department of State",
+          "description": null
+        },
+        {
+          "url": "https://www.csmonitor.com/World/Americas/2026/0305/Cuba-oil-Trump-embargo",
+          "source": "csmonitor.com",
+          "published_at": "1 month ago",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Amid Cuba’s humanitarian crisis, calls for change are getting louder - CSMonitor.com",
+          "description": null
+        },
+        {
+          "url": "https://www.wola.org/analysis/cuban-migration-is-changing-us-must-note/",
+          "source": "wola.org",
+          "published_at": "December 20, 2024",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Cuban Migration is Changing, the U.S. Must Take Note",
+          "description": null
+        },
+        {
+          "url": "https://www.wola.org/analysis/developments-cuban-migration-2023/",
+          "source": "wola.org",
+          "published_at": "January 8, 2025",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Five Key Trends in Cuban Migration in 2023 - WOLA",
+          "description": null
+        },
+        {
+          "url": "https://www.ohchr.org/en/press-releases/2025/11/enforcement-and-recent-strengthening-us-sanctions-deepen-hardships-cuban",
+          "source": "ohchr.org",
+          "published_at": null,
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "Enforcement and recent strengthening of U.S. sanctions deepen hardships for Cuban population: Special Rapporteur | OHCHR",
+          "description": null
+        },
+        {
+          "url": "https://www.thenewhumanitarian.org/news-feature/2026/03/03/cuba-relentless-us-pressure-human-suffering",
+          "source": "thenewhumanitarian.org",
+          "published_at": "2 weeks ago",
+          "query": {
+            "text": "Cuba government response US embargo migration restrictions humanitarian",
+            "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+          },
+          "title": "In Cuba, government mismanagement and US oil moves tell in human suffering",
+          "description": null
+        },
+        {
+          "url": "https://www.aljazeera.com/news/2023/1/26/thousands-of-cubans-left-scrambling-after-new-us-asylum-policy",
+          "source": "aljazeera.com",
+          "published_at": "January 26, 2023",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Thousands of Cubans left scrambling after new US asylum policy | Migration News | Al Jazeera",
+          "description": null
+        },
+        {
+          "url": "https://www.doctorswithoutborders.org/what-we-do/focus/migration-crisis-americas",
+          "source": "doctorswithoutborders.org",
+          "published_at": null,
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Central American migration crisis | Doctors Without Borders - USA",
+          "description": null
+        },
+        {
+          "url": "https://acere.org/migration/",
+          "source": "acere.org",
+          "published_at": "November 14, 2024",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "U.S. Sanctions: A Root Cause of Cuban Migration - The Alliance for Cuba Engagement and Respect (ACERE)",
+          "description": null
+        },
+        {
+          "url": "https://sgp.fas.org/crs/row/IF11151.pdf",
+          "source": "sgp.fas.org",
+          "published_at": null,
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Central American Migration: Root Causes and U.S. Policy",
+          "description": null
+        },
+        {
+          "url": "https://www.unrefugees.org/emergencies/central-america/",
+          "source": "unrefugees.org",
+          "published_at": "October 30, 2025",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Central America Refugee Crisis: Aid, Statistics and News | USA for UNHCR",
+          "description": null
+        },
+        {
+          "url": "https://newlaborforum.cuny.edu/2024/05/01/the-current-migrant-crisis-how-u-s-policy-toward-latin-america-has-fueled-historic-numbers-of-asylum-seekers/",
+          "source": "newlaborforum.cuny.edu",
+          "published_at": "May 1, 2024",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "The Current Migrant Crisis: How U.S. Policy Toward Latin America Has Fueled Historic Numbers of Asylum Seekers - New Labor Forum",
+          "description": null
+        },
+        {
+          "url": "https://www.thenewhumanitarian.org/news-feature/2025/03/26/stranded-trump-induced-migration-crisis-mexico",
+          "source": "thenewhumanitarian.org",
+          "published_at": "April 3, 2025",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Stranded: The Trump-induced migration crisis in Mexico",
+          "description": null
+        },
+        {
+          "url": "https://www.msf.org/central-american-migration-depth",
+          "source": "msf.org",
+          "published_at": null,
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Central American Migration in depth | MSF",
+          "description": null
+        },
+        {
+          "url": "https://www.american.edu/centers/latin-american-latino-studies/upload/cuban-migration-and-its-social-crisis-an-overview.pdf",
+          "source": "american.edu",
+          "published_at": "April 8, 2025",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Cuban Migration and Its Social Crisis: An Overview",
+          "description": null
+        },
+        {
+          "url": "https://www.washingtonpost.com/world/cubans-were-once-privileged-migrants-to-the-united-states-now-theyre-stuck-at-the-border-like-everyone-else/2019/11/04/65f1a4ea-fa60-11e9-9e02-1d45cb3dfa8f_story.html",
+          "source": "washingtonpost.com",
+          "published_at": "November 6, 2019",
+          "query": {
+            "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+            "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+          },
+          "title": "Cuban asylum seekers are stuck on the Mexico border under Trump's MPP - The Washington Post",
+          "description": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Cuba%E2%80%93United_States_relations",
+          "source": "en.wikipedia.org",
+          "published_at": "3 days ago",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "Cuba–United States relations - Wikipedia",
+          "description": null
+        },
+        {
+          "url": "https://www.cbsnews.com/miami/news/cuba-signals-willingness-to-engage-in-dialogue-as-diplomatic-tensions-escalate-with-u-s-over-sanctions/",
+          "source": "cbsnews.com",
+          "published_at": "February 6, 2026",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "Cuba signals willingness to engage in dialogue as diplomatic tensions escalate with U.S. over sanctions - CBS Miami",
+          "description": null
+        },
+        {
+          "url": "https://www.chathamhouse.org/sites/default/files/field/field_document/INTA91_3_02_LeoGrande.pdf",
+          "source": "chathamhouse.org",
+          "published_at": null,
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "Normalizing US–Cuba relations: escaping the shackles of the past",
+          "description": null
+        },
+        {
+          "url": "https://cuba.miami.edu/politics-policy/a-renewed-tenuous-relationship/index.html",
+          "source": "cuba.miami.edu",
+          "published_at": "April 24, 2023",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "A Renewed, Tenuous Relationship - University of Miami Special Report: Cuba and the Caribbean",
+          "description": null
+        },
+        {
+          "url": "https://quincyinst.org/research/u-s-cuban-relations-a-realist-case-for-pragmatic-engagement/",
+          "source": "quincyinst.org",
+          "published_at": "June 26, 2025",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "U.S.–Cuban Relations: A Realist Case for Pragmatic Engagement - Quincy Institute for Responsible Statecraft",
+          "description": null
+        },
+        {
+          "url": "https://www.npr.org/2014/12/18/371597736/mixed-reactions-in-miami-on-diplomatic-overtures-to-cuba",
+          "source": "npr.org",
+          "published_at": "December 18, 2014",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "Mixed Reactions In Miami On Diplomatic Overtures To Cuba : NPR",
+          "description": null
+        },
+        {
+          "url": "https://foreignpolicy.com/2024/12/12/cuba-us-cold-war-normalization-economy-sanctions/",
+          "source": "foreignpolicy.com",
+          "published_at": "December 24, 2024",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "How a Historic Reconciliation Deal Between the U.S. and Cuba Unraveled",
+          "description": null
+        },
+        {
+          "url": "https://obamawhitehouse.archives.gov/the-press-office/2015/07/01/statement-president-re-establishment-diplomatic-relations-cuba",
+          "source": "obamawhitehouse.archives.gov",
+          "published_at": "July 1, 2015",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "Statement by the President on the Re-Establishment of Diplomatic Relations with Cuba | whitehouse.gov",
+          "description": null
+        },
+        {
+          "url": "https://www.caribbean-council.org/diaz-canel-outlines-cubas-approach-to-any-negotiation-with-the-us/",
+          "source": "caribbean-council.org",
+          "published_at": "3 days ago",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "Díaz-Canel outlines Cuba’s approach to any negotiation with the US - The Caribbean Council",
+          "description": null
+        },
+        {
+          "url": "https://www.cfr.org/timelines/us-cuba-relations",
+          "source": "cfr.org",
+          "published_at": "July 15, 2025",
+          "query": {
+            "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+            "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+          },
+          "title": "U.S.-Cuba Relations | Council on Foreign Relations",
+          "description": null
+        },
+        {
+          "url": "https://www.bu.edu/articles/2015/cuban-immigration/",
+          "source": "bu.edu",
+          "published_at": "June 25, 2019",
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "US-Cuban immigration policy and the Cold War and domestic politics that shaped it | The Brink | Boston University",
+          "description": null
+        },
+        {
+          "url": "https://brill.com/view/journals/dipl/1/2/article-p305_305.xml?language=en",
+          "source": "brill.com",
+          "published_at": "December 6, 2019",
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "Diplomacy Meets Migration: US Relations with Cuba during the Cold War, written by Hideaki Kami. 2018. in: Diplomatica Volume 1 Issue 2 (2019)",
+          "description": null
+        },
+        {
+          "url": "https://cmsny.org/publications/imr-cuba-migration-diplomacy/",
+          "source": "cmsny.org",
+          "published_at": "September 30, 2022",
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "Diplomacy Meets Migration: US Relations with Cuba during the Cold War - The Center for Migration Studies of New York (CMS)",
+          "description": null
+        },
+        {
+          "url": "https://fiveable.me/latin-america-1791-present/unit-6/us-cuba-relations-cold-war-context/study-guide/qd8Lf01e3729m6nw",
+          "source": "fiveable.me",
+          "published_at": "1 month ago",
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "U.S.-Cuba Relations and the Cold War Context | Latin... | Fiveable",
+          "description": null
+        },
+        {
+          "url": "https://www.govinfo.gov/content/pkg/CPRT-111SPRT47260/html/CPRT-111SPRT47260.htm",
+          "source": "govinfo.gov",
+          "published_at": null,
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "CHANGING CUBA POLICY--IN THE UNITED STATES NATIONAL INTEREST",
+          "description": null
+        },
+        {
+          "url": "https://academic.oup.com/jah/article/106/1/248/5492019",
+          "source": "academic.oup.com",
+          "published_at": "June 1, 2019",
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "Diplomacy Meets Migration: US Relations with Cuba during the Cold War | Journal of American History | Oxford Academic",
+          "description": null
+        },
+        {
+          "url": "https://scholarship.law.umn.edu/cgi/viewcontent.cgi?article=1282&context=mjil",
+          "source": "scholarship.law.umn.edu",
+          "published_at": null,
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "Cuban Migration to the United States in a Post-Normalized ...",
+          "description": null
+        },
+        {
+          "url": "https://www.refworld.org/reference/countryrep/writenet/1995/en/95792",
+          "source": "refworld.org",
+          "published_at": "April 15, 2025",
+          "query": {
+            "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+            "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+          },
+          "title": "Cuba: Reforms, Migration and International Relations | Refworld",
+          "description": null
+        }
+      ],
+      "usage": {
+        "api_calls": [
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 16464,
+            "output_tokens": 1678,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 1
+          },
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 18161,
+            "output_tokens": 1398,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 1
+          },
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 16643,
+            "output_tokens": 1411,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 1
+          },
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 17848,
+            "output_tokens": 1203,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 1
+          },
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 17493,
+            "output_tokens": 1383,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 1
+          }
+        ],
+        "gnews_requests": 0,
+        "x_api_requests": 0,
+        "exa_requests": 0,
+        "input_tokens": 86609,
+        "output_tokens": 7073,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 5,
+        "estimated_cost": 0.17197400000000002
+      },
+      "cost_usd": 0.17197400000000002,
+      "timestamp": "2026-04-02T08:40:37.882947+00:00",
+      "duration_seconds": 76.5697
+    },
+    {
+      "stage": "deduplication",
+      "component": "url_dedup",
+      "input": {
+        "source_count": 48
+      },
+      "output": {
+        "source_count": 48
+      },
+      "usage": null,
+      "cost_usd": null,
+      "timestamp": "2026-04-02T08:40:37.884095+00:00",
+      "duration_seconds": 0.0
+    },
+    {
+      "stage": "annotation",
+      "component": "ClaudeAnnotator",
+      "input": {
+        "source_count": 48
+      },
+      "output": [
+        {
+          "source": {
+            "url": "https://www.pbs.org/newshour/politics/biden-announces-new-border-restrictions-for-nicaraguans-cubans-and-haitians",
+            "source": "pbs.org",
+            "published_at": "January 5, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Biden announces new border restrictions for Nicaraguans, Cubans and Haitians | PBS News",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "capacity_and_resources",
+              "security_and_defense"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Reports Biden's announcement of new border restrictions and legal pathways for Cuban, Nicaraguan, and Haitian migrants as a balanced policy approach.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.85
+        },
+        {
+          "source": {
+            "url": "https://www.cnn.com/2023/01/05/politics/biden-border-programs/index.html",
+            "source": "cnn.com",
+            "published_at": "January 5, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Biden announces new migration programs as he prepares to visit the border on Sunday | CNN Politics",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "security_and_defense",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Covers Biden's migration programs and border visit announcement with focus on new enforcement and legal pathway mechanisms.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://www.axios.com/2023/02/02/bidens-cuban-migrant-policy-unsustainable-border",
+            "source": "axios.com",
+            "published_at": "February 3, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Biden's Cuban migrant policy may not be effective in long-term, experts say",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "economic",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Analyzes expert opinion questioning the long-term effectiveness and sustainability of Biden's Cuban migrant policies.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.75
+        },
+        {
+          "source": {
+            "url": "https://en.wikipedia.org/wiki/Immigration_policy_of_the_Biden_administration",
+            "source": "en.wikipedia.org",
+            "published_at": "2 weeks ago",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Immigration policy of the Biden administration - Wikipedia",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "legality_constitutionality"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Provides comprehensive factual overview of Biden administration's immigration policy framework and implementation.",
+            "topic": "US immigration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.65
+        },
+        {
+          "source": {
+            "url": "https://www.nbcnews.com/news/amp/rcna64418",
+            "source": "nbcnews.com",
+            "published_at": "January 6, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Biden admin will block more Nicaraguans, Cubans, Venezuelans and Haitians at border but also open more legal pathways",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "security_and_defense",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Reports on Biden administration's dual approach of blocking irregular migration while creating legal pathways for Cuban and other migrants.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.85
+        },
+        {
+          "source": {
+            "url": "https://www.npr.org/2023/01/05/1146976334/biden-border-security-immigration",
+            "source": "npr.org",
+            "published_at": "January 6, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Biden announces new border control measures and legal pathways to some migrants : NPR",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "security_and_defense",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Covers Biden's border security measures and legal immigration pathways in balanced reporting format.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://www.cfr.org/blog/unlikely-biden-trump-throughline-cuba",
+            "source": "cfr.org",
+            "published_at": "July 2, 2025",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "The Unlikely Biden-Trump Throughline on Cuba | Council on Foreign Relations",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription",
+              "external_regulation"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Analyzes policy continuities between Biden and Trump administrations regarding Cuba, suggesting bipartisan approaches to the issue.",
+            "topic": "US-Cuba diplomatic relations",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.7
+        },
+        {
+          "source": {
+            "url": "https://www.weareceda.org/en/us-cuba-news-brief/june6-travelban",
+            "source": "weareceda.org",
+            "published_at": "June 6, 2025",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Trump’s New Travel Ban; CHNV Update; ETECSA Spikes Rates and Sparks Protests — CEDA",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "policy_prescription",
+              "health_and_safety",
+              "external_regulation"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Reports on Trump travel ban affecting Cubans and connectivity issues in Cuba with emphasis on humanitarian concerns.",
+            "topic": "US-Cuba migration and sanctions policy",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.65
+        },
+        {
+          "source": {
+            "url": "https://www.nbcnews.com/news/latino/cubans-weigh-options-migration-us-new-biden-rules-rcna65264",
+            "source": "nbcnews.com",
+            "published_at": "January 12, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Cubans weigh options on migration to U.S. after new Biden border rules",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Reports on how Cubans are evaluating migration options in response to Biden's new border restrictions.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2023/01/05/fact-sheet-biden-harris-administration-announces-new-border-enforcement-actions/",
+            "source": "bidenwhitehouse.archives.gov",
+            "published_at": "January 5, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "FACT SHEET: Biden-Harris Administration Announces New Border Enforcement Actions | The White House",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "security_and_defense"
+            ],
+            "stakeholder_type": "government",
+            "stance_summary": "Official White House fact sheet detailing Biden administration's border enforcement actions and legal pathways for migrants from Cuba and other countries.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.95
+        },
+        {
+          "source": {
+            "url": "https://en.wikipedia.org/wiki/United_States_embargo_against_Cuba",
+            "source": "en.wikipedia.org",
+            "published_at": "1 week ago",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "United States embargo against Cuba - Wikipedia",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "legality_constitutionality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Provides historical and legal overview of the U.S. embargo against Cuba as contextual background.",
+            "topic": "US-Cuba relations",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.35
+        },
+        {
+          "source": {
+            "url": "https://www.wola.org/2026/03/cuba-humanitarian-crisis-governments-response/",
+            "source": "wola.org",
+            "published_at": "2 weeks ago",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "WOLA: U.S. and Cuban governments should center their actions on responding to the Cuban people’s needs and protecting their rights - WOLA",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "fairness_and_equality",
+              "health_and_safety",
+              "morality"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Advocates for U.S. and Cuban governments to prioritize humanitarian response and protection of Cuban citizens' rights amid crisis.",
+            "topic": "US-Cuba humanitarian crisis",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.55
+        },
+        {
+          "source": {
+            "url": "https://www.weareceda.org/en/us-cuba-news-brief/dec5-trump-freezes-immigration-cases-as-blackouts-and-health-crises-grip-cuba-4sdya",
+            "source": "weareceda.org",
+            "published_at": "December 19, 2025",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Trump Shuts Down the Last Legal Pathway for Cubans to Enter the US — CEDA",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "policy_prescription",
+              "fairness_and_equality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Reports on Trump administration shutting down legal immigration pathways for Cubans amid humanitarian crises in Cuba.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.75
+        },
+        {
+          "source": {
+            "url": "https://www.wola.org/analysis/understanding-failure-of-us-cuba-embargo/",
+            "source": "wola.org",
+            "published_at": "January 27, 2025",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Understanding the Failure of the U.S. Embargo on Cuba",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "external_regulation",
+              "economic",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Analyzes the failure and humanitarian impact of the U.S. embargo on Cuba, advocating for policy reconsideration.",
+            "topic": "US-Cuba embargo and relations",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.4
+        },
+        {
+          "source": {
+            "url": "https://www.state.gov/cuba-sanctions",
+            "source": "state.gov",
+            "published_at": "July 10, 2025",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Cuba Sanctions - United States Department of State",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "external_regulation",
+              "legality_constitutionality"
+            ],
+            "stakeholder_type": "government",
+            "stance_summary": "Official State Department summary of U.S. sanctions policy toward Cuba.",
+            "topic": "US-Cuba sanctions",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.45
+        },
+        {
+          "source": {
+            "url": "https://www.csmonitor.com/World/Americas/2026/0305/Cuba-oil-Trump-embargo",
+            "source": "csmonitor.com",
+            "published_at": "1 month ago",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Amid Cuba’s humanitarian crisis, calls for change are getting louder - CSMonitor.com",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "health_and_safety",
+              "morality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Reports on humanitarian crisis in Cuba linked to U.S. embargo policies with calls for policy change.",
+            "topic": "US-Cuba humanitarian crisis",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.5
+        },
+        {
+          "source": {
+            "url": "https://www.wola.org/analysis/cuban-migration-is-changing-us-must-note/",
+            "source": "wola.org",
+            "published_at": "December 20, 2024",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Cuban Migration is Changing, the U.S. Must Take Note",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "policy_prescription",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Analyzes changing patterns in Cuban migration and argues U.S. policy must adapt to new realities.",
+            "topic": "Cuban migration trends",
+            "geographic_focus": "Cuba-United States"
+          },
+          "relevance_score": 0.7
+        },
+        {
+          "source": {
+            "url": "https://www.wola.org/analysis/developments-cuban-migration-2023/",
+            "source": "wola.org",
+            "published_at": "January 8, 2025",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Five Key Trends in Cuban Migration in 2023 - WOLA",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "policy_prescription",
+              "fairness_and_equality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Identifies five key trends in Cuban migration in 2023, providing context for understanding policy impacts.",
+            "topic": "Cuban migration trends",
+            "geographic_focus": "Cuba-United States"
+          },
+          "relevance_score": 0.7
+        },
+        {
+          "source": {
+            "url": "https://www.ohchr.org/en/press-releases/2025/11/enforcement-and-recent-strengthening-us-sanctions-deepen-hardships-cuban",
+            "source": "ohchr.org",
+            "published_at": null,
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Enforcement and recent strengthening of U.S. sanctions deepen hardships for Cuban population: Special Rapporteur | OHCHR",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "external_regulation",
+              "health_and_safety",
+              "morality"
+            ],
+            "stakeholder_type": "international_org",
+            "stance_summary": "UN human rights body states that U.S. sanctions enforcement deepens hardships for Cuban population.",
+            "topic": "US-Cuba sanctions impact",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.5
+        },
+        {
+          "source": {
+            "url": "https://www.thenewhumanitarian.org/news-feature/2026/03/03/cuba-relentless-us-pressure-human-suffering",
+            "source": "thenewhumanitarian.org",
+            "published_at": "2 weeks ago",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "In Cuba, government mismanagement and US oil moves tell in human suffering",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "external_regulation",
+              "health_and_safety",
+              "morality"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Investigative report examining human suffering in Cuba resulting from government mismanagement and U.S. oil embargo measures.",
+            "topic": "US-Cuba humanitarian crisis",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.55
+        },
+        {
+          "source": {
+            "url": "https://www.aljazeera.com/news/2023/1/26/thousands-of-cubans-left-scrambling-after-new-us-asylum-policy",
+            "source": "aljazeera.com",
+            "published_at": "January 26, 2023",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Thousands of Cubans left scrambling after new US asylum policy | Migration News | Al Jazeera",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "fairness_and_equality",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Al Jazeera reports on the humanitarian impact of new US asylum policy changes on Cuban migrants, highlighting the challenges faced by vulnerable populations.",
+            "topic": "US-Cuba migration and asylum policy",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.75
+        },
+        {
+          "source": {
+            "url": "https://www.doctorswithoutborders.org/what-we-do/focus/migration-crisis-americas",
+            "source": "doctorswithoutborders.org",
+            "published_at": null,
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Central American migration crisis | Doctors Without Borders - USA",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "health_and_safety",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Doctors Without Borders frames migration as a health and humanitarian crisis requiring international assistance and resources.",
+            "topic": "Central American migration health crisis",
+            "geographic_focus": "Central America and Americas"
+          },
+          "relevance_score": 0.35
+        },
+        {
+          "source": {
+            "url": "https://acere.org/migration/",
+            "source": "acere.org",
+            "published_at": "November 14, 2024",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "U.S. Sanctions: A Root Cause of Cuban Migration - The Alliance for Cuba Engagement and Respect (ACERE)",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "left",
+            "policy_frames": [
+              "fairness_and_equality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "ACERE argues that US sanctions are a root cause of Cuban migration, positioning sanctions policy as a key driver of the migration issue.",
+            "topic": "US sanctions and Cuban migration",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://sgp.fas.org/crs/row/IF11151.pdf",
+            "source": "sgp.fas.org",
+            "published_at": null,
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Central American Migration: Root Causes and U.S. Policy",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "FAS/CRS provides analytical overview of Central American migration root causes and policy options in a non-partisan format.",
+            "topic": "Central American migration policy analysis",
+            "geographic_focus": "Central America and United States"
+          },
+          "relevance_score": 0.4
+        },
+        {
+          "source": {
+            "url": "https://www.unrefugees.org/emergencies/central-america/",
+            "source": "unrefugees.org",
+            "published_at": "October 30, 2025",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Central America Refugee Crisis: Aid, Statistics and News | USA for UNHCR",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "health_and_safety",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "international_org",
+            "stance_summary": "UNHCR frames Central American migration as a refugee crisis requiring international humanitarian response and aid.",
+            "topic": "Central American refugee crisis",
+            "geographic_focus": "Central America"
+          },
+          "relevance_score": 0.3
+        },
+        {
+          "source": {
+            "url": "https://newlaborforum.cuny.edu/2024/05/01/the-current-migrant-crisis-how-u-s-policy-toward-latin-america-has-fueled-historic-numbers-of-asylum-seekers/",
+            "source": "newlaborforum.cuny.edu",
+            "published_at": "May 1, 2024",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "The Current Migrant Crisis: How U.S. Policy Toward Latin America Has Fueled Historic Numbers of Asylum Seekers - New Labor Forum",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "left",
+            "policy_frames": [
+              "fairness_and_equality",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "New Labor Forum argues that US policy toward Latin America has been a driving force behind historic numbers of asylum seekers.",
+            "topic": "US Latin American policy and migration",
+            "geographic_focus": "Latin America and United States"
+          },
+          "relevance_score": 0.55
+        },
+        {
+          "source": {
+            "url": "https://www.thenewhumanitarian.org/news-feature/2025/03/26/stranded-trump-induced-migration-crisis-mexico",
+            "source": "thenewhumanitarian.org",
+            "published_at": "April 3, 2025",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Stranded: The Trump-induced migration crisis in Mexico",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "fairness_and_equality",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "The New Humanitarian reports on migration crisis in Mexico, linking it to Trump administration policies and their effects on migrants.",
+            "topic": "Trump migration policy and border crisis",
+            "geographic_focus": "Mexico"
+          },
+          "relevance_score": 0.4
+        },
+        {
+          "source": {
+            "url": "https://www.msf.org/central-american-migration-depth",
+            "source": "msf.org",
+            "published_at": null,
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Central American Migration in depth | MSF",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "health_and_safety",
+              "capacity_and_resources"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "MSF provides in-depth humanitarian analysis of Central American migration crisis and its underlying causes.",
+            "topic": "Central American migration humanitarian analysis",
+            "geographic_focus": "Central America"
+          },
+          "relevance_score": 0.35
+        },
+        {
+          "source": {
+            "url": "https://www.american.edu/centers/latin-american-latino-studies/upload/cuban-migration-and-its-social-crisis-an-overview.pdf",
+            "source": "american.edu",
+            "published_at": "April 8, 2025",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Cuban Migration and Its Social Crisis: An Overview",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "fairness_and_equality",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "American University provides comprehensive overview of Cuban migration patterns and associated social crises.",
+            "topic": "Cuban migration and social impact",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.7
+        },
+        {
+          "source": {
+            "url": "https://www.washingtonpost.com/world/cubans-were-once-privileged-migrants-to-the-united-states-now-theyre-stuck-at-the-border-like-everyone-else/2019/11/04/65f1a4ea-fa60-11e9-9e02-1d45cb3dfa8f_story.html",
+            "source": "washingtonpost.com",
+            "published_at": "November 6, 2019",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Cuban asylum seekers are stuck on the Mexico border under Trump's MPP - The Washington Post",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "fairness_and_equality",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Washington Post reports on how Cuban asylum seekers are now treated like other migrants under Trump's Migrant Protection Protocols, ending special status.",
+            "topic": "Cuban asylum seekers and Trump migration policy",
+            "geographic_focus": "United States and Mexico"
+          },
+          "relevance_score": 0.65
+        },
+        {
+          "source": {
+            "url": "https://en.wikipedia.org/wiki/Cuba%E2%80%93United_States_relations",
+            "source": "en.wikipedia.org",
+            "published_at": "3 days ago",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Cuba–United States relations - Wikipedia",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "legality_constitutionality"
+            ],
+            "stakeholder_type": "other",
+            "stance_summary": "Wikipedia provides comprehensive factual overview of historical and contemporary US-Cuba diplomatic relations.",
+            "topic": "US-Cuba diplomatic relations history",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.65
+        },
+        {
+          "source": {
+            "url": "https://www.cbsnews.com/miami/news/cuba-signals-willingness-to-engage-in-dialogue-as-diplomatic-tensions-escalate-with-u-s-over-sanctions/",
+            "source": "cbsnews.com",
+            "published_at": "February 6, 2026",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Cuba signals willingness to engage in dialogue as diplomatic tensions escalate with U.S. over sanctions - CBS Miami",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "external_regulation"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "CBS Miami reports on Cuba signaling willingness to engage in dialogue as diplomatic tensions escalate over US sanctions policy.",
+            "topic": "US-Cuba diplomatic tensions and sanctions",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.85
+        },
+        {
+          "source": {
+            "url": "https://www.chathamhouse.org/sites/default/files/field/field_document/INTA91_3_02_LeoGrande.pdf",
+            "source": "chathamhouse.org",
+            "published_at": null,
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Normalizing US–Cuba relations: escaping the shackles of the past",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Chatham House provides policy analysis advocating for normalization of US-Cuba relations as means to escape historical tensions.",
+            "topic": "US-Cuba relations normalization",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.6
+        },
+        {
+          "source": {
+            "url": "https://cuba.miami.edu/politics-policy/a-renewed-tenuous-relationship/index.html",
+            "source": "cuba.miami.edu",
+            "published_at": "April 24, 2023",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "A Renewed, Tenuous Relationship - University of Miami Special Report: Cuba and the Caribbean",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "University of Miami examines the renewed but tenuous relationship between US and Cuba following diplomatic shifts.",
+            "topic": "US-Cuba diplomatic relations",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.55
+        },
+        {
+          "source": {
+            "url": "https://quincyinst.org/research/u-s-cuban-relations-a-realist-case-for-pragmatic-engagement/",
+            "source": "quincyinst.org",
+            "published_at": "June 26, 2025",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "U.S.–Cuban Relations: A Realist Case for Pragmatic Engagement - Quincy Institute for Responsible Statecraft",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Quincy Institute advocates for pragmatic engagement approach in US-Cuban relations based on realist foreign policy principles.",
+            "topic": "US-Cuba relations pragmatic engagement",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.5
+        },
+        {
+          "source": {
+            "url": "https://www.npr.org/2014/12/18/371597736/mixed-reactions-in-miami-on-diplomatic-overtures-to-cuba",
+            "source": "npr.org",
+            "published_at": "December 18, 2014",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Mixed Reactions In Miami On Diplomatic Overtures To Cuba : NPR",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "public_opinion"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "NPR reports on mixed public reactions in Miami to Obama administration's diplomatic overtures toward Cuba.",
+            "topic": "US-Cuba diplomatic normalization",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.45
+        },
+        {
+          "source": {
+            "url": "https://foreignpolicy.com/2024/12/12/cuba-us-cold-war-normalization-economy-sanctions/",
+            "source": "foreignpolicy.com",
+            "published_at": "December 24, 2024",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "How a Historic Reconciliation Deal Between the U.S. and Cuba Unraveled",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Foreign Policy examines how a historic US-Cuba reconciliation deal unraveled, analyzing the breakdown of normalization efforts.",
+            "topic": "US-Cuba reconciliation collapse",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.65
+        },
+        {
+          "source": {
+            "url": "https://obamawhitehouse.archives.gov/the-press-office/2015/07/01/statement-president-re-establishment-diplomatic-relations-cuba",
+            "source": "obamawhitehouse.archives.gov",
+            "published_at": "July 1, 2015",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Statement by the President on the Re-Establishment of Diplomatic Relations with Cuba | whitehouse.gov",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political"
+            ],
+            "stakeholder_type": "government",
+            "stance_summary": "Official Obama White House statement announcing re-establishment of diplomatic relations with Cuba in 2015.",
+            "topic": "US-Cuba diplomatic relations re-establishment",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.75
+        },
+        {
+          "source": {
+            "url": "https://www.caribbean-council.org/diaz-canel-outlines-cubas-approach-to-any-negotiation-with-the-us/",
+            "source": "caribbean-council.org",
+            "published_at": "3 days ago",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Díaz-Canel outlines Cuba’s approach to any negotiation with the US - The Caribbean Council",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "other",
+            "stance_summary": "Caribbean Council reports on Cuban President Díaz-Canel's approach and conditions for negotiation with the US.",
+            "topic": "Cuba-US negotiation approach",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://www.cfr.org/timelines/us-cuba-relations",
+            "source": "cfr.org",
+            "published_at": "July 15, 2025",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "U.S.-Cuba Relations | Council on Foreign Relations",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "CFR provides comprehensive timeline and analysis of US-Cuba relations history and policy developments.",
+            "topic": "US-Cuba relations timeline and analysis",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.55
+        },
+        {
+          "source": {
+            "url": "https://www.bu.edu/articles/2015/cuban-immigration/",
+            "source": "bu.edu",
+            "published_at": "June 25, 2019",
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "US-Cuban immigration policy and the Cold War and domestic politics that shaped it | The Brink | Boston University",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "external_regulation",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Provides historical analysis of how Cold War politics and domestic US political considerations shaped Cuban immigration policy over time.",
+            "topic": "US-Cuba migration policy history",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.4
+        },
+        {
+          "source": {
+            "url": "https://brill.com/view/journals/dipl/1/2/article-p305_305.xml?language=en",
+            "source": "brill.com",
+            "published_at": "December 6, 2019",
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "Diplomacy Meets Migration: US Relations with Cuba during the Cold War, written by Hideaki Kami. 2018. in: Diplomatica Volume 1 Issue 2 (2019)",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "external_regulation",
+              "policy_prescription",
+              "legality_constitutionality"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Academic examination of the intersection between diplomatic relations and migration policy between the US and Cuba during the Cold War period.",
+            "topic": "US-Cuba migration diplomacy",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.35
+        },
+        {
+          "source": {
+            "url": "https://cmsny.org/publications/imr-cuba-migration-diplomacy/",
+            "source": "cmsny.org",
+            "published_at": "September 30, 2022",
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "Diplomacy Meets Migration: US Relations with Cuba during the Cold War - The Center for Migration Studies of New York (CMS)",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "external_regulation",
+              "fairness_and_equality",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Scholarly analysis exploring the complex relationship between US diplomatic efforts and Cuban migration patterns during the Cold War era.",
+            "topic": "US-Cuba migration diplomacy",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.35
+        },
+        {
+          "source": {
+            "url": "https://fiveable.me/latin-america-1791-present/unit-6/us-cuba-relations-cold-war-context/study-guide/qd8Lf01e3729m6nw",
+            "source": "fiveable.me",
+            "published_at": "1 month ago",
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "U.S.-Cuba Relations and the Cold War Context | Latin... | Fiveable",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "external_regulation"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Educational study guide examining US-Cuba relations within Cold War historical context and its impact on bilateral relations.",
+            "topic": "US-Cuba Cold War relations",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.2
+        },
+        {
+          "source": {
+            "url": "https://www.govinfo.gov/content/pkg/CPRT-111SPRT47260/html/CPRT-111SPRT47260.htm",
+            "source": "govinfo.gov",
+            "published_at": null,
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "CHANGING CUBA POLICY--IN THE UNITED STATES NATIONAL INTEREST",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "legality_constitutionality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "government",
+            "stance_summary": "Congressional policy document analyzing proposed changes to US Cuba policy in the national interest with emphasis on diplomatic and migration considerations.",
+            "topic": "US Cuba policy reform",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.5
+        },
+        {
+          "source": {
+            "url": "https://academic.oup.com/jah/article/106/1/248/5492019",
+            "source": "academic.oup.com",
+            "published_at": "June 1, 2019",
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "Diplomacy Meets Migration: US Relations with Cuba during the Cold War | Journal of American History | Oxford Academic",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "external_regulation",
+              "policy_prescription",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Peer-reviewed historical analysis of the intersection between US-Cuba diplomatic relations and migration policy during the Cold War period.",
+            "topic": "US-Cuba migration diplomacy",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.4
+        },
+        {
+          "source": {
+            "url": "https://scholarship.law.umn.edu/cgi/viewcontent.cgi?article=1282&context=mjil",
+            "source": "scholarship.law.umn.edu",
+            "published_at": null,
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "Cuban Migration to the United States in a Post-Normalized ...",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "legality_constitutionality",
+              "policy_prescription",
+              "external_regulation"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Legal and policy analysis of Cuban migration to the United States in the context of normalized diplomatic relations.",
+            "topic": "Cuban migration policy post-normalization",
+            "geographic_focus": "United States, Cuba"
+          },
+          "relevance_score": 0.45
+        },
+        {
+          "source": {
+            "url": "https://www.refworld.org/reference/countryrep/writenet/1995/en/95792",
+            "source": "refworld.org",
+            "published_at": "April 15, 2025",
+            "query": {
+              "text": "academic analysis US Cuba relations migration policy cold war legacy international law",
+              "intent": "Expert and analytical perspective examining historical context and international legal frameworks"
+            },
+            "title": "Cuba: Reforms, Migration and International Relations | Refworld",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "external_regulation",
+              "policy_prescription",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "international_org",
+            "stance_summary": "Reference document examining Cuban reforms, migration patterns, and the country's international relations in contemporary context.",
+            "topic": "Cuba migration and international relations",
+            "geographic_focus": "Cuba, United States"
+          },
+          "relevance_score": 0.35
+        }
+      ],
+      "usage": {
+        "api_calls": [
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 2347,
+            "output_tokens": 2336,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 0
+          },
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 2427,
+            "output_tokens": 2277,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 0
+          },
+          {
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 1411,
+            "output_tokens": 958,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "web_searches": 0
+          }
+        ],
+        "gnews_requests": 0,
+        "x_api_requests": 0,
+        "exa_requests": 0,
+        "input_tokens": 6185,
+        "output_tokens": 5571,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 0,
+        "estimated_cost": 0.03404
+      },
+      "cost_usd": 0.03404,
+      "timestamp": "2026-04-02T08:40:52.561998+00:00",
+      "duration_seconds": 14.6714
+    },
+    {
+      "stage": "ranking",
+      "component": "MMRRanker",
+      "input": {
+        "source_count": 48
+      },
+      "output": [
+        {
+          "source": {
+            "url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2023/01/05/fact-sheet-biden-harris-administration-announces-new-border-enforcement-actions/",
+            "source": "bidenwhitehouse.archives.gov",
+            "published_at": "January 5, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "FACT SHEET: Biden-Harris Administration Announces New Border Enforcement Actions | The White House",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "security_and_defense"
+            ],
+            "stakeholder_type": "government",
+            "stance_summary": "Official White House fact sheet detailing Biden administration's border enforcement actions and legal pathways for migrants from Cuba and other countries.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States"
+          },
+          "relevance_score": 0.95
+        },
+        {
+          "source": {
+            "url": "https://acere.org/migration/",
+            "source": "acere.org",
+            "published_at": "November 14, 2024",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "U.S. Sanctions: A Root Cause of Cuban Migration - The Alliance for Cuba Engagement and Respect (ACERE)",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "left",
+            "policy_frames": [
+              "fairness_and_equality",
+              "external_regulation"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "ACERE argues that US sanctions are a root cause of Cuban migration, positioning sanctions policy as a key driver of the migration issue.",
+            "topic": "US sanctions and Cuban migration",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://www.caribbean-council.org/diaz-canel-outlines-cubas-approach-to-any-negotiation-with-the-us/",
+            "source": "caribbean-council.org",
+            "published_at": "3 days ago",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Díaz-Canel outlines Cuba’s approach to any negotiation with the US - The Caribbean Council",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "other",
+            "stance_summary": "Caribbean Council reports on Cuban President Díaz-Canel's approach and conditions for negotiation with the US.",
+            "topic": "Cuba-US negotiation approach",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://www.nbcnews.com/news/latino/cubans-weigh-options-migration-us-new-biden-rules-rcna65264",
+            "source": "nbcnews.com",
+            "published_at": "January 12, 2023",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "Cubans weigh options on migration to U.S. after new Biden border rules",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "policy_prescription",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "Reports on how Cubans are evaluating migration options in response to Biden's new border restrictions.",
+            "topic": "US-Cuba migration policy",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.8
+        },
+        {
+          "source": {
+            "url": "https://www.cbsnews.com/miami/news/cuba-signals-willingness-to-engage-in-dialogue-as-diplomatic-tensions-escalate-with-u-s-over-sanctions/",
+            "source": "cbsnews.com",
+            "published_at": "February 6, 2026",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Cuba signals willingness to engage in dialogue as diplomatic tensions escalate with U.S. over sanctions - CBS Miami",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "external_regulation"
+            ],
+            "stakeholder_type": "journalist",
+            "stance_summary": "CBS Miami reports on Cuba signaling willingness to engage in dialogue as diplomatic tensions escalate over US sanctions policy.",
+            "topic": "US-Cuba diplomatic tensions and sanctions",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.85
+        },
+        {
+          "source": {
+            "url": "https://www.cfr.org/blog/unlikely-biden-trump-throughline-cuba",
+            "source": "cfr.org",
+            "published_at": "July 2, 2025",
+            "query": {
+              "text": "Biden administration Cuba migration policy border security enforcement",
+              "intent": "Official US government perspective on migration control and national security concerns"
+            },
+            "title": "The Unlikely Biden-Trump Throughline on Cuba | Council on Foreign Relations",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political",
+              "policy_prescription",
+              "external_regulation"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "Analyzes policy continuities between Biden and Trump administrations regarding Cuba, suggesting bipartisan approaches to the issue.",
+            "topic": "US-Cuba diplomatic relations",
+            "geographic_focus": "United States-Cuba"
+          },
+          "relevance_score": 0.7
+        },
+        {
+          "source": {
+            "url": "https://www.ohchr.org/en/press-releases/2025/11/enforcement-and-recent-strengthening-us-sanctions-deepen-hardships-cuban",
+            "source": "ohchr.org",
+            "published_at": null,
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Enforcement and recent strengthening of U.S. sanctions deepen hardships for Cuban population: Special Rapporteur | OHCHR",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "external_regulation",
+              "health_and_safety",
+              "morality"
+            ],
+            "stakeholder_type": "international_org",
+            "stance_summary": "UN human rights body states that U.S. sanctions enforcement deepens hardships for Cuban population.",
+            "topic": "US-Cuba sanctions impact",
+            "geographic_focus": "Cuba"
+          },
+          "relevance_score": 0.5
+        },
+        {
+          "source": {
+            "url": "https://obamawhitehouse.archives.gov/the-press-office/2015/07/01/statement-president-re-establishment-diplomatic-relations-cuba",
+            "source": "obamawhitehouse.archives.gov",
+            "published_at": "July 1, 2015",
+            "query": {
+              "text": "Miami Cuban American community reaction US Cuba diplomatic relations negotiations",
+              "intent": "Perspective of Cuban diaspora communities in the US with historical political positions"
+            },
+            "title": "Statement by the President on the Re-Establishment of Diplomatic Relations with Cuba | whitehouse.gov",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "political"
+            ],
+            "stakeholder_type": "government",
+            "stance_summary": "Official Obama White House statement announcing re-establishment of diplomatic relations with Cuba in 2015.",
+            "topic": "US-Cuba diplomatic relations re-establishment",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.75
+        },
+        {
+          "source": {
+            "url": "https://www.wola.org/analysis/cuban-migration-is-changing-us-must-note/",
+            "source": "wola.org",
+            "published_at": "December 20, 2024",
+            "query": {
+              "text": "Cuba government response US embargo migration restrictions humanitarian",
+              "intent": "Cuban state perspective and criticisms of US policy from Havana's viewpoint"
+            },
+            "title": "Cuban Migration is Changing, the U.S. Must Take Note",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center_left",
+            "policy_frames": [
+              "policy_prescription",
+              "fairness_and_equality"
+            ],
+            "stakeholder_type": "civil_society",
+            "stance_summary": "Analyzes changing patterns in Cuban migration and argues U.S. policy must adapt to new realities.",
+            "topic": "Cuban migration trends",
+            "geographic_focus": "Cuba-United States"
+          },
+          "relevance_score": 0.7
+        },
+        {
+          "source": {
+            "url": "https://www.american.edu/centers/latin-american-latino-studies/upload/cuban-migration-and-its-social-crisis-an-overview.pdf",
+            "source": "american.edu",
+            "published_at": "April 8, 2025",
+            "query": {
+              "text": "Cuban migrants asylum seekers Central America US border crisis experiences",
+              "intent": "Humanitarian and personal perspective of affected migrants and their experiences"
+            },
+            "title": "Cuban Migration and Its Social Crisis: An Overview",
+            "description": null
+          },
+          "annotation": {
+            "political_lean": "center",
+            "policy_frames": [
+              "fairness_and_equality",
+              "policy_prescription"
+            ],
+            "stakeholder_type": "academic",
+            "stance_summary": "American University provides comprehensive overview of Cuban migration patterns and associated social crises.",
+            "topic": "Cuban migration and social impact",
+            "geographic_focus": "Cuba and United States"
+          },
+          "relevance_score": 0.7
+        }
+      ],
+      "usage": null,
+      "cost_usd": null,
+      "timestamp": "2026-04-02T08:40:52.567036+00:00",
+      "duration_seconds": 0.0045
+    }
+  ],
+  "final_source_count": 10,
+  "total_usage": {
+    "api_calls": [
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 210,
+        "output_tokens": 223,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 0
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 16464,
+        "output_tokens": 1678,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 1
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 18161,
+        "output_tokens": 1398,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 1
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 16643,
+        "output_tokens": 1411,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 1
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 17848,
+        "output_tokens": 1203,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 1
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 17493,
+        "output_tokens": 1383,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 1
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 2347,
+        "output_tokens": 2336,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 0
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 2427,
+        "output_tokens": 2277,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 0
+      },
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 1411,
+        "output_tokens": 958,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "web_searches": 0
+      }
+    ],
+    "gnews_requests": 0,
+    "x_api_requests": 0,
+    "exa_requests": 0,
+    "input_tokens": 93004,
+    "output_tokens": 12867,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "web_searches": 5,
+    "estimated_cost": 0.207339
+  },
+  "total_cost_usd": 0.207339
+}
