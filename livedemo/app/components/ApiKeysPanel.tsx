@@ -1,7 +1,7 @@
 interface ApiKeysPanelProps {
   apiKey: string;
   onChange: (value: string) => void;
-  error?: boolean;
+  error?: string | boolean;
 }
 
 export function ApiKeysPanel({ apiKey, onChange, error }: ApiKeysPanelProps) {
@@ -33,7 +33,7 @@ export function ApiKeysPanel({ apiKey, onChange, error }: ApiKeysPanelProps) {
         />
         {error && (
           <p className="text-xs text-red-500 mt-0.5">
-            A Claude API key is required to run the pipeline.
+            {typeof error === "string" ? error : "A Claude API key is required to run the pipeline."}
           </p>
         )}
       </div>

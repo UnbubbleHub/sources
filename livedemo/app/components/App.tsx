@@ -45,7 +45,7 @@ export function App() {
   const [query, setQuery] = useState("");
   const [exampleDate, setExampleDate] = useState<string | undefined>();
   const [apiKey, setApiKey] = useState("");
-  const [apiKeyError, setApiKeyError] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState<string | boolean>(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleQueryChange = useCallback((v: string) => {
@@ -57,6 +57,10 @@ export function App() {
     if (!query.trim()) return;
     if (!exampleDate && !apiKey.trim()) {
       setApiKeyError(true);
+      return;
+    }
+    if (!exampleDate && !apiKey.trim().startsWith("sk-ant-")) {
+      setApiKeyError("API key must start with \"sk-ant-\"");
       return;
     }
     setApiKeyError(false);
