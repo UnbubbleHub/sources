@@ -11,6 +11,7 @@ from pydantic import BaseModel, field_validator
 
 from unbubble_sources.config import create_from_config, get_default_config_path, load_config
 from unbubble_sources.data import AnnotatedSource, Article, NewsEvent, Tweet
+from unbubble_sources.stream_logger import StreamLogger
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class CLIArgs(BaseModel):
     config: Path
     log: bool = False
     log_dir: str = "logs"
+    stream: bool = False
 
     @field_validator("config")
     @classmethod
@@ -38,17 +40,25 @@ async def run(args: CLIArgs) -> None:
         args: Validated CLI arguments.
     """
     config = load_config(args.config)
+
+    stream_logger_instance = StreamLogger() if args.stream else None
     pipeline, run_logger, _price_cache = create_from_config(
         config,
         log_override=args.log if args.log else None,
         log_dir_override=args.log_dir if args.log_dir != "logs" else None,
+        stream_logger=stream_logger_instance,
     )
     event = NewsEvent(description=args.query)
 
-    logger.info(f"Running pipeline for: {args.query}")
-    logger.info(f"Config: {args.config}")
+    if not args.stream:
+        logger.info(f"Running pipeline for: {args.query}")
+        logger.info(f"Config: {args.config}")
 
     sources, usage = await pipeline.run(event)
+
+    # In stream mode, all output is JSONL — skip human-readable output
+    if args.stream:
+        return
 
     print(f"\nFound {len(sources)} unique sources:\n")
     for i, src in enumerate(sources, 1):
@@ -137,8 +147,15 @@ def main() -> None:
         default="logs",
         help="Directory for log files (default: logs/)",
     )
+    parser.add_argument(
+        "--stream",
+        action="store_true",
+        default=False,
+        help="Output JSONL to stdout (one line per stage, for programmatic consumption)",
+    )
 
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    log_level = logging.CRITICAL if ns.stream else logging.INFO
+    logging.basicConfig(level=log_level, format="%(message)s")
 
     ns = parser.parse_args()
     config_path: Path = ns.config if ns.config else get_default_config_path()
@@ -149,6 +166,7 @@ def main() -> None:
             config=config_path,
             log=ns.log,
             log_dir=ns.log_dir,
+            stream=ns.stream,
         )
     except Exception as e:
         logger.error(str(e))

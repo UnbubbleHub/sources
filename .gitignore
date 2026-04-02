@@ -7,3 +7,5 @@ dist/
 CLAUDE.md
 *_cache/
 logs/
+.vercel
+.env*.local

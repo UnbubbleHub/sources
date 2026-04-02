@@ -12,6 +12,7 @@ from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
+from unbubble_sources.stream_logger import StreamLogger
 from unbubble_sources.search.base import SourceSearcher
 
 logger = logging.getLogger(__name__)
@@ -52,7 +53,7 @@ class ComposablePipeline:
         ranker_top_k: int = 10,
         num_queries_per_generator: int = 5,
         max_results_per_searcher: int = 10,
-        run_logger: RunLogger | None = None,
+        run_logger: RunLogger | StreamLogger | None = None,
         price_cache: PriceCache | None = None,
     ) -> None:
         self._generators = generators

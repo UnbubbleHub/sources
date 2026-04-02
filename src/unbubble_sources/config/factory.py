@@ -39,6 +39,7 @@ from unbubble_sources.query.mistral import MistralQueryGenerator
 from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
+from unbubble_sources.stream_logger import StreamLogger
 from unbubble_sources.search.base import SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.search.exa import ExaSearcher
@@ -125,7 +126,7 @@ def create_ranker(config: MMRRankerConfig) -> MMRRanker:
 
 def create_pipeline(
     config: ComposablePipelineConfig | ClaudeE2EPipelineConfig,
-    run_logger: RunLogger | None = None,
+    run_logger: RunLogger | StreamLogger | None = None,
     price_cache: PriceCache | None = None,
 ) -> Pipeline:
     """Create a pipeline from config."""
@@ -172,25 +173,30 @@ def create_from_config(
     *,
     log_override: bool | None = None,
     log_dir_override: str | None = None,
-) -> tuple[Pipeline, RunLogger | None, PriceCache]:
+    stream_logger: StreamLogger | None = None,
+) -> tuple[Pipeline, RunLogger | StreamLogger | None, PriceCache]:
     """Create a complete pipeline from root config.
 
     Args:
         config: Root configuration.
         log_override: Override the config's logging.enabled setting.
         log_dir_override: Override the config's logging.log_dir setting.
+        stream_logger: If provided, use this StreamLogger instead of RunLogger.
 
     Returns:
-        Tuple of (pipeline, run_logger, price_cache).
-        run_logger is None if logging is disabled.
+        Tuple of (pipeline, logger, price_cache).
+        logger is None if logging is disabled and no stream_logger given.
     """
-    log_enabled = log_override if log_override is not None else config.logging.enabled
-    log_dir = Path(log_dir_override if log_dir_override is not None else config.logging.log_dir)
+    active_logger: RunLogger | StreamLogger | None = stream_logger
 
-    run_logger: RunLogger | None = None
-    if log_enabled:
-        run_logger = RunLogger(log_dir=log_dir, enabled=True)
+    if active_logger is None:
+        log_enabled = log_override if log_override is not None else config.logging.enabled
+        log_dir = Path(
+            log_dir_override if log_dir_override is not None else config.logging.log_dir
+        )
+        if log_enabled:
+            active_logger = RunLogger(log_dir=log_dir, enabled=True)
 
     price_cache = PriceCache()
-    pipeline = create_pipeline(config.pipeline, run_logger=run_logger, price_cache=price_cache)
-    return (pipeline, run_logger, price_cache)
+    pipeline = create_pipeline(config.pipeline, run_logger=active_logger, price_cache=price_cache)
+    return (pipeline, active_logger, price_cache)
