@@ -12,8 +12,8 @@ from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
-from unbubble_sources.stream_logger import StreamLogger
 from unbubble_sources.search.base import SourceSearcher
+from unbubble_sources.stream_logger import StreamLogger
 
 logger = logging.getLogger(__name__)
 

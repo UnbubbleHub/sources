@@ -10,7 +10,6 @@ import asyncio
 import json
 import os
 import queue
-import sys
 import threading
 from http.server import BaseHTTPRequestHandler
 

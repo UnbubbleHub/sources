@@ -154,10 +154,10 @@ def main() -> None:
         help="Output JSONL to stdout (one line per stage, for programmatic consumption)",
     )
 
+    ns = parser.parse_args()
+
     log_level = logging.CRITICAL if ns.stream else logging.INFO
     logging.basicConfig(level=log_level, format="%(message)s")
-
-    ns = parser.parse_args()
     config_path: Path = ns.config if ns.config else get_default_config_path()
 
     try:
