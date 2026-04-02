@@ -45,7 +45,11 @@ class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowerca
 
         # Set API key for the pipeline components to pick up
         if api_key:
-            os.environ["CLAUDE_API_KEY"] = api_key
+            stripped = api_key.strip()
+            os.environ["CLAUDE_API_KEY"] = stripped
+            print(f"[run.py] API key received: {stripped[:8]}...{stripped[-4:]} (len={len(stripped)})", flush=True)
+        else:
+            print("[run.py] WARNING: no api_key in request body", flush=True)
 
         config = load_config(_find_config())
 
