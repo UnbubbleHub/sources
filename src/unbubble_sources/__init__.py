@@ -1,5 +1,7 @@
 """Unbubble Sources: Open tools for research and applications against social polarization."""
 
+from typing import Any
+
 from unbubble_sources.aggregator.base import QueryAggregator
 from unbubble_sources.aggregator.noop import NoOpAggregator
 
@@ -50,7 +52,7 @@ from unbubble_sources.url import extract_domain
 # Or:  from unbubble_sources import ExaSearcher  (triggers lazy import below)
 
 
-def __getattr__(name: str):  # noqa: ANN001
+def __getattr__(name: str) -> Any:  # noqa: ANN001
     """Lazy import for optional-dependency modules."""
     _lazy = {
         "ExaSearcher": "unbubble_sources.search.exa",
