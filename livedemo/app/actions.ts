@@ -1,8 +1,10 @@
 "use server";
 
 import crypto from "crypto";
+import { cookies } from "next/headers";
 import { after } from "next/server";
-import { get, list, put } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
+import { sql } from "@/app/db";
 
 export async function generate(query: string, apiKey: string, date?: string) {
   // Deterministic ID: hash(query + date) → same query on same day = same id
@@ -19,12 +21,22 @@ export async function generate(query: string, apiKey: string, date?: string) {
     return { id };
   }
 
+  // Read visitor ID from cookie (if present)
+  const jar = await cookies();
+  const visitorId = jar.get("unbubble_vid")?.value ?? null;
+
   // Write _meta.json immediately
   await put(
     `runs/${id}/_meta.json`,
-    JSON.stringify({ query, started_at: new Date().toISOString(), date: today }),
-    { access: "private", contentType: "application/json" },
+    JSON.stringify({ query, started_at: new Date().toISOString(), date: today, visitor_id: visitorId }),
+    { access: "public", contentType: "application/json" },
   );
+
+  // Track run in analytics DB
+  sql(
+    "INSERT INTO analytics_runs (run_id, visitor_id, query, date, status) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (run_id) DO NOTHING",
+    [id, visitorId, query, today, "running"],
+  ).catch((err) => console.error("[analytics] run insert failed:", err));
 
   // Fire pipeline in background — return id immediately
   after(async () => {
@@ -52,8 +64,10 @@ export async function generate(query: string, apiKey: string, date?: string) {
             error: "Pipeline failed",
             timestamp: new Date().toISOString(),
           }),
-          { access: "private", contentType: "application/json" },
+          { access: "public", contentType: "application/json" },
         );
+        sql("UPDATE analytics_runs SET status = $1 WHERE run_id = $2", ["error", id])
+          .catch((err) => console.error("[analytics] run update failed:", err));
         return;
       }
 
@@ -61,6 +75,7 @@ export async function generate(query: string, apiKey: string, date?: string) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let lastCost: number | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -78,17 +93,22 @@ export async function generate(query: string, apiKey: string, date?: string) {
             const suffix = data.component ? `__${data.component}` : "";
             const name = `${String(data.step).padStart(2, "0")}_${data.stage}${suffix}.json`;
             await put(`runs/${id}/${name}`, JSON.stringify(data), {
-              access: "private",
+              access: "public",
               contentType: "application/json",
             });
+            if (data.cost_usd != null) lastCost = data.cost_usd;
           } else if (data.type === "completed") {
             await put(`runs/${id}/_completed.json`, JSON.stringify(data), {
-              access: "private",
+              access: "public",
               contentType: "application/json",
             });
           }
         }
       }
+
+      // Mark run as completed in analytics DB
+      sql("UPDATE analytics_runs SET status = $1, cost = $2 WHERE run_id = $3", ["completed", lastCost, id])
+        .catch((err) => console.error("[analytics] run update failed:", err));
     } catch (err) {
       console.error(`[actions.after] pipeline error for run ${id}:`, err);
       await put(
@@ -97,8 +117,10 @@ export async function generate(query: string, apiKey: string, date?: string) {
           error: "Pipeline failed",
           timestamp: new Date().toISOString(),
         }),
-        { access: "private", contentType: "application/json" },
+        { access: "public", contentType: "application/json" },
       );
+      sql("UPDATE analytics_runs SET status = $1 WHERE run_id = $2", ["error", id])
+        .catch((err) => console.error("[analytics] run update failed:", err));
     }
   });
 
@@ -114,11 +136,10 @@ export async function getRunStatus(id: string) {
 
   const entries = await Promise.all(
     blobs.map(async (blob) => {
-      const result = await get(blob.pathname, { access: "private" });
       const name = blob.pathname.split("/").pop()!;
-      if (!result) return { name, data: null };
-      const text = await new Response(result.stream).text();
-      const data = JSON.parse(text);
+      const res = await fetch(blob.url);
+      if (!res.ok) return { name, data: null };
+      const data = await res.json();
       return { name, data };
     }),
   );

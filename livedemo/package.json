@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@tabler/icons-react": "^3.41.1",
     "@tanstack/react-table": "^8.21.3",
     "@vercel/blob": "^2.3.2",
