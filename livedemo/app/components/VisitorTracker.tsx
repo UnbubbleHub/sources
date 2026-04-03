@@ -9,6 +9,7 @@ export function VisitorTracker() {
   useEffect(() => {
     if (tracked.current) return;
     tracked.current = true;
+    if (window.location.pathname.startsWith("/admin")) return;
     trackVisit(window.location.pathname);
   }, []);
 
