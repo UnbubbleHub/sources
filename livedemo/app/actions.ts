@@ -47,14 +47,11 @@ export async function generate(query: string, apiKey: string, date?: string) {
       if (!res.ok || !res.body) {
         let body = "";
         try { body = await res.text(); } catch {}
+        console.error(`[actions.after] /api/run failed for run ${id}: ${res.status} ${res.statusText}`, body);
         await put(
           `runs/${id}/_error.json`,
           JSON.stringify({
-            error: `Python function returned ${res.status}`,
-            status: res.status,
-            statusText: res.statusText,
-            body,
-            url: res.url,
+            error: "Pipeline failed",
             timestamp: new Date().toISOString(),
           }),
           { access: "public", contentType: "application/json" },
@@ -95,11 +92,11 @@ export async function generate(query: string, apiKey: string, date?: string) {
         }
       }
     } catch (err) {
+      console.error(`[actions.after] pipeline error for run ${id}:`, err);
       await put(
         `runs/${id}/_error.json`,
         JSON.stringify({
-          error: String(err),
-          stack: err instanceof Error ? err.stack : undefined,
+          error: "Pipeline failed",
           timestamp: new Date().toISOString(),
         }),
         { access: "public", contentType: "application/json" },
