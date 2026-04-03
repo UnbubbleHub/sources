@@ -42,12 +42,8 @@ class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowerca
         query: str = body["query"]
         api_key: str | None = body.get("api_key")
 
-        # Set API key for the pipeline components to pick up
-        if api_key:
-            stripped = api_key.strip()
-            os.environ["CLAUDE_API_KEY"] = stripped
-            print(f"[run.py] API key received: {stripped[:8]}...{stripped[-4:]} (len={len(stripped)})", flush=True)
-        else:
+        resolved_key = api_key.strip() if api_key else None
+        if not resolved_key:
             print("[run.py] WARNING: no api_key in request body", flush=True)
 
         config = load_config(_find_config())
@@ -57,7 +53,9 @@ class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowerca
 
         from unbubble_sources.config import create_from_config
 
-        pipeline, _, _ = create_from_config(config, stream_logger=stream_logger)
+        pipeline, _, _ = create_from_config(
+            config, stream_logger=stream_logger, api_key=resolved_key,
+        )
         event = NewsEvent(description=query)
 
         # Run pipeline in a background thread so we can stream results

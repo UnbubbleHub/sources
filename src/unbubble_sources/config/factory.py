@@ -43,7 +43,11 @@ from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.stream_logger import StreamLogger
 
 
-def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
+def create_generator(
+    config: QueryGeneratorConfig,
+    *,
+    api_key: str | None = None,
+) -> QueryGenerator:
     """Create a query generator from config.
 
     Uses explicit type matching rather than getattr.
@@ -52,6 +56,7 @@ def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
         return ClaudeQueryGenerator(
             model=config.model,
             system_prompt=config.system_prompt,
+            api_key=api_key,
         )
     if isinstance(config, MistralQueryGeneratorConfig):
         from unbubble_sources.query.mistral import MistralQueryGenerator
@@ -68,12 +73,15 @@ def create_generator(config: QueryGeneratorConfig) -> QueryGenerator:
 
 def create_searcher(
     config: SearcherConfig,
+    *,
+    api_key: str | None = None,
 ) -> SourceSearcher:
     """Create a source searcher from config."""
     if isinstance(config, ClaudeSearcherConfig):
         return ClaudeSearcher(
             model=config.model,
             max_searches_per_query=config.max_searches_per_query,
+            api_key=api_key,
         )
     if isinstance(config, GNewsSearcherConfig):
         from unbubble_sources.search.gnews import GNewsSearcher
@@ -116,11 +124,16 @@ def create_aggregator(
     raise ValueError(msg)
 
 
-def create_annotator(config: ClaudeAnnotatorConfig) -> ClaudeAnnotator:
+def create_annotator(
+    config: ClaudeAnnotatorConfig,
+    *,
+    api_key: str | None = None,
+) -> ClaudeAnnotator:
     """Create a source annotator from config."""
     return ClaudeAnnotator(
         model=config.model,
         batch_size=config.batch_size,
+        api_key=api_key,
     )
 
 
@@ -133,13 +146,17 @@ def create_pipeline(
     config: ComposablePipelineConfig | ClaudeE2EPipelineConfig,
     run_logger: RunLogger | StreamLogger | None = None,
     price_cache: PriceCache | None = None,
+    *,
+    api_key: str | None = None,
 ) -> Pipeline:
     """Create a pipeline from config."""
     if isinstance(config, ComposablePipelineConfig):
-        generators = [create_generator(g) for g in config.generators]
+        generators = [create_generator(g, api_key=api_key) for g in config.generators]
         aggregator = create_aggregator(config.aggregator)
-        searchers = [create_searcher(s) for s in config.searchers]
-        annotator = create_annotator(config.annotator) if config.annotator else None
+        searchers = [create_searcher(s, api_key=api_key) for s in config.searchers]
+        annotator = (
+            create_annotator(config.annotator, api_key=api_key) if config.annotator else None
+        )
         ranker = create_ranker(config.ranker) if config.ranker else None
         ranker_top_k = config.ranker.top_k if config.ranker else 10
 
@@ -156,7 +173,9 @@ def create_pipeline(
             price_cache=price_cache,
         )
     if isinstance(config, ClaudeE2EPipelineConfig):
-        annotator = create_annotator(config.annotator) if config.annotator else None
+        annotator = (
+            create_annotator(config.annotator, api_key=api_key) if config.annotator else None
+        )
         ranker = create_ranker(config.ranker) if config.ranker else None
         ranker_top_k = config.ranker.top_k if config.ranker else 10
 
@@ -168,6 +187,7 @@ def create_pipeline(
             ranker_top_k=ranker_top_k,
             run_logger=run_logger,
             price_cache=price_cache,
+            api_key=api_key,
         )
     msg = f"Unknown pipeline config type: {type(config)}"
     raise ValueError(msg)
@@ -179,6 +199,7 @@ def create_from_config(
     log_override: bool | None = None,
     log_dir_override: str | None = None,
     stream_logger: StreamLogger | None = None,
+    api_key: str | None = None,
 ) -> tuple[Pipeline, RunLogger | StreamLogger | None, PriceCache]:
     """Create a complete pipeline from root config.
 
@@ -187,6 +208,7 @@ def create_from_config(
         log_override: Override the config's logging.enabled setting.
         log_dir_override: Override the config's logging.log_dir setting.
         stream_logger: If provided, use this StreamLogger instead of RunLogger.
+        api_key: API key for Claude components (avoids os.environ mutation).
 
     Returns:
         Tuple of (pipeline, logger, price_cache).
@@ -203,5 +225,7 @@ def create_from_config(
             active_logger = RunLogger(log_dir=log_dir, enabled=True)
 
     price_cache = PriceCache()
-    pipeline = create_pipeline(config.pipeline, run_logger=active_logger, price_cache=price_cache)
+    pipeline = create_pipeline(
+        config.pipeline, run_logger=active_logger, price_cache=price_cache, api_key=api_key,
+    )
     return (pipeline, active_logger, price_cache)
