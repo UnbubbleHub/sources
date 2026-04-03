@@ -2,7 +2,7 @@
 
 import crypto from "crypto";
 import { after } from "next/server";
-import { list, put } from "@vercel/blob";
+import { get, list, put } from "@vercel/blob";
 
 export async function generate(query: string, apiKey: string, date?: string) {
   console.log(`[actions.generate] apiKey: ${apiKey ? `${apiKey.slice(0, 8)}...${apiKey.slice(-4)} (len=${apiKey.length})` : "EMPTY"}`);
@@ -24,7 +24,7 @@ export async function generate(query: string, apiKey: string, date?: string) {
   await put(
     `runs/${id}/_meta.json`,
     JSON.stringify({ query, started_at: new Date().toISOString(), date: today }),
-    { access: "public", contentType: "application/json" },
+    { access: "private", contentType: "application/json" },
   );
 
   // Fire pipeline in background — return id immediately
@@ -54,7 +54,7 @@ export async function generate(query: string, apiKey: string, date?: string) {
             error: "Pipeline failed",
             timestamp: new Date().toISOString(),
           }),
-          { access: "public", contentType: "application/json" },
+          { access: "private", contentType: "application/json" },
         );
         return;
       }
@@ -80,12 +80,12 @@ export async function generate(query: string, apiKey: string, date?: string) {
             const suffix = data.component ? `__${data.component}` : "";
             const name = `${String(data.step).padStart(2, "0")}_${data.stage}${suffix}.json`;
             await put(`runs/${id}/${name}`, JSON.stringify(data), {
-              access: "public",
+              access: "private",
               contentType: "application/json",
             });
           } else if (data.type === "completed") {
             await put(`runs/${id}/_completed.json`, JSON.stringify(data), {
-              access: "public",
+              access: "private",
               contentType: "application/json",
             });
           }
@@ -99,7 +99,7 @@ export async function generate(query: string, apiKey: string, date?: string) {
           error: "Pipeline failed",
           timestamp: new Date().toISOString(),
         }),
-        { access: "public", contentType: "application/json" },
+        { access: "private", contentType: "application/json" },
       );
     }
   });
@@ -116,9 +116,11 @@ export async function getRunStatus(id: string) {
 
   const entries = await Promise.all(
     blobs.map(async (blob) => {
-      const res = await fetch(blob.url);
-      const data = await res.json();
+      const result = await get(blob.pathname, { access: "private" });
       const name = blob.pathname.split("/").pop()!;
+      if (!result) return { name, data: null };
+      const text = await new Response(result.stream).text();
+      const data = JSON.parse(text);
       return { name, data };
     }),
   );
