@@ -67,7 +67,6 @@ export function App() {
     setSubmitting(true);
     try {
       const trimmedKey = apiKey.trim();
-      console.log(`[App] calling generate, apiKey: ${trimmedKey ? `${trimmedKey.slice(0, 8)}...${trimmedKey.slice(-4)} (len=${trimmedKey.length})` : "EMPTY"}, exampleDate: ${exampleDate ?? "none"}`);
       const { id } = await generate(query.trim(), trimmedKey, exampleDate);
       router.push(`/search?id=${id}&q=${encodeURIComponent(query.trim())}`);
     } catch {

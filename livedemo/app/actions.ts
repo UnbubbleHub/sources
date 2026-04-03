@@ -5,7 +5,6 @@ import { after } from "next/server";
 import { get, list, put } from "@vercel/blob";
 
 export async function generate(query: string, apiKey: string, date?: string) {
-  console.log(`[actions.generate] apiKey: ${apiKey ? `${apiKey.slice(0, 8)}...${apiKey.slice(-4)} (len=${apiKey.length})` : "EMPTY"}`);
   // Deterministic ID: hash(query + date) → same query on same day = same id
   const today = date ?? new Date().toISOString().slice(0, 10);
   const id = crypto
@@ -34,7 +33,6 @@ export async function generate(query: string, apiKey: string, date?: string) {
 
     try {
       const payload = { query, api_key: apiKey };
-      console.log(`[actions.after] calling /api/run, api_key: ${apiKey ? `${apiKey.slice(0, 8)}...${apiKey.slice(-4)} (len=${apiKey.length})` : "EMPTY"}`);
       const res = await fetch(`${baseUrl}/api/run`, {
         method: "POST",
         headers: {

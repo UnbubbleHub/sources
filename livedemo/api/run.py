@@ -37,14 +37,18 @@ class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowerca
             return
 
         content_length = int(self.headers.get("Content-Length", 0))
+        if content_length > 10_000:
+            self.send_response(413)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Payload too large"}).encode())
+            return
         body = json.loads(self.rfile.read(content_length))
 
         query: str = body["query"]
         api_key: str | None = body.get("api_key")
 
         resolved_key = api_key.strip() if api_key else None
-        if not resolved_key:
-            print("[run.py] WARNING: no api_key in request body", flush=True)
 
         config = load_config(_find_config())
 
@@ -87,8 +91,11 @@ class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowerca
 
         thread.join()
 
-        # If the pipeline errored, emit an error line
+        # If the pipeline errored, log details server-side, return generic message
         if error is not None:
-            err_line = json.dumps({"type": "error", "error": str(error)})
+            import traceback
+
+            traceback.print_exception(type(error), error, error.__traceback__)
+            err_line = json.dumps({"type": "error", "error": "Pipeline failed"})
             self.wfile.write((err_line + "\n").encode())
             self.wfile.flush()
