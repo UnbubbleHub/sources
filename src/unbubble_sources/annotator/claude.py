@@ -79,7 +79,7 @@ def _source_to_prompt_text(source: Source, index: int) -> str:
     parts.append(f"  URL: {source.url}")
     parts.append(f"  Publisher: {source.source}")
     if source.published_at:
-        parts.append(f"  Published: {source.published_at}")
+        parts.append(f"  Published: {source.published_at.isoformat()}")
     if isinstance(source, Article):
         if source.title:
             parts.append(f"  Title: {source.title}")

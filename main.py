@@ -74,14 +74,14 @@ async def run(args: CLIArgs) -> None:
             logger.info(f"   Source: {inner.source}")
             logger.info(f"   URL: {inner.url}")
             if inner.published_at:
-                logger.info(f"   Published: {inner.published_at}")
+                logger.info(f"   Published: {inner.published_at.isoformat()}")
         elif isinstance(inner, Tweet):
             text_preview = inner.text[:100] + ("..." if len(inner.text) > 100 else "")
             logger.info(f"{i}. @{inner.author_handle}: {text_preview}")
             logger.info(f"   URL: {inner.url}")
             logger.info(f"   Likes: {inner.like_count} | Retweets: {inner.retweet_count}")
             if inner.published_at:
-                logger.info(f"   Published: {inner.published_at}")
+                logger.info(f"   Published: {inner.published_at.isoformat()}")
         else:
             logger.info(f"{i}. {inner.url}")
             logger.info(f"   Source: {inner.source}")

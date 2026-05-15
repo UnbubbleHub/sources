@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import os
+from datetime import datetime
 
 import httpx
 
@@ -134,7 +135,7 @@ class XSearcher:
                 Tweet(
                     url=f"https://x.com/{author_handle}/status/{tweet_id}",
                     source="x.com",
-                    published_at=item.get("created_at"),
+                    published_at=_parse_datetime(item.get("created_at")),
                     query=query,
                     tweet_id=tweet_id,
                     author_handle=author_handle,
@@ -157,3 +158,12 @@ def _to_rfc3339(date_str: str) -> str:
     if "T" in date_str:
         return date_str
     return f"{date_str}T00:00:00Z"
+
+
+def _parse_datetime(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None

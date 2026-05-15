@@ -2,6 +2,7 @@
 
 from typing import Any
 from unittest.mock import MagicMock
+from datetime import datetime, timezone
 
 import httpx
 import pytest
@@ -225,7 +226,7 @@ def test_article_dataclass() -> None:
         title="Test Article",
         url="https://example.com",
         source="Test Source",
-        published_at="2026-02-01",
+        published_at=datetime(2026, 2, 1, tzinfo=timezone.utc),
         description="Test description",
         query=query,
     )

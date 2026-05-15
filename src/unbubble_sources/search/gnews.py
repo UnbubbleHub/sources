@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from datetime import datetime
 
 import httpx
 
@@ -114,9 +115,18 @@ class GNewsSearcher:
                     title=item.get("title", ""),
                     url=item.get("url", ""),
                     source=item.get("source", {}).get("name", "Unknown"),
-                    published_at=item.get("publishedAt"),
+                    published_at=_parse_datetime(item.get("publishedAt")),
                     description=item.get("description"),
                     query=query,
                 )
             )
         return articles
+
+
+def _parse_datetime(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None

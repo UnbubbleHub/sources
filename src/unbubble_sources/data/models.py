@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from enum import StrEnum
+from datetime import datetime
 
 
 class PolicyFrame(StrEnum):
@@ -85,7 +86,7 @@ class Source:
 
     url: str
     source: str
-    published_at: str | None = None
+    published_at: datetime | None = None
     query: SearchQuery | None = None
 
 
