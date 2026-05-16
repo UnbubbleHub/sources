@@ -9,6 +9,7 @@ from datetime import datetime
 from exa_py import AsyncExa
 
 from unbubble_sources.data import Article, SearchQuery, Source, Usage
+from unbubble_sources.parsers import parse_datetime
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +111,7 @@ class ExaSearcher:
                     url=result.url,
                     source=domain,
                     title=result.title or "",
-                    published_at=_parse_datetime(result.published_date),
+                    published_at=parse_datetime(result.published_date),
                     query=query,
                 )
             )
@@ -138,12 +139,4 @@ def _extract_domain(url: str) -> str:
         return hostname
     except Exception:
         return "unknown"
-
-
-def _parse_datetime(value: str | None) -> datetime | None:
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None
+    

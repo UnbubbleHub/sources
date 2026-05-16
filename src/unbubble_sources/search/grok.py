@@ -12,12 +12,12 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime
 
 import httpx
 
 from unbubble_sources.data import APICallUsage, SearchQuery, Source, Tweet, Usage
 from unbubble_sources.url import extract_domain
+from unbubble_sources.parsers import parse_datetime
 
 GROK_RESPONSES_URL = "https://api.x.ai/v1/responses"
 DEFAULT_MODEL = "grok-4-1-fast"
@@ -252,7 +252,7 @@ class GrokSearcher:
                 Tweet(
                     url=url,
                     source=extract_domain(url) or "x.com",
-                    published_at=_parse_datetime(item.get("published_at")),
+                    published_at=parse_datetime(item.get("published_at")),
                     query=query,
                     tweet_id=_extract_tweet_id(url),
                     author_handle=author_handle,
@@ -276,12 +276,3 @@ def _extract_tweet_id(url: str) -> str:
     if len(parts) >= 2 and parts[-2] == "status":
         return parts[-1]
     return ""
-
-
-def _parse_datetime(value: str | None) -> datetime | None:
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None

@@ -13,6 +13,7 @@ import queue
 import threading
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime
+from typing import Any
 
 # unbubble_sources is installed from the repo root via requirements.txt
 from unbubble_sources.config import load_config
@@ -20,7 +21,7 @@ from unbubble_sources.data import NewsEvent
 from unbubble_sources.stream_logger import StreamLogger
 
 
-def _json_default(obj: object) -> str:
+def _json_default(obj: Any) -> str:
     if isinstance(obj, datetime):
         return obj.isoformat()
     return str(obj)

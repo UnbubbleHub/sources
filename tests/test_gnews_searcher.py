@@ -232,3 +232,4 @@ def test_article_dataclass() -> None:
     )
     assert article.title == "Test Article"
     assert article.query == query
+    

@@ -1,11 +1,11 @@
 import asyncio
 import logging
 import os
-from datetime import datetime
 
 import httpx
 
 from unbubble_sources.data import Article, SearchQuery, Source, Usage
+from unbubble_sources.parsers import parse_datetime
 
 GNEWS_API_URL = "https://gnews.io/api/v4/search"
 
@@ -115,18 +115,10 @@ class GNewsSearcher:
                     title=item.get("title", ""),
                     url=item.get("url", ""),
                     source=item.get("source", {}).get("name", "Unknown"),
-                    published_at=_parse_datetime(item.get("publishedAt")),
+                    published_at=parse_datetime(item.get("publishedAt")),
                     description=item.get("description"),
                     query=query,
                 )
             )
         return articles
-
-
-def _parse_datetime(value: str | None) -> datetime | None:
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None
+    
