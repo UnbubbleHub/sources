@@ -11,8 +11,8 @@ import json
 import os
 import queue
 import threading
-from http.server import BaseHTTPRequestHandler
 from datetime import datetime
+from http.server import BaseHTTPRequestHandler
 from typing import Any
 
 # unbubble_sources is installed from the repo root via requirements.txt

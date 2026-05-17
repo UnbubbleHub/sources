@@ -1,8 +1,8 @@
 """Core data models for Unbubble."""
 
 from dataclasses import dataclass, field
-from enum import StrEnum
 from datetime import datetime
+from enum import StrEnum
 
 
 class PolicyFrame(StrEnum):
