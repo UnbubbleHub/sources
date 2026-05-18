@@ -39,10 +39,6 @@ in mind when proposing changes:
   config + inputs. Avoid hidden state. When you cache, cache transparently.
   When you call an LLM, log the prompt and the parsed result.
 
-These aren't slogans — they map directly onto reviewer questions. If a PR
-makes the meta-level *less* visible (more hardcoded weights, less
-configurable axes, hidden filtering), reviewers will push back.
-
 ---
 
 ## Ways to contribute
@@ -135,25 +131,8 @@ A few notes:
 ## Coding conventions
 
 - **Type-annotate everything.** `mypy --strict` must pass.
-- **Imports at the top of the file**, ordered stdlib → third-party →
-  `unbubble_sources.*`. Enforced by ruff/isort. Lazy imports are reserved
-  for optional ML dependencies (see `aggregator/embeddings.py` for the
-  pattern).
-- **Frozen dataclasses** for core data types (in `data/models.py`). `Usage`
-  is the deliberate exception — it accumulates.
-- **Pydantic models** for configuration. Discriminated unions via
-  `type: Literal[...]` + `Field(discriminator="type")`.
-- **Protocol-based interfaces** for every pipeline stage
-  (`QueryGenerator`, `SourceSearcher`, `SourceAnnotator`, `SourceRanker`,
-  `QueryAggregator`). Implementations satisfy the protocol structurally.
-- **Async everywhere I/O happens.** Concurrency via `asyncio.gather`.
-- **No `print()` in library code.** Use `logging.getLogger(__name__)`.
-  `main.py` is the only place that may write to stdout.
-- **Individual searcher / generator failures are logged and skipped**, not
-  raised. One failing backend should not abort a whole run.
-- **No new hardcoded weights or thresholds in code.** If you need a
-  knob, make it a config field. If the behaviour reflects a design
-  decision, document it in code *and* in the README.
+- **Use ruff for typing linting.**
+- **Follogoogle coding styledguides where possible.** See [here](https://google.github.io/styleguide/pyguide.html)
 
 ### Adding a new component
 
@@ -165,34 +144,11 @@ annotator, or ranker:
 2. Add a Pydantic config model in `src/unbubble_sources/config/models.py`
    with a `type: Literal[...]` discriminator, and extend the union type.
 3. Add the instantiation branch in `src/unbubble_sources/config/factory.py`.
-4. Export the class from `src/unbubble_sources/__init__.py` and add it to
-   `__all__`. If the class has heavy or optional dependencies, use the
-   lazy-import path (`__getattr__`) instead of a direct import.
-5. Add tests under `tests/test_<name>.py`. Mock the API boundary; do not
-   make real network calls.
-6. Add an example YAML config under `configs/` if it exercises a new
+4. Add tests under `tests/test_<name>.py`.
+5. Add an example YAML config under `configs/` if it exercises a new
    capability.
-7. Update the README's environment variables, config, and capabilities
+6. Update the README's environment variables, config, and capabilities
    tables.
-
-A concrete worked example for adding a search backend:
-
-1. Create `src/unbubble_sources/search/mybackend.py` with a class that
-   implements the `SourceSearcher` protocol from
-   `src/unbubble_sources/search/base.py`.
-2. Add a `MyBackendSearcherConfig` Pydantic model to
-   `src/unbubble_sources/config/models.py` with
-   `type: Literal["mybackend"]`, and extend the `SearcherConfig`
-   discriminated union.
-3. Add the instantiation branch in
-   `src/unbubble_sources/config/factory.py` (inside `create_searcher`).
-4. Export the class from `src/unbubble_sources/__init__.py` and add it to
-   `__all__`. If the class pulls in an optional SDK, use the
-   lazy-import path (`__getattr__` at the bottom of `__init__.py`).
-5. Add `configs/with_mybackend.yaml` exercising the new searcher.
-6. Add `tests/test_mybackend_searcher.py`, mocking the SDK at its boundary.
-7. Update `README.md` with the new environment variable and a row in the
-   searcher table.
 
 ---
 
@@ -205,30 +161,6 @@ uv run pytest -v
 uv run mypy src/
 uv run ruff check .
 ```
-
-Conventions:
-
-- Tests are standalone `def test_*` functions, not classes.
-- Use module-level `@pytest.fixture` for shared setup.
-- `pytest-asyncio` is configured in `auto` mode — `async def test_*`
-  works directly.
-- Mock external APIs at the SDK boundary (e.g. `anthropic.AsyncAnthropic`),
-  not at HTTP.
-- One test file per source module under `tests/`, mirroring the package
-  layout.
-
----
-
-## Working with API keys and secrets
-
-Do not commit `.env` files, real API keys, or sample run logs that contain
-secrets. The repo's `.gitignore` covers the standard cases, but please
-double-check any new fixture files. If you suspect a key has been leaked,
-revoke and rotate it immediately, then notify the maintainers privately
-(do **not** open a public issue — that amplifies the leak).
-
-The `livedemo/` subproject talks to the library through an HTTP boundary
-and has its own auth conventions documented in `livedemo/AGENTS.md`.
 
 ---
 
@@ -263,18 +195,6 @@ declared in `[project.optional-dependencies]` and lazy-imported. Today the
 
 If you find an existing hard dependency that should be optional, that's a
 welcome bug report or PR.
-
----
-
-## Roadmap pointers
-
-If you're looking for a place to contribute, the README's "Roadmap" and
-"Ideas" sections are a good start. Larger architectural changes currently
-in design — a `Scorer` / `Metric` protocol pair, a `RunResult` wrapper,
-deterministic URL-based article-genre annotation, a political-compass
-metric, an evaluation harness — will land as separate issues with linked
-design notes. If any of those sound interesting, please reach out before
-starting work so we can avoid stepping on each other.
 
 ---
 
