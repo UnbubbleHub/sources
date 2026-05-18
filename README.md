@@ -8,8 +8,8 @@ Unbubble Sources takes a news event as input and returns sources (news articles,
 
 ```bash
 # Install (base — no ML dependencies)
-git clone https://github.com/your-org/unbubble.git
-cd unbubble/sources
+git clone https://github.com/UnbubbleHub/sources.git
+cd sources
 uv sync
 
 # Install with ML extras (required for PCAAggregator / type: pca)
@@ -321,9 +321,17 @@ Vercel picks up `requirements.txt` (or `pyproject.toml` with `[project].dependen
 
 ## Contributing
 
-1. Fork, branch, make changes, add tests
-2. `uv run pytest -v && uv run ruff check . && uv run mypy src/`
-3. Open a PR
+See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) for project values,
+the pull-request loop, coding conventions, and a worked example for
+adding a new component.
+
+Short version:
+
+1. Open an issue describing what you want to do (for anything beyond a
+   one-line fix).
+2. Fork, branch from `main`, make changes, add tests.
+3. `uv run ruff check . && uv run mypy src/ && uv run pytest -v`
+4. Open a PR with a clear description of the change.
 
 ### Ideas
 
@@ -333,4 +341,7 @@ Vercel picks up `requirements.txt` (or `pyproject.toml` with `[project].dependen
 
 ## License
 
-MIT License -- Copyright (c) 2026 Unbubble Contributors
+Unbubble Sources is released under the
+[GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
+
+Copyright (C) 2026 Unbubble Contributors.
