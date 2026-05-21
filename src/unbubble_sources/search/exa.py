@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from exa_py import AsyncExa
 
 from unbubble_sources.data import Article, SearchQuery, Source, Usage
+from unbubble_sources.parsers import maybe_parse_datetime
 
 logger = logging.getLogger(__name__)
 
@@ -104,12 +105,13 @@ class ExaSearcher:
         articles: list[Article] = []
         for result in response.results:
             domain = _extract_domain(result.url)
+            raw_date = result.published_date
             articles.append(
                 Article(
                     url=result.url,
                     source=domain,
                     title=result.title or "",
-                    published_at=result.published_date,
+                    published_at=maybe_parse_datetime(raw_date) if raw_date else None,
                     query=query,
                 )
             )

@@ -162,7 +162,7 @@ class ClaudeSearcher:
             title=result.title,
             url=result.url,
             source=extract_domain(result.url),
-            published_at=result.page_age,
+            published_at=None,
             description=None,  # encrypted_content is not human-readable
             query=query,
         )

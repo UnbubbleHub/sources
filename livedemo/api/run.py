@@ -11,12 +11,20 @@ import json
 import os
 import queue
 import threading
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler
+from typing import Any
 
 # unbubble_sources is installed from the repo root via requirements.txt
 from unbubble_sources.config import load_config
 from unbubble_sources.data import NewsEvent
 from unbubble_sources.stream_logger import StreamLogger
+
+
+def _json_default(obj: Any) -> str:
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return str(obj)
 
 
 def _find_config() -> str:
@@ -86,7 +94,7 @@ class handler(BaseHTTPRequestHandler):  # noqa: N801 — Vercel requires lowerca
             item = q.get()
             if item is None:
                 break
-            self.wfile.write((json.dumps(item, default=str) + "\n").encode())
+            self.wfile.write((json.dumps(item, default=_json_default) + "\n").encode())
             self.wfile.flush()
 
         thread.join()

@@ -16,6 +16,7 @@ import os
 import httpx
 
 from unbubble_sources.data import APICallUsage, SearchQuery, Source, Tweet, Usage
+from unbubble_sources.parsers import maybe_parse_datetime
 from unbubble_sources.url import extract_domain
 
 GROK_RESPONSES_URL = "https://api.x.ai/v1/responses"
@@ -247,11 +248,12 @@ class GrokSearcher:
             if not url:
                 continue
             author_handle = str(item.get("author_handle", "")).strip()
+            raw_date = item.get("published_at")
             tweets.append(
                 Tweet(
                     url=url,
                     source=extract_domain(url) or "x.com",
-                    published_at=item.get("published_at") or None,
+                    published_at=maybe_parse_datetime(raw_date) if raw_date else None,
                     query=query,
                     tweet_id=_extract_tweet_id(url),
                     author_handle=author_handle,
