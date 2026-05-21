@@ -9,7 +9,20 @@ import anthropic
 from anthropic.types import WebSearchToolResultBlock
 
 from unbubble_sources.annotator.claude import ClaudeAnnotator
-from unbubble_sources.data import APICallUsage, Article, NewsEvent, SearchQuery, Source, Usage
+from unbubble_sources.data import (
+    AnnotatedSource,
+    APICallUsage,
+    Article,
+    DiversityReport,
+    NewsEvent,
+    RunResult,
+    SearchQuery,
+    Source,
+    Usage,
+)
+from unbubble_sources.metrics.base import Metric, MetricResult
+from unbubble_sources.metrics.runner import MetricsRunner
+from unbubble_sources.pipeline._report import build_diversity_report
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.ranker.mmr import MMRRanker
 from unbubble_sources.run_logger import RunLogger
@@ -31,8 +44,14 @@ class ClaudeE2EPipeline:
         api_key: API key (defaults to CLAUDE_API_KEY env var).
         target_articles: Target number of diverse articles to find.
         annotator: Optional Claude-based source annotator.
+        fallback_annotator: Optional annotator used only when
+            ``annotator`` is absent. The ranker is **skipped** on
+            fallback-annotated sources; the fallback exists so metrics
+            that need annotations (e.g. the political compass) still
+            have usable input when the diversity step is disabled.
         ranker: Optional MMR diversity ranker.
         ranker_top_k: Number of sources to return from ranker.
+        metrics: Metrics to compute over the final source set.
         run_logger: Optional RunLogger for intermediate result logging.
         price_cache: Optional PriceCache for cost estimation.
     """
@@ -59,8 +78,10 @@ the same underlying facts but from genuinely different angles.\
         target_articles: int = 10,
         *,
         annotator: ClaudeAnnotator | None = None,
+        fallback_annotator: ClaudeAnnotator | None = None,
         ranker: MMRRanker | None = None,
         ranker_top_k: int = 10,
+        metrics: list[Metric] | None = None,
         run_logger: RunLogger | StreamLogger | None = None,
         price_cache: PriceCache | None = None,
     ) -> None:
@@ -69,8 +90,10 @@ the same underlying facts but from genuinely different angles.\
         self._model = model
         self._target = target_articles
         self._annotator = annotator
+        self._fallback_annotator = fallback_annotator
         self._ranker = ranker
         self._ranker_top_k = ranker_top_k
+        self._metrics: list[Metric] = metrics or []
         self._run_logger = run_logger
         self._price_cache = price_cache
 
@@ -80,7 +103,7 @@ the same underlying facts but from genuinely different angles.\
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> tuple[list[Source], Usage]:
+    ) -> RunResult:
         """Execute the E2E pipeline.
 
         Args:
@@ -89,7 +112,8 @@ the same underlying facts but from genuinely different angles.\
             to_date: Optional end date filter.
 
         Returns:
-            Tuple of (diverse sources, usage).
+            A ``RunResult`` wrapping the final sources, accumulated
+            usage, computed metrics, and the diversity report.
         """
         if self._run_logger:
             self._run_logger.start_run("claude_e2e", event)
@@ -194,10 +218,21 @@ the same underlying facts but from genuinely different angles.\
 
         total_usage = usage
 
-        # Annotate sources (optional)
-        if self._annotator and final_articles:
+        # Annotate sources (main → fallback → none); ranker only runs on
+        # main-annotator output. See the composable pipeline for the
+        # exact same control flow.
+        annotated_sources: list[AnnotatedSource] | None = None
+        annotator_name: str | None = None
+        fallback_used = False
+
+        active_annotator = self._annotator or self._fallback_annotator
+        if active_annotator is not None and final_articles:
+            fallback_used = self._annotator is None and self._fallback_annotator is not None
+            annotator_name = type(active_annotator).__name__
+            stage_label = "annotation_fallback" if fallback_used else "annotation"
+
             t0 = time.monotonic()
-            annotated_sources, annotation_usage = await self._annotator.annotate(
+            annotated_sources, annotation_usage = await active_annotator.annotate(
                 final_articles, event.description
             )
             annotation_duration = time.monotonic() - t0
@@ -208,37 +243,67 @@ the same underlying facts but from genuinely different angles.\
 
             if self._run_logger:
                 self._run_logger.log_stage(
-                    stage="annotation",
-                    component="ClaudeAnnotator",
+                    stage=stage_label,
+                    component=annotator_name,
                     input_data={"source_count": len(final_articles)},
                     output_data=annotated_sources,
                     usage=annotation_usage,
                     duration_seconds=annotation_duration,
                 )
 
-            # Rank by diversity (optional, requires annotation)
-            if self._ranker:
-                t0 = time.monotonic()
-                ranked = self._ranker.rank(annotated_sources, self._ranker_top_k)
-                rank_duration = time.monotonic() - t0
+        # Rank by diversity — only when the main annotator ran.
+        ranked_sources: list[AnnotatedSource] | None = None
+        if (
+            annotated_sources is not None
+            and self._ranker is not None
+            and not fallback_used
+        ):
+            t0 = time.monotonic()
+            ranked_sources = self._ranker.rank(annotated_sources, self._ranker_top_k)
+            rank_duration = time.monotonic() - t0
 
-                if self._run_logger:
-                    self._run_logger.log_stage(
-                        stage="ranking",
-                        component="MMRRanker",
-                        input_data={"source_count": len(annotated_sources)},
-                        output_data=ranked,
-                        usage=None,
-                        duration_seconds=rank_duration,
-                    )
+            if self._run_logger:
+                self._run_logger.log_stage(
+                    stage="ranking",
+                    component="MMRRanker",
+                    input_data={"source_count": len(annotated_sources)},
+                    output_data=ranked_sources,
+                    usage=None,
+                    duration_seconds=rank_duration,
+                )
 
-                final_sources: list[Source] = cast(list[Source], ranked)
-            else:
-                final_sources = cast(list[Source], annotated_sources)
+        sources_for_metrics: list[AnnotatedSource]
+        final_sources: list[Source]
+        if ranked_sources is not None:
+            sources_for_metrics = ranked_sources
+            final_sources = cast(list[Source], ranked_sources)
+        elif annotated_sources is not None:
+            sources_for_metrics = annotated_sources
+            final_sources = cast(list[Source], annotated_sources)
         else:
+            sources_for_metrics = []
             final_sources = final_articles
 
+        metric_results: list[MetricResult] = []
+        if self._metrics and sources_for_metrics:
+            runner = MetricsRunner(self._metrics, run_logger=self._run_logger)
+            metric_results = runner.run(sources_for_metrics)
+
+        diversity_report: DiversityReport = build_diversity_report(
+            annotator_name=annotator_name,
+            fallback_used=fallback_used,
+            ranker=self._ranker if not fallback_used else None,
+            ranker_top_k=self._ranker_top_k,
+            annotated_sources=sources_for_metrics,
+            total_source_count=len(final_sources),
+        )
         if self._run_logger:
+            self._run_logger.log_diversity_report(diversity_report)
             self._run_logger.finish_run(final_sources, total_usage)
 
-        return (final_sources, total_usage)
+        return RunResult(
+            sources=final_sources,
+            usage=total_usage,
+            metrics=metric_results,
+            diversity_report=diversity_report,
+        )

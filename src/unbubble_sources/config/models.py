@@ -165,6 +165,36 @@ RankerConfig = MMRRankerConfig
 
 
 # ============================================================
+# Metric Configs
+# ============================================================
+#
+# Real metric types (lean entropy, political compass, frame coverage,
+# …) land in follow-up PRs (M3+). The placeholder ``NoOpMetricConfig``
+# seeds the discriminated union so the schema is valid today; it does
+# nothing at runtime beyond emitting a trivial ``MetricResult`` to
+# exercise the pipeline plumbing.
+
+
+class NoOpMetricConfig(BaseModel):
+    """Placeholder metric: emits a trivial result with no payload.
+
+    Useful only as a seed for the discriminated union and to test that
+    the metrics stage runs end-to-end. Replaced by real metric types
+    in M3+.
+    """
+
+    type: Literal["noop"] = "noop"
+
+    model_config = {"frozen": True}
+
+
+MetricConfig = Annotated[
+    NoOpMetricConfig,
+    Field(discriminator="type"),
+]
+
+
+# ============================================================
 # Pipeline Configs
 # ============================================================
 
@@ -179,6 +209,11 @@ class ComposablePipelineConfig(BaseModel):
     )
     searchers: list[SearcherConfig] = Field(default_factory=list)
     annotator: ClaudeAnnotatorConfig | None = None
+    fallback_annotator: ClaudeAnnotatorConfig | None = None
+    """Cheaper or deterministic annotator run when ``annotator`` is
+    absent. Lets metrics that depend on annotations (e.g. the political
+    compass) still get usable input when the diversity step is skipped.
+    The ranker is **not** run on fallback-annotated sources."""
     ranker: MMRRankerConfig | None = None
     num_queries_per_generator: int = 5
     max_results_per_searcher: int = 10
@@ -193,6 +228,9 @@ class ClaudeE2EPipelineConfig(BaseModel):
     model: str = "claude-haiku-4-5-20251001"
     target_articles: int = 10
     annotator: ClaudeAnnotatorConfig | None = None
+    fallback_annotator: ClaudeAnnotatorConfig | None = None
+    """Cheaper or deterministic annotator run when ``annotator`` is
+    absent. See ``ComposablePipelineConfig.fallback_annotator``."""
     ranker: MMRRankerConfig | None = None
 
     model_config = {"frozen": True}
@@ -227,6 +265,13 @@ class UnbubbleConfig(BaseModel):
     """Root configuration for Unbubble."""
 
     pipeline: ComposablePipelineConfig | ClaudeE2EPipelineConfig
+    metrics: list[MetricConfig] = Field(default_factory=list)
+    """Metrics to compute over the pipeline's final source set.
+
+    Lives at the root, peer to ``pipeline`` and ``logging``, because
+    metrics describe pipeline output without changing it (same level
+    of concern as logging). Empty by default — existing configs keep
+    working unchanged."""
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
 
     model_config = {"frozen": True}

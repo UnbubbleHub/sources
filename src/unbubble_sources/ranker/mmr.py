@@ -18,6 +18,21 @@ from unbubble_sources.data import AnnotatedSource, PerspectiveAnnotation, Politi
 
 logger = logging.getLogger(__name__)
 
+# Score name MMR uses for the relevance dimension. Centralised here so
+# any future renaming is one-place.
+_RELEVANCE_SCORE_NAME = "relevance"
+
+
+def _relevance(source: AnnotatedSource) -> float:
+    """Return the relevance score of an annotated source.
+
+    Looks up the score named ``"relevance"``. Returns ``0.0`` when no
+    such score is attached — which keeps MMR well-defined even if a
+    pipeline runs without a relevance-emitting annotator/scorer.
+    """
+    score = source.get_score(_RELEVANCE_SCORE_NAME)
+    return score.value if score is not None else 0.0
+
 # Ordered political lean values for computing distance
 _POLITICAL_LEAN_ORDER: list[PoliticalLean] = [
     PoliticalLean.FAR_LEFT,
@@ -139,7 +154,7 @@ class MMRRanker:
         selected: list[int] = []
 
         # First pick: highest relevance
-        best_idx = max(remaining, key=lambda i: sources[i].relevance_score)
+        best_idx = max(remaining, key=lambda i: _relevance(sources[i]))
         selected.append(best_idx)
         remaining.remove(best_idx)
 
@@ -153,7 +168,7 @@ class MMRRanker:
 
             for candidate_idx in remaining:
                 candidate = sources[candidate_idx]
-                relevance = candidate.relevance_score
+                relevance = _relevance(candidate)
 
                 # Max similarity to any already-selected source
                 max_sim = max(

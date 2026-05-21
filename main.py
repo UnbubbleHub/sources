@@ -54,7 +54,9 @@ async def run(args: CLIArgs) -> None:
         logger.info(f"Running pipeline for: {args.query}")
         logger.info(f"Config: {args.config}")
 
-    sources, usage = await pipeline.run(event)
+    result = await pipeline.run(event)
+    sources = result.sources
+    usage = result.usage
 
     # In stream mode, all output is JSONL — skip human-readable output
     if args.stream:
@@ -115,6 +117,29 @@ async def run(args: CLIArgs) -> None:
     if usage.exa_requests:
         logger.info(f"Exa requests: {usage.exa_requests}")
     logger.info(f"Estimated cost: ${usage.estimated_cost:.4f}")
+
+    # Metric summary
+    if result.metrics:
+        logger.info("\n--- Metrics ---")
+        for m in result.metrics:
+            head = f"  {m.name}"
+            if m.value is not None:
+                unit = f" {m.unit}" if m.unit else ""
+                head += f": {m.value:.4f}{unit}"
+            if m.visualization:
+                head += f"  [{m.visualization}]"
+            logger.info(head)
+
+    # Diversity report (one-line meta-level summary)
+    dr = result.diversity_report
+    logger.info("\n--- Diversity Report ---")
+    logger.info(
+        f"annotator={dr.annotator or '-'}, "
+        f"fallback={'yes' if dr.fallback_annotator_used else 'no'}, "
+        f"ranker={dr.ranker or '-'}, sources={dr.source_count}"
+    )
+    if dr.lean_distribution:
+        logger.info(f"  Lean: {dr.lean_distribution}")
 
     # Log file path if logging was enabled (pipeline calls finish_run internally)
     if run_logger and run_logger.last_log_path:

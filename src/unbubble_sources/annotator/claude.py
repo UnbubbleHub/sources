@@ -15,6 +15,7 @@ from unbubble_sources.data import (
     PerspectiveAnnotation,
     PolicyFrame,
     PoliticalLean,
+    Score,
     Source,
     StakeholderType,
     Tweet,
@@ -22,6 +23,13 @@ from unbubble_sources.data import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Score name and provenance for the relevance score that the annotator
+# bundles into its single API call. A future ``ClaudeRelevanceScorer``
+# can stand alone, but for now keeping the API call combined avoids a
+# cost regression — see ``docs/CONTRIBUTING.md``.
+_RELEVANCE_SCORE_NAME = "relevance"
+_PROVENANCE = "ClaudeAnnotator"
 
 SYSTEM_PROMPT = """\
 You are a media analysis expert. For each news source provided, extract \
@@ -191,12 +199,22 @@ class ClaudeAnnotator:
         for i, result in enumerate(results):
             if isinstance(result, BaseException):
                 logger.warning("Annotation batch %d failed: %s", i, result)
-                # Fall back to default annotations for this batch
+                # Fall back to default annotations for this batch. Emit
+                # a zero-valued relevance score so downstream consumers
+                # find the field where they expect it.
+                fallback_score = Score(
+                    name=_RELEVANCE_SCORE_NAME,
+                    value=0.0,
+                    range=(0.0, 1.0),
+                    unit="probability",
+                    provenance=f"{_PROVENANCE}:fallback",
+                )
                 for source in batches[i]:
                     all_annotated.append(
                         AnnotatedSource(
                             source=source,
                             annotation=PerspectiveAnnotation(),
+                            scores=(fallback_score,),
                             relevance_score=0.0,
                         )
                     )
@@ -257,13 +275,25 @@ class ClaudeAnnotator:
 
         annotations = self._parse_response(response_text, len(sources))
 
-        # Pair sources with annotations
+        # Pair sources with annotations, lifting the LLM-reported
+        # relevance number into a typed Score with provenance. The
+        # legacy ``relevance_score`` float on AnnotatedSource is set in
+        # parallel for frontend wire-format compatibility — see the
+        # note on AnnotatedSource.
         annotated: list[AnnotatedSource] = []
         for source, (annotation, relevance) in zip(sources, annotations, strict=True):
+            relevance_obj = Score(
+                name=_RELEVANCE_SCORE_NAME,
+                value=relevance,
+                range=(0.0, 1.0),
+                unit="probability",
+                provenance=_PROVENANCE,
+            )
             annotated.append(
                 AnnotatedSource(
                     source=source,
                     annotation=annotation,
+                    scores=(relevance_obj,),
                     relevance_score=relevance,
                 )
             )

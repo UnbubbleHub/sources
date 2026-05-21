@@ -1,7 +1,17 @@
 """Core data models for Unbubble."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    # Forward reference only: MetricResult lives in unbubble_sources.metrics,
+    # which itself imports from this module. The dataclass field below is
+    # typed as the runtime-erased forward reference so we keep a clean
+    # one-way dependency: metrics -> data, never the reverse at runtime.
+    from unbubble_sources.metrics.base import MetricResult
 
 
 class PolicyFrame(StrEnum):
@@ -134,16 +144,78 @@ class PerspectiveAnnotation:
 
 
 @dataclass(frozen=True)
-class AnnotatedSource:
-    """A source paired with its LLM-extracted perspective annotation.
+class Score:
+    """A typed numeric score attached to a source.
 
-    Wraps the original ``Source`` (Article or Tweet) alongside computed
-    metadata used for diversity ranking.
+    Scores are produced by :class:`unbubble_sources.scoring.Scorer`
+    components (and by annotators that bundle scoring with annotation,
+    such as :class:`unbubble_sources.annotator.ClaudeAnnotator`).
+    Downstream consumers — rankers, metrics, the diversity report —
+    look up scores by ``name``.
+
+    Attributes:
+        name: Short identifier used to look the score up
+            (e.g. ``"relevance"``, ``"compass_x"``, ``"credibility"``).
+        value: The numeric value.
+        range: Optional ``(min, max)`` declaring the score's valid
+            interval. ``None`` means unbounded or domain-dependent.
+        unit: Optional human-readable unit (e.g. ``"probability"``).
+            ``None`` for dimensionless scores.
+        provenance: Free-text label naming the component that produced
+            the score (e.g. ``"ClaudeAnnotator"``, ``"MBFCLookup"``).
+            Required for auditability per the project's "make the
+            meta-level explicit" principle.
+    """
+
+    name: str
+    value: float
+    range: tuple[float, float] | None = None
+    unit: str | None = None
+    provenance: str = ""
+
+
+@dataclass(frozen=True)
+class AnnotatedSource:
+    """A source paired with perspective annotation and typed scores.
+
+    Wraps the original ``Source`` (Article or Tweet) alongside its
+    symbolic ``PerspectiveAnnotation`` and any numeric ``scores``
+    attached by annotators or downstream scorers. Use
+    :meth:`get_score` to retrieve a score by name.
+
+    Note:
+        ``relevance_score`` is a **transitional** duplicate of the
+        ``Score`` named ``"relevance"`` carried in :attr:`scores`. It
+        exists only so the existing ``livedemo/`` frontend (which
+        reads ``relevance_score`` from the wire JSON) keeps working
+        during the migration. New Python code should read relevance via
+        ``source.get_score("relevance").value``; the float field will
+        be removed once the frontend migrates. Annotator implementations
+        must keep the two in sync — see ``ClaudeAnnotator`` for the
+        canonical pattern.
     """
 
     source: Source
     annotation: PerspectiveAnnotation
+    scores: tuple[Score, ...] = ()
     relevance_score: float = 0.0
+    """Transitional. Mirror of ``get_score("relevance").value``.
+    Removed once the livedemo frontend migrates to ``scores``."""
+
+    def get_score(self, name: str) -> Score | None:
+        """Look up a score by name.
+
+        Args:
+            name: The ``Score.name`` to find (e.g. ``"relevance"``).
+
+        Returns:
+            The first matching score, or ``None`` if no score with
+            that name is attached.
+        """
+        for s in self.scores:
+            if s.name == name:
+                return s
+        return None
 
 
 @dataclass(frozen=True)
@@ -188,7 +260,7 @@ class Usage:
     def web_searches(self) -> int:
         return sum(c.web_searches for c in self.api_calls)
 
-    def __add__(self, other: "Usage") -> "Usage":
+    def __add__(self, other: Usage) -> Usage:
         return Usage(
             api_calls=self.api_calls + other.api_calls,
             gnews_requests=self.gnews_requests + other.gnews_requests,
@@ -197,10 +269,71 @@ class Usage:
             estimated_cost=self.estimated_cost + other.estimated_cost,
         )
 
-    def __iadd__(self, other: "Usage") -> "Usage":
+    def __iadd__(self, other: Usage) -> Usage:
         self.api_calls.extend(other.api_calls)
         self.gnews_requests += other.gnews_requests
         self.x_api_requests += other.x_api_requests
         self.exa_requests += other.exa_requests
         self.estimated_cost += other.estimated_cost
         return self
+
+
+@dataclass(frozen=True)
+class DiversityReport:
+    """The meta-level summary of a pipeline run.
+
+    Captures *which axes of diversity the pipeline tried to cover, by
+    what criteria, over how many sources*. Always populated by the
+    pipeline (independent of which metrics are configured) so that the
+    contestable structure of any run is observable from outside.
+
+    Attributes:
+        axes_considered: Annotation dimensions used by the ranker
+            (e.g. ``["political_lean", "policy_frames", "stakeholder_type",
+            "geographic_focus", "topic"]``). Empty if no ranker ran.
+        weights: Per-dimension weights of the distance function. Empty
+            if no ranker ran.
+        ranker: Name of the ranker class that ran, or ``None``.
+        ranker_params: Parameters of the ranker (e.g.
+            ``{"lambda_param": 0.5}``).
+        annotator: Name of the annotator class that ran, or ``None``.
+        fallback_annotator_used: True iff the main annotator was
+            absent and the fallback path ran instead.
+        source_count: Number of sources in the final output.
+        lean_distribution: Count of sources per ``PoliticalLean`` value
+            in the final output (label → count).
+    """
+
+    axes_considered: tuple[str, ...] = ()
+    weights: dict[str, float] = field(default_factory=dict)
+    ranker: str | None = None
+    ranker_params: dict[str, Any] = field(default_factory=dict)
+    annotator: str | None = None
+    fallback_annotator_used: bool = False
+    source_count: int = 0
+    lean_distribution: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class RunResult:
+    """The complete result of a pipeline run.
+
+    Wraps the final source set with the accumulated ``Usage``, the
+    list of computed ``MetricResult``s, and the always-populated
+    ``DiversityReport``. This dataclass is what
+    :meth:`unbubble_sources.pipeline.base.Pipeline.run` returns.
+
+    Attributes:
+        sources: Final pipeline sources (annotated and ranked when
+            those steps were configured; raw otherwise).
+        usage: Accumulated API/HTTP usage across all stages.
+        metrics: Successful per-metric results, in metric-config
+            order. Empty if no metrics were configured.
+        diversity_report: Always-populated meta-level summary of the
+            run.
+    """
+
+    sources: list[Source]
+    usage: Usage
+    metrics: list[MetricResult] = field(default_factory=list)
+    diversity_report: DiversityReport = field(default_factory=DiversityReport)

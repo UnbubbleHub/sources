@@ -174,8 +174,11 @@ async def test_annotate_extracts_annotations(
     results, _ = await annotator.annotate(sample_articles, "climate bill passes")
     assert results[0].annotation.political_lean == PoliticalLean.CENTER_LEFT
     assert results[1].annotation.political_lean == PoliticalLean.CENTER_RIGHT
-    assert results[0].relevance_score == pytest.approx(0.9)
-    assert results[1].relevance_score == pytest.approx(0.8)
+    rel_a = results[0].get_score("relevance")
+    rel_b = results[1].get_score("relevance")
+    assert rel_a is not None and rel_a.value == pytest.approx(0.9)
+    assert rel_b is not None and rel_b.value == pytest.approx(0.8)
+    assert rel_a.provenance == "ClaudeAnnotator"
 
 
 async def test_annotate_tracks_usage(
@@ -205,7 +208,9 @@ async def test_annotate_handles_malformed_json(
     # Should return default annotations
     assert len(results) == 2
     assert all(r.annotation.political_lean == PoliticalLean.UNKNOWN for r in results)
-    assert all(r.relevance_score == 0.0 for r in results)
+    for r in results:
+        rel = r.get_score("relevance")
+        assert rel is not None and rel.value == 0.0
 
 
 async def test_annotate_handles_markdown_fences(

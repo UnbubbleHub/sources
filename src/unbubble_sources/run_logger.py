@@ -8,7 +8,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from unbubble_sources.data import Usage
+from unbubble_sources.data import DiversityReport, Usage
+from unbubble_sources.metrics.base import MetricResult
 
 
 class StageRecord(BaseModel):
@@ -24,6 +25,19 @@ class StageRecord(BaseModel):
     duration_seconds: float = 0.0
 
 
+class MetricRecord(BaseModel):
+    """Record of a single metric computation."""
+
+    name: str
+    value: float | None = None
+    unit: str | None = None
+    visualization: str | None = None
+    data: dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
+    duration_seconds: float = 0.0
+    timestamp: str = ""
+
+
 class RunRecord(BaseModel):
     """Record of a complete pipeline run."""
 
@@ -33,6 +47,8 @@ class RunRecord(BaseModel):
     started_at: str
     completed_at: str | None = None
     stages: list[StageRecord] = []
+    metrics: list[MetricRecord] = []
+    diversity_report: dict[str, Any] | None = None
     final_source_count: int = 0
     total_usage: dict[str, Any] | None = None
     total_cost_usd: float | None = None
@@ -150,6 +166,41 @@ class RunLogger:
                 duration_seconds=round(duration_seconds, 4),
             )
         )
+
+    def log_metric(
+        self,
+        metric_name: str,
+        result: MetricResult,
+        duration_seconds: float,
+    ) -> None:
+        """Append a metric result to the current run.
+
+        Args:
+            metric_name: Identifier (should match ``result.name``).
+            result: The computed ``MetricResult``.
+            duration_seconds: Wall-clock time for this metric.
+        """
+        if not self._enabled or self._record is None:
+            return
+
+        self._record.metrics.append(
+            MetricRecord(
+                name=metric_name,
+                value=result.value,
+                unit=result.unit,
+                visualization=result.visualization,
+                data=result.data,
+                metadata=result.metadata,
+                duration_seconds=round(duration_seconds, 4),
+                timestamp=datetime.now(tz=UTC).isoformat(),
+            )
+        )
+
+    def log_diversity_report(self, report: DiversityReport) -> None:
+        """Attach the run's diversity report to the current run record."""
+        if not self._enabled or self._record is None:
+            return
+        self._record.diversity_report = _serialize(report)
 
     def finish_run(
         self,
