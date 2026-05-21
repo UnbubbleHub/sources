@@ -1,6 +1,7 @@
 """Core data models for Unbubble."""
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import StrEnum
 
 
@@ -85,7 +86,7 @@ class Source:
 
     url: str
     source: str
-    published_at: str | None = None
+    published_at: datetime | None = None
     query: SearchQuery | None = None
 
 

@@ -170,7 +170,7 @@ the same underlying facts but from genuinely different angles.\
                                 title=result.title or "",
                                 url=result.url,
                                 source=extract_domain(result.url),
-                                published_at=result.page_age,
+                                published_at=None,
                                 description=None,
                                 query=dummy_query,
                             )

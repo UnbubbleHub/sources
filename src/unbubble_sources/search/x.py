@@ -7,6 +7,7 @@ import os
 import httpx
 
 from unbubble_sources.data import SearchQuery, Source, Tweet, Usage
+from unbubble_sources.parsers import maybe_parse_datetime
 
 X_API_URL = "https://api.twitter.com/2/tweets/search/recent"
 
@@ -129,12 +130,13 @@ class XSearcher:
             author_info = authors.get(author_id, {})
             author_handle = author_info.get("username", "")
             metrics = item.get("public_metrics", {})
+            raw_date = item.get("created_at")
 
             tweets.append(
                 Tweet(
                     url=f"https://x.com/{author_handle}/status/{tweet_id}",
                     source="x.com",
-                    published_at=item.get("created_at"),
+                    published_at=maybe_parse_datetime(raw_date) if raw_date else None,
                     query=query,
                     tweet_id=tweet_id,
                     author_handle=author_handle,

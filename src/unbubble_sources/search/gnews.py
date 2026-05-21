@@ -5,6 +5,7 @@ import os
 import httpx
 
 from unbubble_sources.data import Article, SearchQuery, Source, Usage
+from unbubble_sources.parsers import maybe_parse_datetime
 
 GNEWS_API_URL = "https://gnews.io/api/v4/search"
 
@@ -109,12 +110,13 @@ class GNewsSearcher:
 
         articles: list[Article] = []
         for item in data.get("articles", []):
+            raw_date = item.get("publishedAt")
             articles.append(
                 Article(
                     title=item.get("title", ""),
                     url=item.get("url", ""),
                     source=item.get("source", {}).get("name", "Unknown"),
-                    published_at=item.get("publishedAt"),
+                    published_at=maybe_parse_datetime(raw_date) if raw_date else None,
                     description=item.get("description"),
                     query=query,
                 )

@@ -1,5 +1,6 @@
 """Tests for GNewsSearcher."""
 
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -225,7 +226,7 @@ def test_article_dataclass() -> None:
         title="Test Article",
         url="https://example.com",
         source="Test Source",
-        published_at="2026-02-01",
+        published_at=datetime(2026, 2, 1, tzinfo=UTC),
         description="Test description",
         query=query,
     )
