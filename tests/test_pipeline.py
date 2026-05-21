@@ -5,7 +5,18 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from anthropic.types import WebSearchResultBlock, WebSearchToolResultBlock
 
-from unbubble_sources.data import Article, NewsEvent, SearchQuery, Usage
+from unbubble_sources.data import (
+    AnnotatedSource,
+    Article,
+    DiversityReport,
+    NewsEvent,
+    PerspectiveAnnotation,
+    RunResult,
+    Score,
+    SearchQuery,
+    Usage,
+)
+from unbubble_sources.metrics.noop import NoOpMetric
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
 from unbubble_sources.url import extract_domain
@@ -104,7 +115,8 @@ async def test_composable_run_returns_articles(
     composable_pipeline: ComposablePipeline,
 ) -> None:
     event = NewsEvent(description="Test event")
-    articles, usage = await composable_pipeline.run(event)
+    result = await composable_pipeline.run(event)
+    articles = result.sources
     assert len(articles) == 2
     assert all(isinstance(a, Article) for a in articles)
 
@@ -113,8 +125,91 @@ async def test_composable_run_returns_usage(
     composable_pipeline: ComposablePipeline,
 ) -> None:
     event = NewsEvent(description="Test event")
-    articles, usage = await composable_pipeline.run(event)
+    result = await composable_pipeline.run(event)
+    usage = result.usage
     assert isinstance(usage, Usage)
+
+
+async def test_composable_run_returns_runresult_shape(
+    composable_pipeline: ComposablePipeline,
+) -> None:
+    """Pipeline returns a RunResult, not a tuple."""
+    event = NewsEvent(description="Test event")
+    result = await composable_pipeline.run(event)
+    assert isinstance(result, RunResult)
+    assert isinstance(result.metrics, list)
+    assert isinstance(result.diversity_report, DiversityReport)
+    # No annotator → diversity report records that fact.
+    assert result.diversity_report.annotator is None
+    assert result.diversity_report.fallback_annotator_used is False
+    assert result.diversity_report.source_count == len(result.sources)
+
+
+async def test_composable_run_runs_metrics(
+    composable_pipeline: ComposablePipeline,
+    mock_aggregator: MagicMock,
+    mock_searcher: MagicMock,
+    mock_generator: MagicMock,
+) -> None:
+    """Metrics are only run when annotation has produced AnnotatedSource."""
+    # Build a fresh pipeline with an annotator (so metrics actually fire).
+    annotated = [
+        AnnotatedSource(
+            source=Article(title="A", url="https://a", source="a"),
+            annotation=PerspectiveAnnotation(),
+            scores=(Score(name="relevance", value=0.5, provenance="mock"),),
+            relevance_score=0.5,
+        )
+    ]
+    mock_annotator = MagicMock()
+    mock_annotator.annotate = AsyncMock(return_value=(annotated, Usage()))
+    pipeline = ComposablePipeline(
+        generators=[mock_generator],
+        aggregator=mock_aggregator,
+        searchers=[mock_searcher],
+        annotator=mock_annotator,
+        metrics=[NoOpMetric()],
+    )
+
+    result = await pipeline.run(NewsEvent(description="x"))
+    assert len(result.metrics) == 1
+    assert result.metrics[0].name == "noop"
+    assert result.metrics[0].value == 1.0  # one annotated source
+
+
+async def test_composable_run_uses_fallback_annotator_when_main_absent(
+    mock_aggregator: MagicMock,
+    mock_searcher: MagicMock,
+    mock_generator: MagicMock,
+) -> None:
+    """Fallback annotator runs when the main one is absent; ranker stays off."""
+    annotated = [
+        AnnotatedSource(
+            source=Article(title="A", url="https://a", source="a"),
+            annotation=PerspectiveAnnotation(),
+        )
+    ]
+    fallback = MagicMock()
+    fallback.annotate = AsyncMock(return_value=(annotated, Usage()))
+    ranker = MagicMock()
+    ranker.rank = MagicMock(return_value=annotated)
+
+    pipeline = ComposablePipeline(
+        generators=[mock_generator],
+        aggregator=mock_aggregator,
+        searchers=[mock_searcher],
+        annotator=None,
+        fallback_annotator=fallback,
+        ranker=ranker,  # configured but must NOT run under fallback
+    )
+
+    result = await pipeline.run(NewsEvent(description="x"))
+    fallback.annotate.assert_called_once()
+    ranker.rank.assert_not_called()
+    assert result.diversity_report.fallback_annotator_used is True
+    assert result.diversity_report.annotator == type(fallback).__name__
+    # When fallback is used, the diversity report records no ranker.
+    assert result.diversity_report.ranker is None
 
 
 async def test_composable_run_calls_generator(
@@ -169,7 +264,8 @@ async def test_composable_run_deduplicates_by_url(
     )
 
     event = NewsEvent(description="Test event")
-    articles, usage = await pipeline.run(event)
+    result = await pipeline.run(event)
+    articles = result.sources
     assert len(articles) == 1  # Deduplicated
 
 
@@ -195,7 +291,8 @@ async def test_composable_run_handles_generator_failure(
     )
 
     event = NewsEvent(description="Test event")
-    articles, usage = await pipeline.run(event)
+    result = await pipeline.run(event)
+    articles = result.sources
     assert len(articles) == 2
 
 
@@ -213,7 +310,8 @@ async def test_composable_run_returns_empty_if_no_queries(
     )
 
     event = NewsEvent(description="Test event")
-    articles, usage = await pipeline.run(event)
+    result = await pipeline.run(event)
+    articles, usage = result.sources, result.usage
     assert articles == []
     assert isinstance(usage, Usage)
 
@@ -269,7 +367,8 @@ async def test_e2e_run_returns_usage(
     e2e_pipeline: ClaudeE2EPipeline,
 ) -> None:
     event = NewsEvent(description="Test event")
-    articles, usage = await e2e_pipeline.run(event)
+    result = await e2e_pipeline.run(event)
+    usage = result.usage
 
     assert isinstance(usage, Usage)
     assert len(usage.api_calls) == 1

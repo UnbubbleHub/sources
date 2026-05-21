@@ -19,9 +19,11 @@ from unbubble_sources.config.models import (
     ExaSearcherConfig,
     GNewsSearcherConfig,
     GrokSearcherConfig,
+    MetricConfig,
     MistralQueryGeneratorConfig,
     MMRRankerConfig,
     NoOpAggregatorConfig,
+    NoOpMetricConfig,
     NoOpQueryGeneratorConfig,
     PCAAggregatorConfig,
     QueryGeneratorConfig,
@@ -29,6 +31,8 @@ from unbubble_sources.config.models import (
     UnbubbleConfig,
     XSearcherConfig,
 )
+from unbubble_sources.metrics.base import Metric
+from unbubble_sources.metrics.noop import NoOpMetric
 from unbubble_sources.pipeline.base import Pipeline
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
@@ -142,11 +146,25 @@ def create_ranker(config: MMRRankerConfig) -> MMRRanker:
     return MMRRanker(lambda_param=config.lambda_param)
 
 
+def create_metric(config: MetricConfig) -> Metric:
+    """Create a metric from config."""
+    if isinstance(config, NoOpMetricConfig):
+        return NoOpMetric()
+    msg = f"Unknown metric config type: {type(config)}"
+    raise ValueError(msg)
+
+
+def create_metrics(configs: list[MetricConfig]) -> list[Metric]:
+    """Create a list of metrics from a list of configs."""
+    return [create_metric(c) for c in configs]
+
+
 def create_pipeline(
     config: ComposablePipelineConfig | ClaudeE2EPipelineConfig,
     run_logger: RunLogger | StreamLogger | None = None,
     price_cache: PriceCache | None = None,
     *,
+    metrics: list[Metric] | None = None,
     api_key: str | None = None,
 ) -> Pipeline:
     """Create a pipeline from config."""
@@ -157,6 +175,11 @@ def create_pipeline(
         annotator = (
             create_annotator(config.annotator, api_key=api_key) if config.annotator else None
         )
+        fallback_annotator = (
+            create_annotator(config.fallback_annotator, api_key=api_key)
+            if config.fallback_annotator
+            else None
+        )
         ranker = create_ranker(config.ranker) if config.ranker else None
         ranker_top_k = config.ranker.top_k if config.ranker else 10
 
@@ -165,16 +188,23 @@ def create_pipeline(
             aggregator=aggregator,
             searchers=searchers,
             annotator=annotator,
+            fallback_annotator=fallback_annotator,
             ranker=ranker,
             ranker_top_k=ranker_top_k,
             num_queries_per_generator=config.num_queries_per_generator,
             max_results_per_searcher=config.max_results_per_searcher,
+            metrics=metrics or [],
             run_logger=run_logger,
             price_cache=price_cache,
         )
     if isinstance(config, ClaudeE2EPipelineConfig):
         annotator = (
             create_annotator(config.annotator, api_key=api_key) if config.annotator else None
+        )
+        fallback_annotator = (
+            create_annotator(config.fallback_annotator, api_key=api_key)
+            if config.fallback_annotator
+            else None
         )
         ranker = create_ranker(config.ranker) if config.ranker else None
         ranker_top_k = config.ranker.top_k if config.ranker else 10
@@ -183,8 +213,10 @@ def create_pipeline(
             model=config.model,
             target_articles=config.target_articles,
             annotator=annotator,
+            fallback_annotator=fallback_annotator,
             ranker=ranker,
             ranker_top_k=ranker_top_k,
+            metrics=metrics or [],
             run_logger=run_logger,
             price_cache=price_cache,
             api_key=api_key,
@@ -225,7 +257,12 @@ def create_from_config(
             active_logger = RunLogger(log_dir=log_dir, enabled=True)
 
     price_cache = PriceCache()
+    metrics = create_metrics(config.metrics)
     pipeline = create_pipeline(
-        config.pipeline, run_logger=active_logger, price_cache=price_cache, api_key=api_key,
+        config.pipeline,
+        run_logger=active_logger,
+        price_cache=price_cache,
+        metrics=metrics,
+        api_key=api_key,
     )
     return (pipeline, active_logger, price_cache)

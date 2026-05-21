@@ -15,7 +15,8 @@ import sys
 from datetime import UTC, datetime
 from typing import Any
 
-from unbubble_sources.data import Usage
+from unbubble_sources.data import DiversityReport, Usage
+from unbubble_sources.metrics.base import MetricResult
 from unbubble_sources.run_logger import _serialize
 
 STAGE_STEPS: dict[str, int] = {
@@ -74,6 +75,33 @@ class StreamLogger:
             "usage": _serialize(usage) if usage is not None else None,
             "cost_usd": usage.estimated_cost if usage is not None else None,
             "duration_seconds": round(duration_seconds, 4),
+            "timestamp": datetime.now(tz=UTC).isoformat(),
+        })
+
+    def log_metric(
+        self,
+        metric_name: str,
+        result: MetricResult,
+        duration_seconds: float,
+    ) -> None:
+        """Emit one JSONL event per computed metric."""
+        self._emit({
+            "type": "metric",
+            "metric_name": metric_name,
+            "value": result.value,
+            "unit": result.unit,
+            "visualization": result.visualization,
+            "data": result.data,
+            "metadata": result.metadata,
+            "duration_seconds": round(duration_seconds, 4),
+            "timestamp": datetime.now(tz=UTC).isoformat(),
+        })
+
+    def log_diversity_report(self, report: DiversityReport) -> None:
+        """Emit a single JSONL event carrying the run's diversity report."""
+        self._emit({
+            "type": "diversity_report",
+            "report": _serialize(report),
             "timestamp": datetime.now(tz=UTC).isoformat(),
         })
 

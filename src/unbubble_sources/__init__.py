@@ -15,16 +15,20 @@ from unbubble_sources.data import (
     AnnotatedSource,
     APICallUsage,
     Article,
+    DiversityReport,
     NewsEvent,
     PerspectiveAnnotation,
     PolicyFrame,
     PoliticalLean,
+    RunResult,
+    Score,
     SearchQuery,
     Source,
     StakeholderType,
     Tweet,
     Usage,
 )
+from unbubble_sources.metrics import Metric, MetricResult, MetricsRunner, NoOpMetric
 from unbubble_sources.pipeline.base import Pipeline
 from unbubble_sources.pipeline.claude_e2e import ClaudeE2EPipeline
 from unbubble_sources.pipeline.composable import ComposablePipeline
@@ -42,6 +46,7 @@ from unbubble_sources.query.noop import NoOpQueryGenerator
 from unbubble_sources.ranker.base import SourceRanker
 from unbubble_sources.ranker.mmr import MMRRanker, perspective_distance
 from unbubble_sources.run_logger import RunLogger
+from unbubble_sources.scoring import Scorer
 from unbubble_sources.search.base import ArticleSearcher, SourceSearcher
 from unbubble_sources.search.claude import ClaudeSearcher
 from unbubble_sources.url import extract_domain
@@ -72,10 +77,13 @@ __all__ = [
     "APICallUsage",
     "AnnotatedSource",
     "Article",
+    "DiversityReport",
     "NewsEvent",
     "PerspectiveAnnotation",
     "PoliticalLean",
     "PolicyFrame",
+    "RunResult",
+    "Score",
     "SearchQuery",
     "Source",
     "StakeholderType",
@@ -93,9 +101,11 @@ __all__ = [
     "perspective_distance",
     # Protocols
     "ArticleSearcher",
+    "Metric",
     "Pipeline",
     "QueryAggregator",
     "QueryGenerator",
+    "Scorer",
     "SourceAnnotator",
     "SourceRanker",
     "SourceSearcher",
@@ -116,6 +126,10 @@ __all__ = [
     "ClaudeAnnotator",
     # Rankers
     "MMRRanker",
+    # Metrics
+    "MetricResult",
+    "MetricsRunner",
+    "NoOpMetric",
     # Pipelines
     "ClaudeE2EPipeline",
     "ComposablePipeline",

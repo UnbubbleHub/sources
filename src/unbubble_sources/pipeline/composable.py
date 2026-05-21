@@ -7,7 +7,18 @@ from typing import cast
 
 from unbubble_sources.aggregator.base import QueryAggregator
 from unbubble_sources.annotator.claude import ClaudeAnnotator
-from unbubble_sources.data import NewsEvent, SearchQuery, Source, Usage
+from unbubble_sources.data import (
+    AnnotatedSource,
+    DiversityReport,
+    NewsEvent,
+    RunResult,
+    SearchQuery,
+    Source,
+    Usage,
+)
+from unbubble_sources.metrics.base import Metric, MetricResult
+from unbubble_sources.metrics.runner import MetricsRunner
+from unbubble_sources.pipeline._report import build_diversity_report
 from unbubble_sources.pricing import PriceCache
 from unbubble_sources.query.base import QueryGenerator
 from unbubble_sources.ranker.mmr import MMRRanker
@@ -27,17 +38,32 @@ class ComposablePipeline:
     3. All searchers execute the aggregated queries in parallel
     4. Results are deduplicated by URL
     5. (Optional) Annotator extracts perspective metadata via Claude
+        - If the main ``annotator`` is absent and a ``fallback_annotator``
+          is configured, the fallback runs instead. The ranker is **not**
+          run on fallback-annotated sources.
     6. (Optional) MMR ranker selects top-k diverse sources
+    7. Metrics are computed over the final annotated source set
+    8. A ``DiversityReport`` is always built describing the meta-level
+       of the run (which axes were considered, which annotator/ranker
+       ran, the political-lean distribution of the result).
 
     Args:
         generators: List of query generators.
         aggregator: Query aggregator for deduplication/diversification.
         searchers: List of source searchers.
         annotator: Optional Claude-based source annotator.
+        fallback_annotator: Optional annotator run only when ``annotator``
+            is absent. The ranker is **skipped** on fallback-annotated
+            sources — the fallback exists so metrics like the political
+            compass have usable input even when the diversity step is
+            disabled.
         ranker: Optional MMR diversity ranker.
         ranker_top_k: Number of sources to return from ranker.
         num_queries_per_generator: Queries to request from each generator.
         max_results_per_searcher: Max results per query for each searcher.
+        metrics: Metrics to compute over the final source set. Metrics
+            only run when an annotation step (main or fallback) has
+            populated the sources.
         run_logger: Optional RunLogger for intermediate result logging.
         price_cache: Optional PriceCache for cost estimation.
     """
@@ -49,10 +75,12 @@ class ComposablePipeline:
         searchers: list[SourceSearcher],
         *,
         annotator: ClaudeAnnotator | None = None,
+        fallback_annotator: ClaudeAnnotator | None = None,
         ranker: MMRRanker | None = None,
         ranker_top_k: int = 10,
         num_queries_per_generator: int = 5,
         max_results_per_searcher: int = 10,
+        metrics: list[Metric] | None = None,
         run_logger: RunLogger | StreamLogger | None = None,
         price_cache: PriceCache | None = None,
     ) -> None:
@@ -60,10 +88,12 @@ class ComposablePipeline:
         self._aggregator = aggregator
         self._searchers = searchers
         self._annotator = annotator
+        self._fallback_annotator = fallback_annotator
         self._ranker = ranker
         self._ranker_top_k = ranker_top_k
         self._num_queries = num_queries_per_generator
         self._max_results = max_results_per_searcher
+        self._metrics: list[Metric] = metrics or []
         self._run_logger = run_logger
         self._price_cache = price_cache
 
@@ -73,7 +103,7 @@ class ComposablePipeline:
         *,
         from_date: str | None = None,
         to_date: str | None = None,
-    ) -> tuple[list[Source], Usage]:
+    ) -> RunResult:
         """Execute the composable pipeline.
 
         Args:
@@ -82,9 +112,8 @@ class ComposablePipeline:
             to_date: Optional end date filter.
 
         Returns:
-            Tuple of (diverse deduplicated sources, usage).
-            When annotator + ranker are configured, returns AnnotatedSource
-            objects (which are also valid Source-compatible dataclasses).
+            A ``RunResult`` wrapping the final sources, accumulated
+            usage, computed metrics, and the diversity report.
         """
         if self._run_logger:
             self._run_logger.start_run("composable", event)
@@ -127,9 +156,23 @@ class ComposablePipeline:
                 )
 
         if not all_queries:
+            empty_report = build_diversity_report(
+                annotator_name=None,
+                fallback_used=False,
+                ranker=None,
+                ranker_top_k=self._ranker_top_k,
+                annotated_sources=[],
+                total_source_count=0,
+            )
             if self._run_logger:
+                self._run_logger.log_diversity_report(empty_report)
                 self._run_logger.finish_run([], total_usage)
-            return ([], total_usage)
+            return RunResult(
+                sources=[],
+                usage=total_usage,
+                metrics=[],
+                diversity_report=empty_report,
+            )
 
         # Step 2: Aggregate queries
         t0 = time.monotonic()
@@ -203,10 +246,22 @@ class ComposablePipeline:
                 duration_seconds=dedup_duration,
             )
 
-        # Step 5: Annotate sources (optional)
-        if self._annotator and sources:
+        # Step 5: Annotate sources (main → fallback → none).
+        # The fallback only runs when the main annotator is absent and
+        # the ranker is skipped on fallback-annotated sources, by design:
+        # see the class docstring.
+        annotated_sources: list[AnnotatedSource] | None = None
+        annotator_name: str | None = None
+        fallback_used = False
+
+        active_annotator = self._annotator or self._fallback_annotator
+        if active_annotator is not None and sources:
+            fallback_used = self._annotator is None and self._fallback_annotator is not None
+            annotator_name = type(active_annotator).__name__
+            stage_label = "annotation_fallback" if fallback_used else "annotation"
+
             t0 = time.monotonic()
-            annotated_sources, annotation_usage = await self._annotator.annotate(
+            annotated_sources, annotation_usage = await active_annotator.annotate(
                 sources, event.description
             )
             annotation_duration = time.monotonic() - t0
@@ -217,37 +272,76 @@ class ComposablePipeline:
 
             if self._run_logger:
                 self._run_logger.log_stage(
-                    stage="annotation",
-                    component="ClaudeAnnotator",
+                    stage=stage_label,
+                    component=annotator_name,
                     input_data={"source_count": len(sources)},
                     output_data=annotated_sources,
                     usage=annotation_usage,
                     duration_seconds=annotation_duration,
                 )
 
-            # Step 6: Rank by diversity (optional, requires annotation)
-            if self._ranker:
-                t0 = time.monotonic()
-                ranked = self._ranker.rank(annotated_sources, self._ranker_top_k)
-                rank_duration = time.monotonic() - t0
+        # Step 6: Rank by diversity (requires the MAIN annotator).
+        # Fallback-annotated sources skip the ranker because the
+        # fallback is intended for cheaper / less-trusted annotations
+        # where re-ordering may amplify noise.
+        ranked_sources: list[AnnotatedSource] | None = None
+        if (
+            annotated_sources is not None
+            and self._ranker is not None
+            and not fallback_used
+        ):
+            t0 = time.monotonic()
+            ranked_sources = self._ranker.rank(annotated_sources, self._ranker_top_k)
+            rank_duration = time.monotonic() - t0
 
-                if self._run_logger:
-                    self._run_logger.log_stage(
-                        stage="ranking",
-                        component="MMRRanker",
-                        input_data={"source_count": len(annotated_sources)},
-                        output_data=ranked,
-                        usage=None,
-                        duration_seconds=rank_duration,
-                    )
+            if self._run_logger:
+                self._run_logger.log_stage(
+                    stage="ranking",
+                    component="MMRRanker",
+                    input_data={"source_count": len(annotated_sources)},
+                    output_data=ranked_sources,
+                    usage=None,
+                    duration_seconds=rank_duration,
+                )
 
-                final_sources: list[Source] = cast(list[Source], ranked)
-            else:
-                final_sources = cast(list[Source], annotated_sources)
+        # Decide the final source list and the input the metrics see.
+        sources_for_metrics: list[AnnotatedSource]
+        final_sources: list[Source]
+        if ranked_sources is not None:
+            sources_for_metrics = ranked_sources
+            final_sources = cast(list[Source], ranked_sources)
+        elif annotated_sources is not None:
+            sources_for_metrics = annotated_sources
+            final_sources = cast(list[Source], annotated_sources)
         else:
+            sources_for_metrics = []
             final_sources = sources
 
+        # Step 7: Metrics. Only meaningful if an annotation step ran,
+        # since most metrics need ``AnnotatedSource`` input. Per-metric
+        # failures are isolated by the runner.
+        metric_results: list[MetricResult] = []
+        if self._metrics and sources_for_metrics:
+            runner = MetricsRunner(self._metrics, run_logger=self._run_logger)
+            metric_results = runner.run(sources_for_metrics)
+
+        # Step 8: Diversity report — always built, regardless of which
+        # optional stages ran. Makes the meta-level explicit.
+        diversity_report: DiversityReport = build_diversity_report(
+            annotator_name=annotator_name,
+            fallback_used=fallback_used,
+            ranker=self._ranker if not fallback_used else None,
+            ranker_top_k=self._ranker_top_k,
+            annotated_sources=sources_for_metrics,
+            total_source_count=len(final_sources),
+        )
         if self._run_logger:
+            self._run_logger.log_diversity_report(diversity_report)
             self._run_logger.finish_run(final_sources, total_usage)
 
-        return (final_sources, total_usage)
+        return RunResult(
+            sources=final_sources,
+            usage=total_usage,
+            metrics=metric_results,
+            diversity_report=diversity_report,
+        )

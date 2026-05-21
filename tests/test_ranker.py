@@ -8,6 +8,7 @@ from unbubble_sources.data import (
     PerspectiveAnnotation,
     PolicyFrame,
     PoliticalLean,
+    Score,
     StakeholderType,
 )
 from unbubble_sources.ranker.mmr import (
@@ -142,6 +143,7 @@ def _make_annotated(
             geographic_focus=geo,
             topic="test",
         ),
+        scores=(Score(name="relevance", value=relevance, provenance="test"),),
         relevance_score=relevance,
     )
 

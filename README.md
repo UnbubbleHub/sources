@@ -89,7 +89,8 @@ Each source is annotated with structured perspective metadata using Claude. The 
 | `stance_summary` | free text | — | 1–2 sentence summary of the source's position |
 | `topic` | string | IPTC-inspired | Short topic label (e.g. "climate policy") |
 | `geographic_focus` | string | — | Country or region the source focuses on |
-| `relevance_score` | float 0–1 | — | How relevant the source is to the queried event |
+
+In addition to the symbolic annotation above, `ClaudeAnnotator` emits a typed `Score(name="relevance", value=0–1, provenance="ClaudeAnnotator")` attached to the `AnnotatedSource`. Downstream consumers (MMR ranker, metrics) look this up via `annotated.get_score("relevance")`.
 
 ### Why these frameworks?
 
@@ -227,7 +228,15 @@ logging:
 |---|---|---|
 | `Article` | `title`, `url`, `source`, `published_at`, `description` | News article |
 | `Tweet` | `tweet_id`, `author_handle`, `text`, `like_count`, ... | X/Twitter post |
-| `AnnotatedSource` | `source` (Article\|Tweet), `annotation`, `relevance_score` | Source + perspective metadata |
+| `AnnotatedSource` | `source` (Article\|Tweet), `annotation`, `scores` (tuple of `Score`), `relevance_score`* | Source + perspective metadata + typed numeric scores |
+| `Score` | `name`, `value`, `range`, `unit`, `provenance` | Typed numeric score with provenance; looked up via `get_score(name)` |
+
+\* `relevance_score` is a transitional duplicate of the `Score` named
+`"relevance"` carried in `scores`, kept temporarily so the existing
+`livedemo/` frontend (which reads the float field from the wire JSON)
+keeps working during the migration. New code should read relevance via
+`source.get_score("relevance").value`; the float field will be removed
+once the frontend migrates.
 
 ### Annotation enums
 
@@ -321,9 +330,7 @@ Vercel picks up `requirements.txt` (or `pyproject.toml` with `[project].dependen
 
 ## Contributing
 
-See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) for project values,
-the pull-request loop, coding conventions, and a worked example for
-adding a new component.
+See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) for project values, the pull-request loop, coding conventions, and a worked example for adding a new component. For the team's full planned-work list (M-numbered foundation refactors, queued metrics, longer-term ideas, conceptual items) see [`docs/PLANNED_FEATURES.md`](docs/PLANNED_FEATURES.md).
 
 Short version:
 
@@ -341,7 +348,6 @@ Short version:
 
 ## License
 
-Unbubble Sources is released under the
-[GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
+Unbubble Sources is released under the [GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
 
 Copyright (C) 2026 Unbubble Contributors.
